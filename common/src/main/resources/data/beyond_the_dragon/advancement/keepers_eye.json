@@ -1,0 +1,25 @@
+{
+	"criteria": {
+		"granted": {
+			"trigger": "minecraft:impossible"
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "minecraft:lectern"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.keepers_eye.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.keepers_eye.description"
+		},
+		"frame": "goal"
+	},
+	"requirements": [
+		[
+			"granted"
+		]
+	],
+	"parent": "beyond_the_dragon:ruins"
+}

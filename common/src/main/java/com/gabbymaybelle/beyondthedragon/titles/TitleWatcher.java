@@ -1,5 +1,6 @@
 package com.gabbymaybelle.beyondthedragon.titles;
 
+import com.gabbymaybelle.beyondthedragon.Advancements;
 import com.gabbymaybelle.beyondthedragon.BeyondTheDragon;
 import com.gabbymaybelle.beyondthedragon.Config;
 import com.gabbymaybelle.beyondthedragon.rings.Rings;
@@ -81,6 +82,19 @@ public final class TitleWatcher {
 
 	private static void watch(ServerPlayer player, State state, long now) {
 		ResourceKey<Level> dimension = player.level().dimension();
+		if (dimension == Level.END) {
+			// The rings' advancements, whether or not titles are on.
+			Rings reached = Rings.at(player.getX(), player.getZ());
+			if (reached.ordinal() >= Rings.MIDDLE.ordinal()) {
+				Advancements.grant(player, "middle_reaches");
+			}
+			if (reached.ordinal() >= Rings.OUTER.ordinal()) {
+				Advancements.grant(player, "outer_reaches");
+			}
+			if (reached.ordinal() >= Rings.EDGE.ordinal()) {
+				Advancements.grant(player, "the_edge");
+			}
+		}
 		if (!enabledIn(dimension)) {
 			return;
 		}

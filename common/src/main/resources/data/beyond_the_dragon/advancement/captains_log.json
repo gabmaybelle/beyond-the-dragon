@@ -1,0 +1,35 @@
+{
+	"criteria": {
+		"found": {
+			"trigger": "minecraft:location",
+			"conditions": {
+				"player": {
+					"type": "minecraft:entity_properties",
+					"entity": "this",
+					"predicate": {
+						"minecraft:location": {
+							"structures": "beyond_the_dragon:wreck"
+						}
+					}
+				}
+			}
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "minecraft:purpur_block"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.captains_log.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.captains_log.description"
+		}
+	},
+	"requirements": [
+		[
+			"found"
+		]
+	],
+	"parent": "beyond_the_dragon:ruins"
+}

@@ -1,0 +1,35 @@
+{
+	"criteria": {
+		"found": {
+			"trigger": "minecraft:location",
+			"conditions": {
+				"player": {
+					"type": "minecraft:entity_properties",
+					"entity": "this",
+					"predicate": {
+						"minecraft:location": {
+							"structures": "#beyond_the_dragon:ruins"
+						}
+					}
+				}
+			}
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "minecraft:end_stone_bricks"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.ruins.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.ruins.description"
+		}
+	},
+	"requirements": [
+		[
+			"found"
+		]
+	],
+	"parent": "beyond_the_dragon:root"
+}

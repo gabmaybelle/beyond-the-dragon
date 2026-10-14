@@ -1,0 +1,24 @@
+{
+	"criteria": {
+		"granted": {
+			"trigger": "minecraft:impossible"
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "minecraft:beacon"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.dragon_notices.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.dragon_notices.description"
+		}
+	},
+	"requirements": [
+		[
+			"granted"
+		]
+	],
+	"parent": "beyond_the_dragon:root"
+}

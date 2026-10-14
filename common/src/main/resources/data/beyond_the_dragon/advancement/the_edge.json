@@ -1,0 +1,25 @@
+{
+	"criteria": {
+		"granted": {
+			"trigger": "minecraft:impossible"
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "minecraft:end_rod"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.the_edge.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.the_edge.description"
+		},
+		"frame": "challenge"
+	},
+	"requirements": [
+		[
+			"granted"
+		]
+	],
+	"parent": "beyond_the_dragon:outer_reaches"
+}

@@ -66,6 +66,23 @@ final class ApheliteTest {
 		oreGeneration(server);
 		perks(server);
 		portrait(ctx, server);
+		guide(ctx, server);
+	}
+
+	/** The item advancements fire when the things reach an inventory. */
+	private void guide(ClientGameTestContext ctx, TestServerContext server) {
+		check(!BeyondTheDragonClientTest.advancementDone(server, "far_metal"), "no shard yet, no A Far Metal");
+		server.runOnServer(s -> {
+			ServerPlayer player = player(s);
+			player.getInventory().add(new ItemStack(Aphelite.SHARD.get()));
+			player.getInventory().add(new ItemStack(Aphelite.INGOT.get()));
+			player.getInventory().add(new ItemStack(Aphelite.CHESTPLATE.get()));
+		});
+		ctx.waitTicks(10);
+		check(BeyondTheDragonClientTest.advancementDone(server, "far_metal"), "a shard in the inventory grants A Far Metal");
+		check(BeyondTheDragonClientTest.advancementDone(server, "aphelite"), "an ingot grants Aphelite");
+		check(BeyondTheDragonClientTest.advancementDone(server, "past_netherite"), "a piece of aphelite gear grants Past Netherite");
+		server.runOnServer(s -> player(s).getInventory().clearContent());
 	}
 
 	/**

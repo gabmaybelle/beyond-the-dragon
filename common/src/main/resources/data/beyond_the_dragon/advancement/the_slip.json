@@ -1,0 +1,35 @@
+{
+	"criteria": {
+		"found": {
+			"trigger": "minecraft:location",
+			"conditions": {
+				"player": {
+					"type": "minecraft:entity_properties",
+					"entity": "this",
+					"predicate": {
+						"minecraft:location": {
+							"structures": "beyond_the_dragon:sinking_city"
+						}
+					}
+				}
+			}
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "minecraft:purpur_pillar"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.the_slip.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.the_slip.description"
+		}
+	},
+	"requirements": [
+		[
+			"found"
+		]
+	],
+	"parent": "beyond_the_dragon:ruins"
+}

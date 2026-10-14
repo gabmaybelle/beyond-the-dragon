@@ -1,5 +1,6 @@
 package com.gabbymaybelle.beyondthedragon.ladder;
 
+import com.gabbymaybelle.beyondthedragon.Advancements;
 import com.gabbymaybelle.beyondthedragon.BeyondTheDragon;
 import com.gabbymaybelle.beyondthedragon.Config;
 import com.gabbymaybelle.beyondthedragon.mixin.BeaconBlockEntityAccessor;
@@ -139,6 +140,9 @@ public final class DragonLadder {
 		if (player != null) {
 			player.sendSystemMessage(Component.translatable("message.beyond_the_dragon.ladder.unlocked"));
 		}
+		if (player instanceof ServerPlayer serverPlayer) {
+			Advancements.grant(serverPlayer, "dragon_notices");
+		}
 		BeyondTheDragon.LOGGER.info("The Dragon Ladder is unlocked: egg on a beacon at {}", egg);
 		return true;
 	}
@@ -191,6 +195,7 @@ public final class DragonLadder {
 		BeyondTheDragon.LOGGER.info("Tier {} dragon beaten: {} reward stack(s) at {}", tier, dropped, podium);
 		for (ServerPlayer player : end.players()) {
 			player.sendSystemMessage(Component.translatable("message.beyond_the_dragon.ladder.rewarded", tier));
+			Advancements.grant(player, "tier_" + tier);
 		}
 	}
 

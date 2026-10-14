@@ -17,6 +17,9 @@ isn't out yet.
   tells you when you cross into the Middle Reaches (2,000 blocks out), the Outer Reaches (5,000)
   or the Edge (10,000), and some things only exist past the outer ring.
 - **Names for the End's biomes**, and a title when you enter any new biome, in any dimension.
+- **A guide that doesn't spoil.** A "Beyond the Dragon" advancements tab whose entries hint at the
+  next step, and a short note in every ruin's chest that points at another ruin or at what the
+  End keeps. Nothing is forced on you; look when you want a nudge.
 - **The Outer Reaches.** Four kinds of ruin on the End's islands, built from the End's own
   architecture: abandoned observatories, wrecked End ships, dragon graveyards and cities sinking
   into the void. A few shulkers and phantoms guard them. Chests hold End odds and ends and, past

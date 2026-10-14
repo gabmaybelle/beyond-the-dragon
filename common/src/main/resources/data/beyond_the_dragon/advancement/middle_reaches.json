@@ -1,0 +1,24 @@
+{
+	"criteria": {
+		"granted": {
+			"trigger": "minecraft:impossible"
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "minecraft:elytra"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.middle_reaches.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.middle_reaches.description"
+		}
+	},
+	"requirements": [
+		[
+			"granted"
+		]
+	],
+	"parent": "beyond_the_dragon:root"
+}

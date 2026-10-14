@@ -1,0 +1,31 @@
+{
+	"criteria": {
+		"got": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "beyond_the_dragon:aphelite_shard"
+					}
+				]
+			}
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "beyond_the_dragon:aphelite_shard"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.far_metal.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.far_metal.description"
+		}
+	},
+	"requirements": [
+		[
+			"got"
+		]
+	],
+	"parent": "beyond_the_dragon:root"
+}

@@ -1,0 +1,32 @@
+{
+	"criteria": {
+		"got": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "#beyond_the_dragon:aphelite_gear"
+					}
+				]
+			}
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "beyond_the_dragon:aphelite_chestplate"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.past_netherite.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.past_netherite.description"
+		},
+		"frame": "goal"
+	},
+	"requirements": [
+		[
+			"got"
+		]
+	],
+	"parent": "beyond_the_dragon:aphelite"
+}

@@ -1,5 +1,6 @@
 package com.gabbymaybelle.beyondthedragon.structures;
 
+import com.gabbymaybelle.beyondthedragon.Advancements;
 import com.gabbymaybelle.beyondthedragon.BeyondTheDragon;
 import com.gabbymaybelle.beyondthedragon.aphelite.Aphelite;
 import com.gabbymaybelle.beyondthedragon.titles.Titles;
@@ -123,6 +124,8 @@ public final class Observatories {
 		}
 		if (player instanceof ServerPlayer serverPlayer) {
 			give(serverPlayer, chart(level, lectern));
+			Advancements.grant(serverPlayer, "keepers_eye");
+			Advancements.grant(serverPlayer, "keepers_chart");
 		}
 		BeyondTheDragon.LOGGER.info("An observatory was restored at {}", key);
 	}
@@ -185,6 +188,7 @@ public final class Observatories {
 			return false;
 		}
 		give(serverPlayer, chart(level, pos));
+		Advancements.grant(serverPlayer, "keepers_chart");
 		return true;
 	}
 

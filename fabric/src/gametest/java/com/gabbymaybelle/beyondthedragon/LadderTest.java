@@ -87,6 +87,7 @@ final class LadderTest {
 		ctx.waitTicks(100);
 		placeEgg(server, beacon);
 		check(!unlocked(server), "the egg on an unlit beacon does not unlock the ladder");
+		check(!BeyondTheDragonClientTest.advancementDone(server, "dragon_notices"), "no advancement for the unlit beacon");
 
 		// Give it a pyramid and try again.
 		server.runOnServer(s -> {
@@ -114,6 +115,7 @@ final class LadderTest {
 		BeyondTheDragon.LOGGER.info("[test] beacon before the lit attempt: {}", beaconState);
 		placeEgg(server, beacon);
 		check(unlocked(server), "the egg on a lit beacon unlocks the ladder (" + beaconState + ")");
+		check(BeyondTheDragonClientTest.advancementDone(server, "dragon_notices"), "unlocking the ladder grants The Dragon Takes Notice");
 		BeyondTheDragonClientTest.screenshot(ctx, "beyond_the_dragon_egg_on_beacon");
 	}
 
@@ -191,6 +193,9 @@ final class LadderTest {
 		waitOnServer(ctx, server, s -> end(s).getDragons().isEmpty(), 600);
 		respawn(ctx, server, origin, 3);
 		check(tier(server) == 3, "a fourth respawn stays at tier 3");
+		for (int t = 1; t <= 3; t++) {
+			check(BeyondTheDragonClientTest.advancementDone(server, "tier_" + t), "beating the tier " + t + " dragon grants its advancement");
+		}
 	}
 
 	private void placeEgg(TestServerContext server, BlockPos beacon) {

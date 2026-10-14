@@ -37,6 +37,14 @@ One codebase, two jars:
   type: a jigsaw that refuses to start unless the footprint's corners are on an island) and
   `InRingCondition` (the `beyond_the_dragon:in_ring` loot condition).
 
+The in-game guide is the advancements tab (`data/.../advancement/`, written by `generate-data.py`
+with its language keys) and the lore books in the ruins' chest loot (the `LORE` table in the
+generator). Advancements that vanilla triggers can't express use an `impossible` criterion and
+are granted from code with `Advancements.grant(player, path)` at the moments already noticed
+(ring entry in `TitleWatcher`, restoration and chart in `Observatories`, unlock and tier kills in
+`DragonLadder`); finding ruins uses `minecraft:location` with the `#beyond_the_dragon:ruins`
+structure tag, and the item ones `inventory_changed`.
+
 Registering anything (items, blocks, placement modifiers) goes through
 `Services.PLATFORM.register(...)`, never `Registry.register` directly: NeoForge only accepts
 registrations in its registry event, so its `Platform` queues them and the result is a

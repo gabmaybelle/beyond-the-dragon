@@ -139,6 +139,31 @@
 					"weight": 1
 				}
 			]
+		},
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:written_book",
+					"modifier": [
+						{
+							"type": "minecraft:set_book_cover",
+							"title": "Scratched on Bone",
+							"author": "unknown",
+							"generation": 0
+						},
+						{
+							"type": "minecraft:set_written_book_pages",
+							"pages": [
+								"the vault under the ribs takes a trial key. the phantoms that circle here carry them. one prize to each of us, it said, and it kept its word.",
+								"out past the skull there is a city that slipped. half of it hangs over nothing. we did not stay."
+							],
+							"mode": "replace_all"
+						}
+					]
+				}
+			]
 		}
 	]
 }
