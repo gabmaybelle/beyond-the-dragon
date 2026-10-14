@@ -11,6 +11,6 @@
 	},
 	"max_distance_from_center": 48,
 	"min_surface_y": 50,
-	"max_slope": 10,
+	"max_slope": 12,
 	"min_distance": 1000
 }

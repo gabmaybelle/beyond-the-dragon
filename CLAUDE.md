@@ -142,6 +142,16 @@ or test names. Check the diff for these before every push.
 - Keep the credit line: "made by Gabby with help from Claude, an AI assistant".
 - Gabby publishes on Modrinth herself. Don't upload anything there.
 
-**Minecraft.** Fabric and NeoForge on Minecraft 26.3 (Mojang names; Loom 1.18.4, ModDevGradle
-2.0, Java 25). Vanilla names changed a lot in 26.x: check the merged jar rather than older docs
+**Minecraft.** Fabric and NeoForge (Mojang names; Loom 1.18.4, ModDevGradle 2.0, Java 25).
+Version branches: `main` is the newest Minecraft (26.3), `26.1` is 26.1.2, and older versions get
+a branch each. Behaviour changes land on `main` and are cherry-picked to the version branches,
+where only the version differences are edited; CI runs on every branch. The data formats differ
+between versions (loot `modifier`/`condition` here against `functions`/`conditions` on 26.1,
+`worldgen/feature` against `worldgen/configured_feature`, the trim palette metadata against an
+`armor_trims` atlas): `generate-data.py` writes everything in the 26.3 shape and converts under
+its `FORMAT` constant, the one line that differs between the branches' generators. Structure
+templates differ too: `structure.js` writes palette entries as `id`/`properties` here and
+`Name`/`Properties` on 26.1, and stamps each version's `DATA_VERSION`; a template with either
+wrong loads with its box but places no blocks, silently. Each branch's test matrix is its own:
+BetterEnd and Stellarity run here but not on 26.1 (their 26.1 builds don't load or hang). Vanilla names changed a lot in 26.x: check the merged jar rather than older docs
 (for example `iron_chain`, `pink_petals[flower_amount=N]`, timelines instead of `time query daytime`).
