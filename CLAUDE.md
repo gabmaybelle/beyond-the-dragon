@@ -48,7 +48,9 @@ registrations in its registry event, so its `Platform` queues them and the resul
 - `./gradlew :fabric:runClientGameTest`: the settings file and the in-game checks, in a real game
   window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestBetterEnd`,
   `-PtestStellarity` or `-PtestNullscape` to play it with that mod installed (fetched from
-  Modrinth's maven, never bundled); CI runs all four. `BTD_TEST_ONLY=structures` (or
+  Modrinth's maven, never bundled); CI runs all four. `-PtestJei` / `-PtestRei` load the game
+  with that recipe viewer (and what it needs) for a load check; the recipes are plain JSON, so
+  the viewers list them on their own. `BTD_TEST_ONLY=structures` (or
   `=aphelite`) in the environment plays only that part of the test, in a couple of minutes, for
   tuning. `BTD_SCREENSHOTS=<folder>` keeps the test's
   screenshots (titles, each ruin from the air, the egg on the beacon, each dragon tier) there;

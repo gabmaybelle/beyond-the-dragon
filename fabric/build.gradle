@@ -36,6 +36,17 @@ dependencies {
 	if (project.hasProperty("testNullscape")) {
 		runtimeOnly "maven.modrinth:nullscape:${project.nullscape_version}"
 	}
+	// Recipe viewers (each with what it needs): the recipes are plain crafting and smithing
+	// JSON, so a viewer lists them on its own; these runs prove the game loads with one.
+	if (project.hasProperty("testJei")) {
+		runtimeOnly "maven.modrinth:jei:${project.jei_version}"
+		runtimeOnly "maven.modrinth:mezzconfig:${project.mezzconfig_version}"
+	}
+	if (project.hasProperty("testRei")) {
+		runtimeOnly "maven.modrinth:rei:${project.rei_version}"
+		runtimeOnly "maven.modrinth:cloth-config:${project.cloth_config_version}"
+		runtimeOnly "maven.modrinth:architectury-api:${project.architectury_version}"
+	}
 }
 
 processResources {
