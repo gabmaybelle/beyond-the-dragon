@@ -367,7 +367,7 @@ function sinkingCity() {
 /**
  * The build raised on a plinth: end stone `depth` deep under every column whose lowest block is
  * within the bottom few layers (a ship's hull or a tilted city gets a foundation under its whole
- * underside, not just its keel). The structure's start height sinks the template by the same
+ * underside, not just its keel; the city's fat tower, four up, gets a stone column). The structure's start height sinks the template by the same
  * depth, so on flat ground the plinth is buried and on a ragged or sloping island it is the
  * foundation the ruin stands on.
  */
@@ -385,7 +385,7 @@ function withPlinth(b, depth) {
 	const r = new Build([b.size[0], b.size[1] + shift, b.size[2]]);
 	for (const [x, y, z, e] of b.all()) if (y + shift >= 0) r.blocks.set(`${x},${y + shift},${z}`, e);
 	for (const [k, y0] of lowest) {
-		if (y0 - minY > 3) continue;
+		if (y0 - minY > 4) continue;
 		for (let d = 0; d < y0 + shift; d++) r.blocks.set(`${k.split(',')[0]},${d},${k.split(',')[1]}`, { state: 'minecraft:end_stone' });
 	}
 	r.shulkers = b.shulkers.map(([x, y, z]) => [x, y + shift, z]);
@@ -394,7 +394,7 @@ function withPlinth(b, depth) {
 }
 
 // Keep in step with PLINTH in generate-data.py (the structures' start height).
-const PLINTH = 5;
+const PLINTH = 8;
 
 function generate(name, intact, missing, title, intro, lectern) {
 	const theBook = book(title, intro, missing, intact);

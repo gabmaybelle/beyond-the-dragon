@@ -3,29 +3,43 @@ package com.gabbymaybelle.beyondthedragon.structures;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pools.DimensionPadding;
+import net.minecraft.world.level.levelgen.structure.pools.EmptyPoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
 import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 /**
  * A jigsaw structure that only starts on solid End ground. A plain {@code minecraft:jigsaw}
  * happily projects its start onto a heightmap of 0 where there is no island, and then the
  * structure sits over the void; this type samples the surface on a three-by-three grid over the
- * {@code footprint} first, the way End Cities check their corners in code. {@code min_surface_y}
- * is the lowest surface height that counts as an island (vanilla End land is y 55 to 75 or so),
- * {@code max_slope} is how far the highest and lowest samples may differ (the templates' end
- * stone plinth covers that much of a drop), and {@code min_distance} keeps the structure that
- * many blocks from the End's centre. The biomes are the {@code #minecraft:is_end} tag, so
+ * start template's footing first, the way End Cities check their corners in code. The footing
+ * is the whole template's box, or the part of it named by {@code footing} ({@code [x1, z1, x2,
+ * z2]}, template coordinates) for a ruin meant to hang over an edge; it turns with the
+ * template's rotation, which the jigsaw placement draws first from the context's random and
+ * which is peeked here from a copy of that random. The template's height comes from the surface
+ * at the footing's centre (not vanilla's projection at the whole box's centre, which could be
+ * over the void). {@code min_surface_y} is the lowest surface height that counts as an island
+ * (vanilla End land is y 55 to 75 or so), {@code max_slope} is how far the highest and lowest
+ * samples may differ (the templates' end stone plinth covers that much of a drop), and
+ * {@code min_distance} keeps the structure that many blocks from the End's centre. The biomes are the {@code #minecraft:is_end} tag, so
  * modded End biomes count too; the surface and distance checks do the rest, and they matter
  * there most: {@code beard_box} terrain adaptation does nothing on an End whose density
  * functions it can't outweigh (Stellarity's, for one).
@@ -38,8 +52,8 @@ public final class EndJigsawStructure extends Structure {
 			HeightProvider.CODEC.fieldOf("start_height").forGetter(s -> s.startHeight),
 			Codec.intRange(0, 128).fieldOf("max_distance_from_center").forGetter(s -> s.maxDistanceFromCenter),
 			Codec.intRange(0, 320).optionalFieldOf("min_surface_y", 50).forGetter(s -> s.minSurfaceY),
-			Codec.intRange(0, 64).optionalFieldOf("footprint", 16).forGetter(s -> s.footprint),
 			Codec.intRange(0, 64).optionalFieldOf("max_slope", 6).forGetter(s -> s.maxSlope),
+			Codec.INT.listOf(4, 4).optionalFieldOf("footing", List.of()).forGetter(s -> s.footing),
 			Codec.intRange(0, 100000).optionalFieldOf("min_distance", 0).forGetter(s -> s.minDistance)
 	).apply(instance, EndJigsawStructure::new));
 	public static final StructureType<EndJigsawStructure> TYPE = () -> CODEC;
@@ -49,21 +63,80 @@ public final class EndJigsawStructure extends Structure {
 	private final HeightProvider startHeight;
 	private final int maxDistanceFromCenter;
 	private final int minSurfaceY;
-	private final int footprint;
 	private final int maxSlope;
+	private final List<Integer> footing;
 	private final int minDistance;
 
 	public EndJigsawStructure(StructureSettings settings, Holder<StructureTemplatePool> startPool, int size, HeightProvider startHeight,
-			int maxDistanceFromCenter, int minSurfaceY, int footprint, int maxSlope, int minDistance) {
+			int maxDistanceFromCenter, int minSurfaceY, int maxSlope, List<Integer> footing, int minDistance) {
 		super(settings);
 		this.startPool = startPool;
 		this.size = size;
 		this.startHeight = startHeight;
 		this.maxDistanceFromCenter = maxDistanceFromCenter;
 		this.minSurfaceY = minSurfaceY;
-		this.footprint = footprint;
 		this.maxSlope = maxSlope;
+		this.footing = footing;
 		this.minDistance = minDistance;
+	}
+
+	/**
+	 * The box the start template would occupy in a chunk, the footing within it that must be on
+	 * land, the lowest and highest surface under that footing, and the first free height at the
+	 * footing's centre (where the template's bottom goes, before {@code start_height}).
+	 */
+	public record Surface(BoundingBox box, BoundingBox footing, int lowest, int highest, int free) {
+	}
+
+	public int minSurfaceY() {
+		return minSurfaceY;
+	}
+
+	public int maxSlope() {
+		return maxSlope;
+	}
+
+	/**
+	 * Where the template would really stand in this chunk and what the ground does under it, or
+	 * empty if the start pool has nothing. The placement's first two draws from the context's
+	 * random are the rotation and the start element, so the same draws from a copy of that random
+	 * (nothing here touches the original before the placement does) give the box; the surface is
+	 * then sampled on a three-by-three grid over it: corners, edges and the middle, which is where
+	 * the placement reads the height it projects the template to.
+	 */
+	public Optional<Surface> surface(GenerationContext context) {
+		int x = context.chunkPos().getMinBlockX();
+		int z = context.chunkPos().getMinBlockZ();
+		WorldgenRandom peek = new WorldgenRandom(new LegacyRandomSource(0L));
+		peek.setLargeFeatureSeed(context.seed(), context.chunkPos().x(), context.chunkPos().z());
+		Rotation rotation = Rotation.getRandom(peek);
+		StructurePoolElement element = startPool.value().getRandomTemplate(peek);
+		if (element == EmptyPoolElement.INSTANCE) {
+			return Optional.empty();
+		}
+		BoundingBox box = element.getBoundingBox(context.structureTemplateManager(), new BlockPos(x, 0, z), rotation);
+		BoundingBox feet = box;
+		if (footing.size() == 4) {
+			// The footing turns with the template, about the same corner the template turns about.
+			BlockPos a = StructureTemplate.transform(new BlockPos(footing.get(0), 0, footing.get(1)), Mirror.NONE, rotation, BlockPos.ZERO).offset(x, 0, z);
+			BlockPos b = StructureTemplate.transform(new BlockPos(footing.get(2), 0, footing.get(3)), Mirror.NONE, rotation, BlockPos.ZERO).offset(x, 0, z);
+			feet = BoundingBox.fromCorners(a, b);
+		}
+		int lowest = Integer.MAX_VALUE;
+		int highest = Integer.MIN_VALUE;
+		for (int i = 0; i <= 2; i++) {
+			for (int j = 0; j <= 2; j++) {
+				int sampleX = feet.minX() + (feet.maxX() - feet.minX()) * i / 2;
+				int sampleZ = feet.minZ() + (feet.maxZ() - feet.minZ()) * j / 2;
+				int surface = context.chunkGenerator().getFirstOccupiedHeight(sampleX, sampleZ, Heightmap.Types.WORLD_SURFACE_WG,
+						context.heightAccessor(), context.randomState());
+				lowest = Math.min(lowest, surface);
+				highest = Math.max(highest, surface);
+			}
+		}
+		int free = context.chunkGenerator().getFirstFreeHeight((feet.minX() + feet.maxX()) / 2, (feet.minZ() + feet.maxZ()) / 2,
+				Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState());
+		return Optional.of(new Surface(box, feet, lowest, highest, free));
 	}
 
 	@Override
@@ -74,26 +147,18 @@ public final class EndJigsawStructure extends Structure {
 		if (Math.sqrt((double) x * x + (double) z * z) < minDistance) {
 			return Optional.empty();
 		}
-		// The whole footprint must stand on an island, and on nearly level ground: nine samples,
-		// corners, edges and middle.
-		int half = footprint / 2;
-		int lowest = Integer.MAX_VALUE;
-		int highest = Integer.MIN_VALUE;
-		for (int i = 0; i <= 2; i++) {
-			for (int j = 0; j <= 2; j++) {
-				int surface = context.chunkGenerator().getFirstOccupiedHeight(x + i * half, z + j * half, Heightmap.Types.WORLD_SURFACE_WG,
-						context.heightAccessor(), context.randomState());
-				lowest = Math.min(lowest, surface);
-				highest = Math.max(highest, surface);
-			}
-		}
-		if (lowest < minSurfaceY || highest - lowest > maxSlope) {
+		// The whole box must stand on an island, and on nearly level ground.
+		Optional<Surface> surface = surface(context);
+		if (surface.isEmpty() || surface.get().lowest() < minSurfaceY || surface.get().highest() - surface.get().lowest() > maxSlope) {
 			return Optional.empty();
 		}
-		BlockPos start = new BlockPos(x, startHeight.sample(context.random(), new net.minecraft.world.level.levelgen.WorldGenerationContext(
-				context.chunkGenerator(), context.heightAccessor())), z);
-		return JigsawPlacement.addPieces(context, startPool, Optional.empty(), size, start, false,
-				Optional.of(Heightmap.Types.WORLD_SURFACE_WG), new JigsawStructure.MaxDistance(maxDistanceFromCenter),
+		// The template's bottom goes at the footing centre's first free block plus the start height
+		// (negative: the plinth sinks in). A constant height never reads its random; a copy is
+		// passed all the same so the context's own random reaches the placement untouched.
+		int y = surface.get().free() + startHeight.sample(new WorldgenRandom(new LegacyRandomSource(0L)),
+				new net.minecraft.world.level.levelgen.WorldGenerationContext(context.chunkGenerator(), context.heightAccessor()));
+		return JigsawPlacement.addPieces(context, startPool, Optional.empty(), size, new BlockPos(x, y, z), false,
+				Optional.empty(), new JigsawStructure.MaxDistance(maxDistanceFromCenter),
 				PoolAliasLookup.EMPTY, DimensionPadding.ZERO, LiquidSettings.IGNORE_WATERLOGGING);
 	}
 

@@ -7,11 +7,16 @@
 	"start_pool": "beyond_the_dragon:sinking_city/start",
 	"size": 1,
 	"start_height": {
-		"absolute": -5
+		"absolute": -8
 	},
 	"max_distance_from_center": 80,
 	"min_surface_y": 50,
-	"footprint": 44,
-	"max_slope": 6,
+	"max_slope": 10,
+	"footing": [
+		14,
+		56,
+		27,
+		69
+	],
 	"min_distance": 1000
 }

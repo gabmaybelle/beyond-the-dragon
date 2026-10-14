@@ -47,7 +47,9 @@ registrations in its registry event, so its `Platform` queues them and the resul
 - `./gradlew :fabric:runClientGameTest`: the settings file and the in-game checks, in a real game
   window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestBetterEnd`,
   `-PtestStellarity` or `-PtestNullscape` to play it with that mod installed (fetched from
-  Modrinth's maven, never bundled); CI runs all four. With a mod that reworks the dragon fight
+  Modrinth's maven, never bundled); CI runs all four. `BTD_TEST_ONLY=structures` in the
+  environment plays only the structure checks (footing, placement yield, restoration, respawn)
+  in about two minutes, for tuning placement. With a mod that reworks the dragon fight
   installed, the test expects our tier attacks to stay off. BetterEnd keeps the fight but
   replaces the respawn check (crystals four blocks from the End's origin, on bedrock, any
   height); the ladder test places them there when it is loaded.
@@ -68,8 +70,14 @@ registrations in its registry event, so its `Platform` queues them and the resul
   between 1.21.1 and 26.x. Keep every new attack behind its own setting and reuse vanilla phases
   and entities (charge phase, shulker bullets, lingering clouds) rather than inventing new ones.
 - **End structures must check for ground.** A data-only jigsaw happily generates at height 0 over
-  the void; our structure type samples the surface on a 3×3 grid over the footprint and refuses
-  a start that is too low or too uneven (`max_slope`). Every template also stands on a plinth of
+  the void; our structure type samples the surface on a 3×3 grid over the start template's
+  rotated footing (the whole box, or the `footing` sub-box for the city, which hangs over the
+  edge by design; the rotation is peeked from a copy of the context's random, whose first draw
+  the jigsaw placement uses for it), refuses a start that is too low or too uneven
+  (`max_slope`), and sets the height itself from the footing's centre: vanilla's projection
+  reads the *whole box's* centre, which put a graveyard on the void floor. The game test's
+  placement-yield check prints, per ruin and per End mod, how many candidate chunks were
+  rejected for void and for slope; tune from those numbers. Every template also stands on a plinth of
   end stone (`PLINTH` in both generator scripts) and starts that deep below the surface, so the
   plinth is buried on flat ground and is the foundation on a slope. `beard_box` stays on but
   can't be relied on: Stellarity's End density ignores it.

@@ -1,8 +1,8 @@
 {
 	"placement": {
 		"type": "minecraft:random_spread",
-		"spacing": 44,
-		"separation": 20,
+		"spacing": 36,
+		"separation": 16,
 		"salt": 20261017,
 		"exclusion_zone": {
 			"other_set": "minecraft:end_cities",

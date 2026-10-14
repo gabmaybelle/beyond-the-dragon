@@ -1,6 +1,7 @@
 package com.gabbymaybelle.beyondthedragon;
 
 import com.gabbymaybelle.beyondthedragon.aphelite.Aphelite;
+import com.gabbymaybelle.beyondthedragon.structures.EndJigsawStructure;
 import com.gabbymaybelle.beyondthedragon.structures.Observatories;
 import com.gabbymaybelle.beyondthedragon.structures.ObservatoryData;
 import java.util.List;
@@ -21,16 +22,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 
 /**
- * The Outer Reaches structures in a real game: the nearest observatory to the End's centre is
- * found by the game's own locator, it stands on land (nothing under its base is air), its
- * lectern and chests are there; putting back every missing block restores it, which hands out
- * the keeper's chart with markers on it; and a death in the End comes back at its lectern.
+ * The Outer Reaches structures in a real game: the nearest ruin of each kind to the End's centre
+ * is found by the game's own locator and stands on land (its columns have ground, not air,
+ * under them); each kind's placement yields starts often enough across the seed; the
+ * observatory has its lectern and chests, putting back every missing block restores it, which
+ * hands out the keeper's chart with markers on it; a death in the End comes back at its
+ * lectern, and a death at home does not.
  */
 final class StructuresTest {
 	private final Consumer<String> ok;
@@ -41,27 +47,108 @@ final class StructuresTest {
 		this.failed = failed;
 	}
 
+	private static final List<String> KINDS = List.of("observatory", "wreck", "graveyard", "sinking_city");
+
 	void run(ClientGameTestContext ctx, TestServerContext server) {
+		for (String kind : KINDS) {
+			String report = server.computeOnServer(s -> footing(s.getLevel(Level.END), kind));
+			BeyondTheDragon.LOGGER.info("[test] {}: {}", kind, report);
+			check(!report.startsWith("none") && !report.startsWith("no structure"), "a " + kind + " generates within 120 chunks of the End's centre (" + report + ")");
+			if (report.startsWith("none") || report.startsWith("no structure")) {
+				continue;
+			}
+			check(report.matches(".*base y -?\\d+.*") && !report.contains(" 0 base blocks"), "the " + kind + "'s base was found (" + report + ")");
+			int overAir = airUnderBase(report);
+			int base = baseBlocks(report);
+			check(overAir >= 0 && overAir * 10 <= base, "the " + kind + " stands on land, not the void (" + report + ")");
+			if (kind.equals("observatory")) {
+				check(report.contains("1 lectern(s)") && !report.contains(" 0 chest(s)"), "the observatory has its lectern and chests (" + report + ")");
+			}
+		}
+		placementYield(server);
+		restoration(ctx, server);
+	}
+
+	/**
+	 * How often each kind's placement actually yields a start, asked of the seed alone the way
+	 * the locator does (no chunks loaded): every candidate chunk of the structure set within
+	 * 4,000 blocks of the centre, against the surface and slope checks. A kind that passes too
+	 * rarely is one players would never find.
+	 */
+	private void placementYield(TestServerContext server) {
 		String report = server.computeOnServer(s -> {
 			ServerLevel end = s.getLevel(Level.END);
-			Holder<Structure> observatory = end.registryAccess().lookupOrThrow(Registries.STRUCTURE)
-					.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id("observatory")));
-			BlockPos start = end.findNearestMapStructure(HolderSet.direct(observatory), new BlockPos(0, 64, 0), 120, false);
-			if (start == null) {
-				return "none within 120 chunks";
-			}
-			// Loading the chunks round the start generates the pieces; the start's bounding box then
-			// says where the (randomly rotated) piece actually stands.
-			for (int cx = -2; cx <= 2; cx++) {
-				for (int cz = -2; cz <= 2; cz++) {
-					end.getChunk((start.getX() >> 4) + cx, (start.getZ() >> 4) + cz);
+			var state = end.getChunkSource().getGeneratorState();
+			var generator = end.getChunkSource().getGenerator();
+			// The same climate sampler the game's own structure check builds.
+			var climate = state.randomState().createClimateSampler(SamplerContext.builder().enableCaches().build());
+			StringBuilder out = new StringBuilder();
+			for (String kind : KINDS) {
+				Holder<Structure> holder = end.registryAccess().lookupOrThrow(Registries.STRUCTURE)
+						.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind)));
+				EndJigsawStructure structure = (EndJigsawStructure) holder.value();
+				int candidates = 0;
+				int starts = 0;
+				int voids = 0;
+				int steep = 0;
+				for (StructurePlacement placement : state.getPlacementsForStructure(holder)) {
+					for (int cx = -250; cx <= 250; cx++) {
+						for (int cz = -250; cz <= 250; cz++) {
+							if (!placement.isStructureChunk(state, cx, cz)) {
+								continue;
+							}
+							candidates++;
+							var context = new Structure.GenerationContext(end.registryAccess(), generator, generator.getBiomeSource(), climate, state.randomState(),
+									s.getStructureTemplateManager(), end.getSeed(), new ChunkPos(cx, cz), end, holder.value().biomes()::contains);
+							if (holder.value().findValidGenerationPoint(context).isPresent()) {
+								starts++;
+							} else {
+								var surface = structure.surface(context);
+								if (surface.isEmpty() || surface.get().lowest() < structure.minSurfaceY()) {
+									voids++;
+								} else if (surface.get().highest() - surface.get().lowest() > structure.maxSlope()) {
+									steep++;
+								}
+							}
+						}
+					}
 				}
+				out.append(kind).append(' ').append(starts).append(" of ").append(candidates)
+						.append(" (void ").append(voids).append(", steep ").append(steep).append("); ");
 			}
-			var starts = end.structureManager().startsForStructure(start.getX() >> 4, start.getZ() >> 4, observatory.value());
-			if (starts.isEmpty() || !starts.get(0).isValid()) {
-				return "no structure start at " + start;
+			return out.toString();
+		});
+		BeyondTheDragon.LOGGER.info("[test] yield within 4000 blocks: {}", report);
+		for (String kind : KINDS) {
+			var m = java.util.regex.Pattern.compile(kind + " (\\d+) of (\\d+)").matcher(report);
+			int starts = m.find() ? Integer.parseInt(m.group(1)) : -1;
+			check(starts >= 5, "at least five " + kind + " starts within 4000 blocks of the centre (" + report + ")");
+		}
+	}
+
+	/** Where the nearest ruin of a kind stands and what is under it; the observatory's lectern and chests are counted too. */
+	private static String footing(ServerLevel end, String kind) {
+		Holder<Structure> structure = end.registryAccess().lookupOrThrow(Registries.STRUCTURE)
+				.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind)));
+		BlockPos start = end.findNearestMapStructure(HolderSet.direct(structure), new BlockPos(0, 64, 0), 120, false);
+		if (start == null) {
+			return "none within 120 chunks";
+		}
+		// Loading the start's chunk creates the pieces; the start's bounding box then says where the
+		// (randomly rotated) template actually stands, and loading every chunk under it places it.
+		end.getChunk(start.getX() >> 4, start.getZ() >> 4);
+		var starts = end.structureManager().startsForStructure(start.getX() >> 4, start.getZ() >> 4, structure.value());
+		if (starts.isEmpty() || !starts.get(0).isValid()) {
+			return "no structure start at " + start;
+		}
+		// The start's box is inflated by twelve for terrain adaptation; the piece's is the template's.
+		var box = starts.get(0).getPieces().get(0).getBoundingBox();
+		for (int cx = box.minX() >> 4; cx <= box.maxX() >> 4; cx++) {
+			for (int cz = box.minZ() >> 4; cz <= box.maxZ() >> 4; cz++) {
+				end.getChunk(cx, cz);
 			}
-			var box = starts.get(0).getBoundingBox();
+		}
+		{
 			// The building's columns are the ones with End City masonry in them; each stands on
 			// the template's bottom row (its end stone plinth, sunk into the island), and that row
 			// must have ground, not air, beneath it.
@@ -79,7 +166,7 @@ final class StructuresTest {
 							lecterns++;
 						} else if (state.is(Blocks.CHEST)) {
 							chests++;
-						} else if (state.is(Blocks.END_STONE_BRICKS) || state.is(Blocks.PURPUR_BLOCK) || state.is(Blocks.PURPUR_PILLAR)) {
+						} else if (state.is(Blocks.END_STONE_BRICKS) || state.is(Blocks.PURPUR_BLOCK) || state.is(Blocks.PURPUR_PILLAR) || state.is(Blocks.BONE_BLOCK)) {
 							building = true;
 						}
 					}
@@ -93,17 +180,7 @@ final class StructuresTest {
 			}
 			return "box from " + box.minX() + "," + box.minY() + "," + box.minZ() + " to " + box.maxX() + "," + box.maxY() + "," + box.maxZ()
 					+ ", base y " + baseY + ", " + baseBlocks + " base blocks, " + airUnderBase + " over air, " + lecterns + " lectern(s), " + chests + " chest(s)";
-		});
-		BeyondTheDragon.LOGGER.info("[test] observatory: {}", report);
-		check(!report.startsWith("none") && !report.startsWith("no structure"), "an observatory generates within 120 chunks of the End's centre (" + report + ")");
-		if (report.startsWith("none") || report.startsWith("no structure")) {
-			return;
 		}
-		check(report.contains("1 lectern(s)") && !report.contains(" 0 chest(s)"), "the observatory has its lectern and chests (" + report + ")");
-		check(report.matches(".*base y \\d+.*") && !report.contains(" 0 base blocks"), "the observatory's base was found (" + report + ")");
-		int overAir = airUnderBase(report);
-		check(overAir >= 0 && overAir <= 8, "the observatory stands on land, not the void (" + report + ")");
-		restoration(ctx, server);
 	}
 
 	/** Puts back every missing block, which should restore the observatory and hand out the chart. */
@@ -168,14 +245,20 @@ final class StructuresTest {
 			check(false, "a restored observatory is on record for the respawn check");
 			return;
 		}
+		// Die a good way off, so coming back at the lectern can't be an accident; the client gets
+		// a moment to arrive first, or a death during a dimension change shows no death screen.
 		server.runOnServer(s -> {
 			ServerLevel end = s.getLevel(Level.END);
 			ServerPlayer player = player(s);
+			player.setGameMode(GameType.CREATIVE);
+			player.teleportTo(end, lectern.getX() + 40.5, lectern.getY() + 10, lectern.getZ() + 40.5, java.util.Set.of(), 0, 0, false);
+		});
+		ctx.waitTicks(40);
+		server.runOnServer(s -> {
+			ServerPlayer player = player(s);
 			player.setPermanentlyInvulnerable(false);
 			player.setGameMode(GameType.SURVIVAL);
-			// Die a good way off, so coming back at the lectern can't be an accident.
-			player.teleportTo(end, lectern.getX() + 40.5, lectern.getY() + 10, lectern.getZ() + 40.5, java.util.Set.of(), 0, 0, false);
-			player.kill(end);
+			player.kill(s.getLevel(Level.END));
 		});
 		ctx.waitForScreen(DeathScreen.class);
 		ctx.clickScreenButton("deathScreen.respawn");
@@ -187,6 +270,29 @@ final class StructuresTest {
 		});
 		double distance = server.computeOnServer(s -> player(s).blockPosition().distSqr(lectern.above()));
 		check(where.contains("the_end") && distance <= 9, "a death in the End respawns at the restored observatory's lectern (" + where + ")");
+
+		// The same death at home must be vanilla's: back at the world spawn, not in the End.
+		server.runOnServer(s -> {
+			ServerPlayer player = player(s);
+			player.setGameMode(GameType.CREATIVE);
+			player.teleportTo(s.overworld(), 0.5, 200, 0.5, java.util.Set.of(), 0, 0, false);
+		});
+		ctx.waitTicks(40);
+		server.runOnServer(s -> {
+			ServerPlayer player = player(s);
+			player.setPermanentlyInvulnerable(false);
+			player.setGameMode(GameType.SURVIVAL);
+			player.kill(s.overworld());
+		});
+		ctx.waitForScreen(DeathScreen.class);
+		ctx.clickScreenButton("deathScreen.respawn");
+		ctx.waitTicks(60);
+		String home = server.computeOnServer(s -> {
+			ServerPlayer player = player(s);
+			player.setPermanentlyInvulnerable(true);
+			return player.level().dimension().identifier() + " " + player.blockPosition();
+		});
+		check(home.contains("overworld"), "a death in the Overworld respawns at home, not at an observatory (" + home + ")");
 	}
 
 	private static StructureStart nearestObservatory(ServerLevel end) {
@@ -203,6 +309,11 @@ final class StructuresTest {
 	private static int airUnderBase(String report) {
 		var m = java.util.regex.Pattern.compile("(\\d+) over air").matcher(report);
 		return m.find() ? Integer.parseInt(m.group(1)) : -1;
+	}
+
+	private static int baseBlocks(String report) {
+		var m = java.util.regex.Pattern.compile("(\\d+) base blocks").matcher(report);
+		return m.find() ? Integer.parseInt(m.group(1)) : 0;
 	}
 
 	private void check(boolean condition, String what) {

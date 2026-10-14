@@ -188,11 +188,11 @@ print("data and assets written")
 # the ruins off the void and away from the dragon's island.
 # Every template stands on PLINTH blocks of end stone (generate-structures.js); the start sinks
 # by as much so the plinth is buried on flat ground and is the foundation on a slope. MAX_SLOPE
-# is how uneven (highest minus lowest surface, in blocks) the footprint may be: the plinth covers
+# is how uneven (highest minus lowest surface, in blocks) the template's box may be: the plinth covers
 # that much of a drop. beard_box fills under the box on vanilla terrain but not on every modded
 # End (Stellarity's density ignores it), so the plinth does the real work.
-PLINTH = 5
-MAX_SLOPE = 6
+PLINTH = 8
+MAX_SLOPE = 10
 write(MC_DATA.parent / NS / "tags" / "worldgen" / "biome" / "has_structure" / "outer_reaches.json",
       {"values": ["#minecraft:is_end"]})
 write(DATA / "worldgen" / "structure" / "observatory.json", {
@@ -206,7 +206,6 @@ write(DATA / "worldgen" / "structure" / "observatory.json", {
     "start_height": {"absolute": -PLINTH},
     "max_distance_from_center": 32,
     "min_surface_y": 50,
-    "footprint": 21,
     "max_slope": MAX_SLOPE,
     "min_distance": 1000,
 })
@@ -249,7 +248,7 @@ write(DATA / "loot_table" / "chests" / "observatory.json", {
 })
 
 # The other three Outer Reaches structures (templates from generate-structures.js).
-def structure(name, pool_name, template, size, footprint, spacing, separation, salt, extra_biomes=None, min_surface_y=50):
+def structure(name, pool_name, template, size, spacing, separation, salt, extra_biomes=None, min_surface_y=50, max_slope=MAX_SLOPE, footing=None):
     write(DATA / "worldgen" / "structure" / f"{name}.json", {
         "type": ns("end_jigsaw"),
         "biomes": f"#{NS}:has_structure/outer_reaches",
@@ -261,8 +260,8 @@ def structure(name, pool_name, template, size, footprint, spacing, separation, s
         "start_height": {"absolute": -PLINTH},
         "max_distance_from_center": size,
         "min_surface_y": min_surface_y,
-        "footprint": footprint,
-        "max_slope": MAX_SLOPE,
+        "max_slope": max_slope,
+        **({"footing": footing} if footing else {}),
         "min_distance": 1000,
     })
     write(DATA / "worldgen" / "structure_set" / f"{name}s.json", {
@@ -284,9 +283,12 @@ def structure(name, pool_name, template, size, footprint, spacing, separation, s
         }}],
     })
 
-structure("wreck", "wreck", "wreck", 40, 14, 28, 12, 20261015)
-structure("graveyard", "graveyard", "graveyard", 48, 24, 36, 16, 20261016)
-structure("sinking_city", "sinking_city", "sinking_city", 80, 44, 44, 20, 20261017)
+structure("wreck", "wreck", "wreck", 40, 28, 12, 20261015)
+structure("graveyard", "graveyard", "graveyard", 48, 36, 16, 20261016)
+# The city hangs over the edge by design: only its lowest house (the south cluster's base, template
+# x 14-27, z 56-69) must be on land, and the rest may stand over the void. Closer together than the
+# others too; with the whole box required to be on land it was one city per 2,500 blocks.
+structure("sinking_city", "sinking_city", "sinking_city", 80, 36, 16, 20261017, footing=[14, 56, 27, 69])
 
 def chest_loot(name, rolls, entries, far_entries):
     write(DATA / "loot_table" / "chests" / f"{name}.json", {

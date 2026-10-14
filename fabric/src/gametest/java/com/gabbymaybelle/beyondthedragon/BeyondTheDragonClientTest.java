@@ -41,10 +41,17 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 			world.getConnection().waitForChunksRender();
 			boolean loaded = world.getServer().computeOnServer(server -> FabricLoader.getInstance().isModLoaded(BeyondTheDragon.MOD_ID));
 			check(loaded, "the mod is loaded in a new world");
-			titles(ctx, world.getServer());
-			new ApheliteTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
+			// BTD_TEST_ONLY=structures (an environment variable, passed through by Gradle) plays just
+			// the structure checks: a couple of minutes instead of five while tuning placement.
+			boolean onlyStructures = "structures".equals(System.getenv("BTD_TEST_ONLY"));
+			if (!onlyStructures) {
+				titles(ctx, world.getServer());
+				new ApheliteTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
+			}
 			new StructuresTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
-			new LadderTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
+			if (!onlyStructures) {
+				new LadderTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
+			}
 		}
 		if (!failures.isEmpty()) {
 			throw new AssertionError(failures.size() + " check(s) failed:\n - " + String.join("\n - ", failures));

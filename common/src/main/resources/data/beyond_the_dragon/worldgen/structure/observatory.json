@@ -7,11 +7,10 @@
 	"start_pool": "beyond_the_dragon:observatory/start",
 	"size": 1,
 	"start_height": {
-		"absolute": -5
+		"absolute": -8
 	},
 	"max_distance_from_center": 32,
 	"min_surface_y": 50,
-	"footprint": 21,
-	"max_slope": 6,
+	"max_slope": 10,
 	"min_distance": 1000
 }
