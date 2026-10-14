@@ -34,8 +34,10 @@ One codebase, two jars:
 
 - **The common sources are compiled twice**, once per loader. A class that compiles on Fabric but
   not NeoForge (or the reverse) is a common class that leaked a loader import.
-- **Mixins** need no refmap on NeoForge (Mojang names at runtime) and get one from Loom on Fabric;
-  the one `beyond_the_dragon.mixins.json` serves both.
+- **Mixins** need no refmap on either loader: Minecraft 26.x ships with Mojang names at runtime, so
+  the one `beyond_the_dragon.mixins.json` serves both jars as it is.
+- **The ladder's loot tables are placeholders** (dragon's breath) until the aphelite items exist;
+  `data/beyond_the_dragon/loot_table/dragon_ladder/tier_N.json`.
 - **Dragon fight code is the fragile part.** Vanilla's dragon phases are hard-coded and differ
   between 1.21.1 and 26.x. Keep every new attack behind its own setting and reuse vanilla phases
   and entities (charge phase, shulker bullets, lingering clouds) rather than inventing new ones.
@@ -43,7 +45,15 @@ One codebase, two jars:
   the void; our structure type does End City's surface-height check.
 - **Nothing ticks across the world.** Rings and titles are one check per player per second;
   structure lookups are computed from the seed, never by loading chunks.
-- Vanilla names changed a lot in 26.x: check the merged jar rather than older docs.
+- Vanilla names changed a lot in 26.x: check the merged jar rather than older docs. Data files
+  too: loot entries take `"modifier": [{"type": "minecraft:set_count", ...}]` and
+  `"condition": ...`, not the old `functions`/`function`/`conditions`, and unknown keys are
+  ignored without a warning. Copy the shape from a vanilla file in the merged jar
+  (`data/minecraft/...`) before writing a new kind of data file.
+- Decompiled 26.3 sources (for reading vanilla, not for copying): ModDevGradle leaves them in
+  `~/.gradle/caches/neoformruntime/intermediate_results/mergeWithSources_*_output.jar`.
+- The egg must be **sneak-placed** on the beacon, like any block on a container; a plain
+  right-click opens the beacon's menu. The egg is see-through, so it doesn't dim the beam.
 
 ## Working on Gabby's mods (the same in every repo)
 

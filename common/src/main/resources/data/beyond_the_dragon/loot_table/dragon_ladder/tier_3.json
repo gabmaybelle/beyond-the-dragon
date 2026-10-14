@@ -1,0 +1,17 @@
+{
+	"type": "minecraft:gift",
+	"pools": [
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:dragon_breath",
+					"modifier": [
+						{ "type": "minecraft:set_count", "count": 12 }
+					]
+				}
+			]
+		}
+	]
+}

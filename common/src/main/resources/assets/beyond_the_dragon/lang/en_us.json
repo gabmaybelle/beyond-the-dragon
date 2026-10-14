@@ -7,5 +7,11 @@
 	"title.beyond_the_dragon.ring.inner": "The Inner End",
 	"title.beyond_the_dragon.ring.middle": "The Middle Reaches",
 	"title.beyond_the_dragon.ring.outer": "The Outer Reaches",
-	"title.beyond_the_dragon.ring.edge": "The Edge"
+	"title.beyond_the_dragon.ring.edge": "The Edge",
+	"title.beyond_the_dragon.ladder.returns": "The Dragon Returns",
+	"title.beyond_the_dragon.ladder.tier": "Tier %s of %s",
+	"message.beyond_the_dragon.ladder.unlocked": "The egg hums on its beacon. The next dragon will be stronger.",
+	"message.beyond_the_dragon.ladder.already_unlocked": "The egg settles. The dragon already knows you.",
+	"message.beyond_the_dragon.ladder.beacon_unlit": "The egg sits on a beacon that isn't lit. Nothing happens.",
+	"message.beyond_the_dragon.ladder.rewarded": "The tier %s dragon falls. Its reward lies at the portal."
 }

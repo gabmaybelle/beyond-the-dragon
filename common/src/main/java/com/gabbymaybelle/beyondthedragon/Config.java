@@ -45,6 +45,8 @@ public final class Config {
 	// With a mod that reworks the dragon fight (Stellarity, True Ending, ...) the new attacks stay
 	// off unless this is on; the tiers and rewards still run.
 	public static boolean dragonAbilitiesWithOtherDragonMods = false;
+	// Mod ids that rework the dragon fight, comma-separated.
+	public static String otherDragonModIds = "stellarity,true_ending,ender_dragon_fight_remastered";
 
 	// Aphelite.
 	public static boolean aphelitePerks = true;
@@ -67,6 +69,7 @@ public final class Config {
 		COMMENTS.put("dragonPullingBreath", "Tier 2 attack.");
 		COMMENTS.put("dragonDiveBomb", "Tier 3 attack.");
 		COMMENTS.put("dragonAbilitiesWithOtherDragonMods", "Use the new attacks even when another mod reworks the dragon fight.");
+		COMMENTS.put("otherDragonModIds", "Mod ids counted as reworking the dragon fight, comma-separated.");
 		COMMENTS.put("aphelitePerks", "Aphelite's perks (shorter levitation, safe landings, bonus shards). Off: stats only.");
 	}
 
@@ -104,6 +107,7 @@ public final class Config {
 		dragonPullingBreath = readBool(props, "dragonPullingBreath", dragonPullingBreath);
 		dragonDiveBomb = readBool(props, "dragonDiveBomb", dragonDiveBomb);
 		dragonAbilitiesWithOtherDragonMods = readBool(props, "dragonAbilitiesWithOtherDragonMods", dragonAbilitiesWithOtherDragonMods);
+		otherDragonModIds = props.getProperty("otherDragonModIds", otherDragonModIds).trim();
 		aphelitePerks = readBool(props, "aphelitePerks", aphelitePerks);
 		if (ringMiddle >= ringOuter || ringOuter >= ringEdge) {
 			BeyondTheDragon.LOGGER.warn("The rings must be in order (ringMiddle < ringOuter < ringEdge); using 2000, 5000 and 10000");
@@ -140,6 +144,7 @@ public final class Config {
 			case "dragonPullingBreath" -> Boolean.toString(dragonPullingBreath);
 			case "dragonDiveBomb" -> Boolean.toString(dragonDiveBomb);
 			case "dragonAbilitiesWithOtherDragonMods" -> Boolean.toString(dragonAbilitiesWithOtherDragonMods);
+			case "otherDragonModIds" -> otherDragonModIds;
 			case "aphelitePerks" -> Boolean.toString(aphelitePerks);
 			default -> throw new IllegalArgumentException(key);
 		};
