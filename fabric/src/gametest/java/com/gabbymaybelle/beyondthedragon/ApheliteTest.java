@@ -71,7 +71,8 @@ final class ApheliteTest {
 
 	/** The item advancements fire when the things reach an inventory. */
 	private void guide(ClientGameTestContext ctx, TestServerContext server) {
-		check(!BeyondTheDragonClientTest.advancementDone(server, "far_metal"), "no shard yet, no A Far Metal");
+		// (A shard may already have been picked up while mining; the ingot is the clean negative.)
+		check(!BeyondTheDragonClientTest.advancementDone(server, "aphelite"), "no ingot yet, no Aphelite advancement");
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.getInventory().add(new ItemStack(Aphelite.SHARD.get()));
@@ -223,6 +224,14 @@ final class ApheliteTest {
 				}
 				item.discard();
 			}
+			// The player stands beside the ore and may have picked a drop up as its pickup delay ended.
+			ServerPlayer player = player(s);
+			for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
+				if (stack.getItem() == Aphelite.SHARD.get()) {
+					shards += stack.getCount();
+				}
+			}
+			player.getInventory().clearContent();
 			return shards;
 		});
 	}
