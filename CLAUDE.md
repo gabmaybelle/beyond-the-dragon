@@ -23,7 +23,8 @@ One codebase, two jars:
 - `tools/`: `TextureGen.java` draws the aphelite textures from vanilla's netherite ones (run it
   with `java tools/TextureGen.java <unpacked vanilla textures> common/src/main/resources/assets/beyond_the_dragon`);
   `generate-data.py` writes every aphelite and structure data and asset JSON (recipes, tags,
-  loot, worldgen, item models with all trim overlays); `generate-structures.js` builds the
+  loot, worldgen, item models with all trim overlays); `TrimGen.java` draws the Dragon Scale
+  trim sheets (`java tools/TrimGen.java common/src/main/resources/assets/beyond_the_dragon`); `generate-structures.js` builds the
   structure templates by remixing vanilla's End City and fossil pieces, read straight from the
   game jar (`--jar`, default: Loom's 26.3 merged jar under `~/.gradle`), through `structure.js`
   + `nbt.js`; the observatory comes as an intact template (what restoration compares against)
@@ -47,9 +48,9 @@ registrations in its registry event, so its `Platform` queues them and the resul
 - `./gradlew :fabric:runClientGameTest`: the settings file and the in-game checks, in a real game
   window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestBetterEnd`,
   `-PtestStellarity` or `-PtestNullscape` to play it with that mod installed (fetched from
-  Modrinth's maven, never bundled); CI runs all four. `BTD_TEST_ONLY=structures` in the
-  environment plays only the structure checks (footing, placement yield, restoration, respawn)
-  in about two minutes, for tuning placement. `BTD_SCREENSHOTS=<folder>` keeps the test's
+  Modrinth's maven, never bundled); CI runs all four. `BTD_TEST_ONLY=structures` (or
+  `=aphelite`) in the environment plays only that part of the test, in a couple of minutes, for
+  tuning. `BTD_SCREENSHOTS=<folder>` keeps the test's
   screenshots (titles, each ruin from the air, the egg on the beacon, each dragon tier) there;
   the run directory they land in is thrown away otherwise. With a mod that reworks the dragon fight
   installed, the test expects our tier attacks to stay off. BetterEnd keeps the fight but

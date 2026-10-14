@@ -8,9 +8,13 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
+import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
+import net.minecraft.client.CameraType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -30,10 +34,12 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
+import net.minecraft.world.item.equipment.trim.ArmorTrim;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -59,6 +65,72 @@ final class ApheliteTest {
 		oreDrops(ctx, server);
 		oreGeneration(server);
 		perks(server);
+		portrait(ctx, server);
+	}
+
+	/**
+	 * The set in Dragon Scale trim, from the front, in two materials: the trim is a thing to be
+	 * looked at, so its picture is kept with the test's screenshots.
+	 */
+	private void portrait(ClientGameTestContext ctx, TestServerContext server) {
+		for (String material : List.of("gold", "quartz")) {
+			server.runOnServer(s -> {
+				ServerPlayer player = player(s);
+				ServerLevel overworld = s.overworld();
+				ArmorTrim trim = new ArmorTrim(
+						s.registryAccess().lookupOrThrow(Registries.TRIM_MATERIAL)
+								.getOrThrow(ResourceKey.create(Registries.TRIM_MATERIAL, Identifier.withDefaultNamespace(material))),
+						s.registryAccess().lookupOrThrow(Registries.TRIM_PATTERN)
+								.getOrThrow(ResourceKey.create(Registries.TRIM_PATTERN, Aphelite.id("dragon_scale"))));
+				List<Supplier<Item>> set = List.of(Aphelite.HELMET, Aphelite.CHESTPLATE, Aphelite.LEGGINGS, Aphelite.BOOTS);
+				EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+				for (int i = 0; i < 4; i++) {
+					ItemStack stack = new ItemStack(set.get(i).get());
+					stack.set(DataComponents.TRIM, trim);
+					player.setItemSlot(slots[i], stack);
+				}
+				player.setPermanentlyInvulnerable(true);
+				player.setGameMode(GameType.CREATIVE);
+				player.getAbilities().flying = true;
+				player.onUpdateAbilities();
+				// High up first: the ground's height can't be read until the chunk is loaded.
+				player.teleportTo(overworld, 0.5, 200, 0.5, java.util.Set.of(), 0, 0, false);
+			});
+			ctx.waitTicks(60);
+			server.runOnServer(s -> {
+				ServerPlayer player = player(s);
+				ServerLevel overworld = s.overworld();
+				BlockPos ground = overworld.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(0, 0, 0));
+				player.getAbilities().flying = false;
+				player.onUpdateAbilities();
+				player.teleportTo(overworld, 0.5, ground.getY(), 0.5, java.util.Set.of(), 0, 0, false);
+			});
+			// Coming back from the End the client fades in from black; give it time. A narrow field
+			// of view brings the figure close enough to see the scales.
+			ctx.waitTicks(100);
+			int fov = ctx.computeOnClient(mc -> mc.options.fov().get());
+			ctx.runOnClient(mc -> {
+				mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
+				mc.options.fov().set(45);
+				if (!mc.gui.hud.isHidden()) {
+					mc.gui.hud.toggle();
+				}
+			});
+			ctx.waitTicks(60);
+			BeyondTheDragonClientTest.screenshot(ctx, TestScreenshotOptions.of("beyond_the_dragon_trim_" + material).withSize(1280, 720));
+			ctx.runOnClient(mc -> {
+				mc.options.setCameraType(CameraType.FIRST_PERSON);
+				mc.options.fov().set(fov);
+				if (mc.gui.hud.isHidden()) {
+					mc.gui.hud.toggle();
+				}
+			});
+		}
+		server.runOnServer(s -> {
+			for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+				player(s).setItemSlot(slot, ItemStack.EMPTY);
+			}
+		});
 	}
 
 	private void registry() {
@@ -103,6 +175,17 @@ final class ApheliteTest {
 			player.setGameMode(GameType.SURVIVAL);
 			end.setBlockAndUpdate(base.offset(-2, -1, -2), Blocks.OBSIDIAN.defaultBlockState());
 			player.teleportTo(end, base.getX() - 1.5, base.getY(), base.getZ() - 1.5, java.util.Set.of(), 0, 0, false);
+		});
+		// Drops in a chunk that isn't ticking entities yet are invisible to entity queries, and on
+		// a slow server (a modded End generating around the player) the chunk takes a while.
+		int waited = 0;
+		while (waited < 1200 && !server.computeOnServer(s -> s.getLevel(Level.END).isPositionEntityTicking(base))) {
+			ctx.waitTicks(10);
+			waited += 10;
+		}
+		server.runOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			ServerPlayer player = player(s);
 			player.getInventory().clearContent();
 			player.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(pickaxe));
 			for (ItemEntity item : end.getEntitiesOfClass(ItemEntity.class, new AABB(base).inflate(16))) {
