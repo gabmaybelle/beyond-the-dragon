@@ -1,0 +1,24 @@
+{
+	"criteria": {
+		"granted": {
+			"trigger": "minecraft:impossible"
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "minecraft:shulker_shell"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.tier_1.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.tier_1.description"
+		}
+	},
+	"requirements": [
+		[
+			"granted"
+		]
+	],
+	"parent": "beyond_the_dragon:dragon_notices"
+}

@@ -1,0 +1,29 @@
+{
+	"criteria": {
+		"entered_end": {
+			"trigger": "minecraft:changed_dimension",
+			"conditions": {
+				"to": "minecraft:the_end"
+			}
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "minecraft:dragon_egg"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.root.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.root.description"
+		},
+		"background": "minecraft:gui/advancements/backgrounds/end",
+		"show_toast": false,
+		"announce_to_chat": false
+	},
+	"requirements": [
+		[
+			"entered_end"
+		]
+	]
+}

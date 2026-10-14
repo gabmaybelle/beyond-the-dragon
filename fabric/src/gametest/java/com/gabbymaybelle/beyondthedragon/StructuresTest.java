@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -25,6 +26,10 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -67,9 +72,51 @@ final class StructuresTest {
 				check(report.contains("1 lectern(s)") && !report.contains(" 0 chest(s)"), "the observatory has its lectern and chests (" + report + ")");
 			}
 			tour(ctx, server, kind, report);
+			found(ctx, server, kind, report);
 		}
 		placementYield(server);
+		lore(server);
 		restoration(ctx, server);
+	}
+
+	private static final java.util.Map<String, String> FOUND_ADVANCEMENT = java.util.Map.of(
+			"observatory", "ruins", "wreck", "captains_log", "graveyard", "bone_garden", "sinking_city", "the_slip");
+
+	/** Standing inside the ruin grants its advancement (vanilla's location trigger, checked every second). */
+	private void found(ClientGameTestContext ctx, TestServerContext server, String kind, String report) {
+		var m = java.util.regex.Pattern.compile("box from (-?\\d+),(-?\\d+),(-?\\d+) to (-?\\d+),(-?\\d+),(-?\\d+)").matcher(report);
+		if (!m.find()) {
+			return;
+		}
+		double cx = (Integer.parseInt(m.group(1)) + Integer.parseInt(m.group(4))) / 2.0;
+		double cy = (Integer.parseInt(m.group(2)) + Integer.parseInt(m.group(5))) / 2.0;
+		double cz = (Integer.parseInt(m.group(3)) + Integer.parseInt(m.group(6))) / 2.0;
+		server.runOnServer(s -> player(s).teleportTo(s.getLevel(Level.END), cx, cy, cz, java.util.Set.of(), 0, 0, false));
+		ctx.waitTicks(45);
+		String path = FOUND_ADVANCEMENT.get(kind);
+		check(BeyondTheDragonClientTest.advancementDone(server, path), "standing in the " + kind + " grants " + path);
+	}
+
+	private static final java.util.Map<String, String> LORE_TITLE = java.util.Map.of(
+			"observatory", "The Keeper's Letter", "wreck", "Captain's Log", "graveyard", "Scratched on Bone", "sinking_city", "A Resident's Note");
+
+	/** Every ruin's chest loot carries its note: the tables are rolled on the server, no chest needed. */
+	private void lore(TestServerContext server) {
+		for (String kind : KINDS) {
+			String title = server.computeOnServer(s -> {
+				ServerLevel end = s.getLevel(Level.END);
+				var table = s.reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, Aphelite.id("chests/" + kind)));
+				var params = new LootParams.Builder(end).withParameter(LootContextParams.ORIGIN, Vec3.ZERO).create(LootContextParamSets.CHEST);
+				for (ItemStack stack : table.getRandomItems(params)) {
+					if (stack.getItem() == Items.WRITTEN_BOOK) {
+						var content = stack.get(DataComponents.WRITTEN_BOOK_CONTENT);
+						return content == null ? "(no content)" : content.title().raw();
+					}
+				}
+				return "(no book)";
+			});
+			check(LORE_TITLE.get(kind).equals(title), "the " + kind + "'s chests carry '" + LORE_TITLE.get(kind) + "' (got " + title + ")");
+		}
 	}
 
 	/** A look at the ruin from the air, for the eyes: the screenshot is what the design reviews are made from. */
@@ -233,8 +280,8 @@ final class StructuresTest {
 						var state = end.getBlockState(new BlockPos(x, y, z));
 						if (state.is(Blocks.LECTERN)) {
 							lecterns++;
-						} else if (state.is(Blocks.CHEST)) {
-							chests++;
+						} else if (state.is(Blocks.CHEST) || BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().contains("chest")) {
+							chests++; // Lootr swaps loot chests for its own block
 						} else if (state.is(Blocks.END_STONE_BRICKS) || state.is(Blocks.PURPUR_BLOCK) || state.is(Blocks.PURPUR_PILLAR) || state.is(Blocks.BONE_BLOCK)) {
 							building = true;
 						}
@@ -300,6 +347,8 @@ final class StructuresTest {
 		check(result.contains("early false") && result.contains("one short unrestored"), "an observatory one block short is not restored (" + result + ")");
 		check(result.contains("last restored"), "the last missing block restores the observatory (" + result + ")");
 		check(result.matches(".*charts [1-9].*") && !result.contains("markers 0"), "restoring hands out the keeper's chart with markers on it (" + result + ")");
+		check(BeyondTheDragonClientTest.advancementDone(server, "keepers_eye") && BeyondTheDragonClientTest.advancementDone(server, "keepers_chart"),
+				"restoring grants Keeper's Eye and Keeper's Chart");
 		respawn(ctx, server);
 	}
 

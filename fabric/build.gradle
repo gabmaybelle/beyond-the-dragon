@@ -42,6 +42,11 @@ dependencies {
 		runtimeOnly "maven.modrinth:jei:${project.jei_version}"
 		runtimeOnly "maven.modrinth:mezzconfig:${project.mezzconfig_version}"
 	}
+	// Lootr turns loot chests into per-player ones; ours are vanilla chests with loot tables,
+	// placed by jigsaw templates like vanilla's, so it should take them. -PtestLootr proves it.
+	if (project.hasProperty("testLootr")) {
+		runtimeOnly "maven.modrinth:lootr:${project.lootr_version}"
+	}
 	if (project.hasProperty("testRei")) {
 		runtimeOnly "maven.modrinth:rei:${project.rei_version}"
 		runtimeOnly "maven.modrinth:cloth-config:${project.cloth_config_version}"

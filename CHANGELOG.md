@@ -14,4 +14,5 @@
 - A title when you enter a new biome, in any dimension, after you've been there a few seconds and never more than once every fifteen. Each dimension can be switched off on its own.
 - The End's five biomes get names of their own: The Dragon's Island, The Shattered Isles, The Pale Flats, The Chorus Heights and The Void's Edge. The vanilla names are a setting away.
 - In the End, the title also says which ring you're in: the Inner End, the Middle Reaches (from 2,000 blocks out), the Outer Reaches (5,000) or the Edge (10,000). The distances are settings.
+- An in-game guide that doesn't spoil: a "Beyond the Dragon" advancements tab (seventeen entries, each description a hint at the next step, granted as you go), and a short written note in every ruin's chest, a captain's log, a keeper's letter, a line scratched on bone, a resident's goodbye, each pointing at another ruin or at what the End keeps.
 - A settings file, both loaders (Fabric and NeoForge), builds for Minecraft 26.3 and 26.1.2, and an in-game test that plays through all of the above.

@@ -17,6 +17,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -120,6 +121,7 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 				"after the cooldown the End's title shows (The Dragon's Island)");
 		check(TitleWatcher.shownRing(id).map(ring -> ring.name().equals("INNER")).orElse(false),
 				"the inner ring is the subtitle");
+		check(advancementDone(server, "root"), "entering the End opens the Beyond the Dragon advancements tab");
 
 		// Out past the middle ring's start, in the same biome or another: the ring change shows.
 		server.runOnServer(s -> player(s).teleportTo(Config.ringMiddle + 100.5, 90, 0.5));
@@ -128,6 +130,9 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 		screenshot(ctx, "beyond_the_dragon_ring_title");
 		check(TitleWatcher.shownRing(id).map(ring -> ring.name().equals("MIDDLE")).orElse(false),
 				"crossing into the middle ring shows the ring subtitle");
+		ctx.waitTicks(30);
+		check(advancementDone(server, "middle_reaches"), "reaching the middle ring grants its advancement");
+		check(!advancementDone(server, "outer_reaches"), "the outer ring's advancement waits (not granted at the middle ring)");
 	}
 
 	/**
@@ -159,6 +164,14 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 			}
 		}
 		return shot;
+	}
+
+	/** Whether the test player has finished one of the mod's advancements. */
+	static boolean advancementDone(TestServerContext server, String path) {
+		return server.computeOnServer(s -> {
+			var holder = s.getAdvancements().get(Identifier.fromNamespaceAndPath(BeyondTheDragon.MOD_ID, path));
+			return holder != null && player(s).getAdvancements().getOrStartProgress(holder).isDone();
+		});
 	}
 
 	private static ServerPlayer player(MinecraftServer server) {

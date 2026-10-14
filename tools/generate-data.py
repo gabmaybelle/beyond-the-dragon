@@ -62,6 +62,41 @@ def ns(path):
     return f"{NS}:{path}"
 
 
+# --- the lore notes: a short written book in every chest of a ruin kind, pointing at another ruin
+# or at what the End keeps. They are the in-game guide, with the advancements tab; nothing else
+# tells a player these things. Pages stay short enough to read at a glance.
+LORE = {
+    "wreck": ("Captain's Log", "the captain", [
+        "Day 40. Ran her onto the island in the dark. Hull split along the east side; the mast went with the first gust. The crew took the boats and did not come back.",
+        "Far out, towards where the sky goes thin, there is a tower with a glass eye on its roof. Lights in it, some nights. The keeper's lectern, the old charts call it.",
+        "South of here, shoals of bone. The dragon's kin fell there once, the charts say, and something still circles above them, carrying what it took from the dead.",
+    ]),
+    "observatory": ("The Keeper's Letter", "the keeper", [
+        "If you have found this, the storm has had the roof. The lectern's book says what is missing; put it all back and she will see again. The chart is yours then.",
+        "Two things I never wrote down, in case the wrong hands found them. The first: the egg, set on a lit beacon, calls the dragon back. Each time, it comes back angrier.",
+        "The second: past the outer reaches, five thousand paces from the island, the end stone holds a metal a step beyond netherite. Four shards and four popped chorus fruit to the ingot.",
+    ]),
+    "graveyard": ("Scratched on Bone", "unknown", [
+        "the vault under the ribs takes a trial key. the phantoms that circle here carry them. one prize to each of us, it said, and it kept its word.",
+        "out past the skull there is a city that slipped. half of it hangs over nothing. we did not stay.",
+    ]),
+    "sinking_city": ("A Resident's Note", "a resident", [
+        "We are leaving before the rest goes. If you are reading this, go to the keeper's tower instead; the one with the glass eye.",
+        "Mend it, and its chart will show you every ruin and city near. More than that: the lectern is where the dead come back. The End has no other such place.",
+    ]),
+}
+
+
+def lore_book(kind):
+    title, author, pages = LORE[kind]
+    return {"type": "minecraft:item", "name": "minecraft:written_book", "modifier": [
+        {"type": "minecraft:set_book_cover", "title": title, "author": author, "generation": 0},
+        {"type": "minecraft:set_written_book_pages", "pages": pages, "mode": "replace_all"},
+    ]}
+
+
+
+
 # --- recipes -------------------------------------------------------------------------------
 write(DATA / "recipe" / "aphelite_ingot.json", {
     "type": "minecraft:crafting_shapeless",
@@ -232,6 +267,104 @@ write(ASSETS / "equipment" / "aphelite.json", {"layers": {
 
 print("data and assets written")
 
+# --- the advancements tab: the in-game guide. Each entry's description hints at the next step.
+# Finding ruins and getting items use vanilla triggers; the rest are granted from the code at the
+# moments it already notices (Advancements.grant), through an "impossible" criterion.
+ADVANCEMENTS = []  # (path, title, description)
+
+
+def advancement(path, parent, icon, title, description, criteria, frame=None, background=None):
+    ADVANCEMENTS.append((path, title, description))
+    display = {
+        "icon": {"id": icon},
+        "title": {"translate": f"advancements.{NS}.{path}.title"},
+        "description": {"translate": f"advancements.{NS}.{path}.description"},
+    }
+    if frame:
+        display["frame"] = frame
+    if background:
+        display["background"] = background
+        display["show_toast"] = False
+        display["announce_to_chat"] = False
+    data = {
+        "criteria": criteria,
+        "display": display,
+        "requirements": [[name] for name in criteria],
+    }
+    if parent:
+        data["parent"] = ns(parent)
+    write(DATA / "advancement" / f"{path}.json", data)
+
+
+GRANTED = {"granted": {"trigger": "minecraft:impossible"}}
+
+
+def found(structure):
+    return {"found": {"trigger": "minecraft:location", "conditions": {"player": {
+        "type": "minecraft:entity_properties", "entity": "this",
+        "predicate": {"minecraft:location": {"structures": structure}}}}}}
+
+
+def got(items):
+    return {"got": {"trigger": "minecraft:inventory_changed", "conditions": {"items": [{"items": items}]}}}
+
+
+advancement("root", None, "minecraft:dragon_egg", "Beyond the Dragon",
+            "You killed the dragon. That was the tutorial.",
+            {"entered_end": {"trigger": "minecraft:changed_dimension", "conditions": {"to": "minecraft:the_end"}}},
+            background="minecraft:gui/advancements/backgrounds/end")
+advancement("middle_reaches", "root", "minecraft:elytra", "The Middle Reaches",
+            "Fly 2,000 blocks from the centre. The End gets more rewarding the farther out you go.", GRANTED)
+advancement("outer_reaches", "middle_reaches", "minecraft:chorus_fruit", "The Outer Reaches",
+            "5,000 blocks out. Something only forms in the end stone here.", GRANTED)
+advancement("the_edge", "outer_reaches", "minecraft:end_rod", "The Edge",
+            "10,000 blocks from the centre. Few have been this far.", GRANTED, frame="challenge")
+advancement("ruins", "root", "minecraft:end_stone_bricks", "Ruins",
+            "Someone was here before you. Four kinds of ruin drift through the islands; their chests hold notes.",
+            found(f"#{NS}:ruins"))
+advancement("keepers_eye", "ruins", "minecraft:lectern", "Keeper's Eye",
+            "An observatory's lectern lists what the storm took. Put it all back.", GRANTED, frame="goal")
+advancement("keepers_chart", "keepers_eye", "minecraft:filled_map", "Keeper's Chart",
+            "The restored lectern's map marks the nearest ruin of each kind. Sneak at it for another.", GRANTED)
+advancement("captains_log", "ruins", "minecraft:purpur_block", "Captain's Log",
+            "A wreck on the islands. The captain kept a log.", found(ns("wreck")))
+advancement("bone_garden", "ruins", "minecraft:bone_block", "Bone Garden",
+            "A dragon graveyard. Its vault wants a trial key; the phantoms above carry them.", found(ns("graveyard")))
+advancement("the_slip", "ruins", "minecraft:purpur_pillar", "The Slip",
+            "A city sinking into the void. Mind the bridges.", found(ns("sinking_city")))
+advancement("far_metal", "root", ns("aphelite_shard"), "A Far Metal",
+            "A shard from end stone past the outer ring. Four of these and four popped chorus fruit make an ingot.",
+            got(ns("aphelite_shard")))
+advancement("aphelite", "far_metal", ns("aphelite_ingot"), "Aphelite",
+            "An ingot and an Aphelite Upgrade template turn netherite into this at a smithing table. Graveyards keep the templates.",
+            got(ns("aphelite_ingot")))
+advancement("past_netherite", "aphelite", ns("aphelite_chestplate"), "Past Netherite",
+            "Each piece worn shortens a shulker's levitation; helmet, leggings and boots together make every fall in the End harmless.",
+            got(f"#{NS}:aphelite_gear"), frame="goal")
+advancement("dragon_notices", "root", "minecraft:beacon", "The Dragon Takes Notice",
+            "A lit beacon, and the egg on top. Every respawn after that brings it back stronger.", GRANTED)
+advancement("tier_1", "dragon_notices", "minecraft:shulker_shell", "Tier 1",
+            "It fires shulker bullets now. Its first death drops the Dragon Scale armour trim.", GRANTED)
+advancement("tier_2", "tier_1", "minecraft:dragon_breath", "Tier 2",
+            "Its breath pools drag you in. Its first death drops an Aphelite Upgrade template.", GRANTED)
+advancement("tier_3", "tier_2", "minecraft:dragon_head", "Tier 3",
+            "It dives. Its first death drops another Aphelite Upgrade template, and the ladder ends here.", GRANTED, frame="challenge")
+
+write(DATA / "tags" / "worldgen" / "structure" / "ruins.json",
+      {"values": [ns("observatory"), ns("wreck"), ns("graveyard"), ns("sinking_city")]})
+write(DATA / "tags" / "item" / "aphelite_gear.json",
+      {"values": [ns(n) for n in ("aphelite_helmet", "aphelite_chestplate", "aphelite_leggings", "aphelite_boots",
+                                  "aphelite_sword", "aphelite_pickaxe", "aphelite_axe", "aphelite_shovel", "aphelite_hoe")]})
+
+# The language file is kept by hand except for these keys, which are rewritten from the list above.
+lang_path = ASSETS / "lang" / "en_us.json"
+lang = json.loads(lang_path.read_text(encoding="utf-8"))
+lang = {k: v for k, v in lang.items() if not k.startswith(f"advancements.{NS}.")}
+for path, title, description in ADVANCEMENTS:
+    lang[f"advancements.{NS}.{path}.title"] = title
+    lang[f"advancements.{NS}.{path}.description"] = description
+lang_path.write_text(json.dumps(lang, indent="\t", ensure_ascii=False) + "\n", encoding="utf-8")
+
 # --- the Outer Reaches structures -------------------------------------------------------------
 # Templates come from tools/generate-structures.js; this is the worldgen and loot around them.
 # Every End biome, vanilla or modded; the structure type's own height and distance checks keep
@@ -278,7 +411,12 @@ write(DATA / "worldgen" / "template_pool" / "observatory" / "start.json", {
         "projection": "rigid",
     }}],
 })
-write(DATA / "loot_table" / "chests" / "observatory.json", {
+def with_lore(kind, table):
+    table["pools"].append({"rolls": 1, "entries": [lore_book(kind)]})
+    return table
+
+
+write(DATA / "loot_table" / "chests" / "observatory.json", with_lore("observatory", {
     "type": "minecraft:chest",
     "pools": [
         {"rolls": {"type": "minecraft:uniform", "min": 3, "max": 5}, "entries": [
@@ -296,7 +434,7 @@ write(DATA / "loot_table" / "chests" / "observatory.json", {
             {"type": "minecraft:empty", "weight": 1},
         ]},
     ],
-})
+}))
 
 # The other three Outer Reaches structures (templates from generate-structures.js).
 def structure(name, pool_name, template, size, spacing, separation, salt, extra_biomes=None, min_surface_y=50, max_slope=MAX_SLOPE, footing=None):
@@ -349,6 +487,7 @@ def chest_loot(name, rolls, entries, far_entries):
         "pools": [
             {"rolls": rolls, "entries": entries},
             {"rolls": 1, "condition": {"type": ns("in_ring"), "ring": "outer"}, "entries": far_entries},
+            {"rolls": 1, "entries": [lore_book(name)]},
         ],
     })
 

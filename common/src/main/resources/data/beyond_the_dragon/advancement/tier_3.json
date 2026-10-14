@@ -1,0 +1,25 @@
+{
+	"criteria": {
+		"granted": {
+			"trigger": "minecraft:impossible"
+		}
+	},
+	"display": {
+		"icon": {
+			"id": "minecraft:dragon_head"
+		},
+		"title": {
+			"translate": "advancements.beyond_the_dragon.tier_3.title"
+		},
+		"description": {
+			"translate": "advancements.beyond_the_dragon.tier_3.description"
+		},
+		"frame": "challenge"
+	},
+	"requirements": [
+		[
+			"granted"
+		]
+	],
+	"parent": "beyond_the_dragon:tier_2"
+}
