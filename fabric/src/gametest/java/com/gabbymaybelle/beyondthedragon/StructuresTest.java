@@ -225,6 +225,8 @@ final class StructuresTest {
 				}
 				out.append(kind).append(' ').append(starts).append(" of ").append(candidates)
 						.append(" (void ").append(voids).append(", steep ").append(steep).append("); ");
+				// A line per kind: on a heavy modded End this scan takes minutes, and silence reads as a hang.
+				BeyondTheDragon.LOGGER.info("[test] yield so far: {}", out);
 			}
 			return out.toString();
 		});

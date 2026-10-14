@@ -226,15 +226,15 @@
 				{
 					"type": "minecraft:item",
 					"name": "minecraft:written_book",
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_book_cover",
+							"function": "minecraft:set_book_cover",
 							"title": "A Resident's Note",
 							"author": "a resident",
 							"generation": 0
 						},
 						{
-							"type": "minecraft:set_written_book_pages",
+							"function": "minecraft:set_written_book_pages",
 							"pages": [
 								"We are leaving before the rest goes. If you are reading this, go to the keeper's tower instead; the one with the glass eye.",
 								"Mend it, and its chart will show you every ruin and city near. More than that: the lectern is where the dead come back. The End has no other such place."

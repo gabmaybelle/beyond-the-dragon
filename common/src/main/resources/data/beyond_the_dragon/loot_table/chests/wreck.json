@@ -186,15 +186,15 @@
 				{
 					"type": "minecraft:item",
 					"name": "minecraft:written_book",
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_book_cover",
+							"function": "minecraft:set_book_cover",
 							"title": "Captain's Log",
 							"author": "the captain",
 							"generation": 0
 						},
 						{
-							"type": "minecraft:set_written_book_pages",
+							"function": "minecraft:set_written_book_pages",
 							"pages": [
 								"Day 40. Ran her onto the island in the dark. Hull split along the east side; the mast went with the first gust. The crew took the boats and did not come back.",
 								"Far out, towards where the sky goes thin, there is a tower with a glass eye on its roof. Lights in it, some nights. The keeper's lectern, the old charts call it.",

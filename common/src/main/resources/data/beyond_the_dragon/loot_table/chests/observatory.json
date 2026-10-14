@@ -161,15 +161,15 @@
 				{
 					"type": "minecraft:item",
 					"name": "minecraft:written_book",
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_book_cover",
+							"function": "minecraft:set_book_cover",
 							"title": "The Keeper's Letter",
 							"author": "the keeper",
 							"generation": 0
 						},
 						{
-							"type": "minecraft:set_written_book_pages",
+							"function": "minecraft:set_written_book_pages",
 							"pages": [
 								"If you have found this, the storm has had the roof. The lectern's book says what is missing; put it all back and she will see again. The chart is yours then.",
 								"Two things I never wrote down, in case the wrong hands found them. The first: the egg, set on a lit beacon, calls the dragon back. Each time, it comes back angrier.",
