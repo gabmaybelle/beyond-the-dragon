@@ -93,6 +93,24 @@ final class StructuresTest {
 		double cz = (Integer.parseInt(m.group(3)) + Integer.parseInt(m.group(6))) / 2.0;
 		server.runOnServer(s -> player(s).teleportTo(s.getLevel(Level.END), cx, cy, cz, java.util.Set.of(), 0, 0, false));
 		ctx.waitTicks(45);
+		// With the player there and the chunks ticking, which blocks are the chests now? (Lootr
+		// swaps loot chests for its own once a player is near; vanilla keeps minecraft:chest.)
+		String chests = server.computeOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			java.util.Map<String, Integer> ids = new java.util.TreeMap<>();
+			for (int x = Integer.parseInt(m.group(1)); x <= Integer.parseInt(m.group(4)); x++) {
+				for (int y = Integer.parseInt(m.group(2)); y <= Integer.parseInt(m.group(5)); y++) {
+					for (int z = Integer.parseInt(m.group(3)); z <= Integer.parseInt(m.group(6)); z++) {
+						String id = BuiltInRegistries.BLOCK.getKey(end.getBlockState(new BlockPos(x, y, z)).getBlock()).toString();
+						if (id.contains("chest")) {
+							ids.merge(id, 1, Integer::sum);
+						}
+					}
+				}
+			}
+			return ids.toString();
+		});
+		BeyondTheDragon.LOGGER.info("[test] {} chests with the player there: {}", kind, chests);
 		String path = FOUND_ADVANCEMENT.get(kind);
 		check(BeyondTheDragonClientTest.advancementDone(server, path), "standing in the " + kind + " grants " + path);
 	}
@@ -167,7 +185,7 @@ final class StructuresTest {
 		} catch (AssertionError slow) {
 			BeyondTheDragon.LOGGER.warn("[test] the {}'s chunk never reached the client; its picture may be empty", kind);
 		}
-		ctx.waitTicks(200);
+		ctx.waitTicks(45);
 		double gamma = ctx.computeOnClient(mc -> mc.options.gamma().get());
 		ctx.runOnClient(mc -> {
 			if (!mc.gui.hud.isHidden()) {
@@ -231,6 +249,8 @@ final class StructuresTest {
 				}
 				out.append(kind).append(' ').append(starts).append(" of ").append(candidates)
 						.append(" (void ").append(voids).append(", steep ").append(steep).append("); ");
+				// A line per kind: on a heavy modded End this scan takes minutes, and silence reads as a hang.
+				BeyondTheDragon.LOGGER.info("[test] yield so far: {}", out);
 			}
 			return out.toString();
 		});
@@ -270,6 +290,7 @@ final class StructuresTest {
 			// must have ground, not air, beneath it.
 			int lecterns = 0;
 			int chests = 0;
+			String chestBlock = "";
 			int airUnderBase = 0;
 			int baseBlocks = 0;
 			int baseY = box.minY();
@@ -281,7 +302,8 @@ final class StructuresTest {
 						if (state.is(Blocks.LECTERN)) {
 							lecterns++;
 						} else if (state.is(Blocks.CHEST) || BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().contains("chest")) {
-							chests++; // Lootr swaps loot chests for its own block
+							chests++; // Lootr swaps loot chests for its own block; the report names it
+							chestBlock = state.is(Blocks.CHEST) ? "" : " [" + BuiltInRegistries.BLOCK.getKey(state.getBlock()) + "]";
 						} else if (state.is(Blocks.END_STONE_BRICKS) || state.is(Blocks.PURPUR_BLOCK) || state.is(Blocks.PURPUR_PILLAR) || state.is(Blocks.BONE_BLOCK)) {
 							building = true;
 						}
@@ -295,7 +317,7 @@ final class StructuresTest {
 				}
 			}
 			return "box from " + box.minX() + "," + box.minY() + "," + box.minZ() + " to " + box.maxX() + "," + box.maxY() + "," + box.maxZ()
-					+ ", base y " + baseY + ", " + baseBlocks + " base blocks, " + airUnderBase + " over air, " + lecterns + " lectern(s), " + chests + " chest(s)";
+					+ ", base y " + baseY + ", " + baseBlocks + " base blocks, " + airUnderBase + " over air, " + lecterns + " lectern(s), " + chests + " chest(s)" + chestBlock;
 		}
 	}
 

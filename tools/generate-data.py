@@ -300,9 +300,15 @@ GRANTED = {"granted": {"trigger": "minecraft:impossible"}}
 
 
 def found(structure):
-    return {"found": {"trigger": "minecraft:location", "conditions": {"player": {
-        "type": "minecraft:entity_properties", "entity": "this",
-        "predicate": {"minecraft:location": {"structures": structure}}}}}}
+    # 26.3 takes one typed predicate with a "minecraft:location" sub-predicate; 26.1 a list of
+    # conditions with a plain "location" one.
+    if FORMAT == "26.3":
+        player = {"type": "minecraft:entity_properties", "entity": "this",
+                  "predicate": {"minecraft:location": {"structures": structure}}}
+    else:
+        player = [{"condition": "minecraft:entity_properties", "entity": "this",
+                   "predicate": {"location": {"structures": structure}}}]
+    return {"found": {"trigger": "minecraft:location", "conditions": {"player": player}}}
 
 
 def got(items):
