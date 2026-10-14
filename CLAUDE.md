@@ -73,6 +73,14 @@ registrations in its registry event, so its `Platform` queues them and the resul
   (`data/minecraft/...`) before writing a new kind of data file.
 - Decompiled 26.3 sources (for reading vanilla, not for copying): ModDevGradle leaves them in
   `~/.gradle/caches/neoformruntime/intermediate_results/mergeWithSources_*_output.jar`.
+- **Jigsaw pieces have no mirror**: `PoolElementStructurePiece.getMirror()` is null; treat it as
+  `Mirror.NONE` before any `StructureTemplate.transform`. A target decoration added with
+  `MapItemSavedData.addTargetDecoration` lives in the item's `map_decorations` component until
+  the map is carried; read the component, not the saved data, straight after making a map.
+- **Observatory restoration** compares the world against
+  `data/beyond_the_dragon/restoration/observatory.json` (written by the generator from the
+  intact/ruin difference), at each block's rotated world position; it is read from the jar with
+  `getResourceAsStream`, so there is no reload listener to keep per loader.
 - The egg must be **sneak-placed** on the beacon, like any block on a container; a plain
   right-click opens the beacon's menu. The egg is see-through, so it doesn't dim the beam.
 

@@ -1,0 +1,766 @@
+{
+	"size": [
+		21,
+		24,
+		21
+	],
+	"lectern": [
+		8,
+		13,
+		13
+	],
+	"missing": [
+		{
+			"pos": [
+				11,
+				15,
+				4
+			],
+			"block": "minecraft:end_stone_bricks"
+		},
+		{
+			"pos": [
+				11,
+				15,
+				9
+			],
+			"block": "minecraft:purpur_pillar"
+		},
+		{
+			"pos": [
+				12,
+				15,
+				4
+			],
+			"block": "minecraft:end_stone_bricks"
+		},
+		{
+			"pos": [
+				13,
+				15,
+				4
+			],
+			"block": "minecraft:end_stone_bricks"
+		},
+		{
+			"pos": [
+				14,
+				15,
+				4
+			],
+			"block": "minecraft:end_stone_bricks"
+		},
+		{
+			"pos": [
+				14,
+				15,
+				5
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				15,
+				15,
+				4
+			],
+			"block": "minecraft:end_stone_bricks"
+		},
+		{
+			"pos": [
+				16,
+				15,
+				4
+			],
+			"block": "minecraft:purpur_pillar"
+		},
+		{
+			"pos": [
+				16,
+				15,
+				5
+			],
+			"block": "minecraft:end_stone_bricks"
+		},
+		{
+			"pos": [
+				16,
+				15,
+				6
+			],
+			"block": "minecraft:end_stone_bricks"
+		},
+		{
+			"pos": [
+				16,
+				15,
+				7
+			],
+			"block": "minecraft:end_stone_bricks"
+		},
+		{
+			"pos": [
+				16,
+				15,
+				8
+			],
+			"block": "minecraft:end_stone_bricks"
+		},
+		{
+			"pos": [
+				16,
+				15,
+				9
+			],
+			"block": "minecraft:magenta_stained_glass"
+		},
+		{
+			"pos": [
+				11,
+				16,
+				3
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				11,
+				16,
+				4
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				11,
+				16,
+				6
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				11,
+				16,
+				7
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				11,
+				16,
+				8
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				11,
+				16,
+				9
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				12,
+				16,
+				3
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				12,
+				16,
+				4
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				12,
+				16,
+				6
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				12,
+				16,
+				7
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				12,
+				16,
+				8
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				12,
+				16,
+				9
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				13,
+				16,
+				3
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				13,
+				16,
+				4
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				13,
+				16,
+				6
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				13,
+				16,
+				7
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				13,
+				16,
+				8
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				13,
+				16,
+				9
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				14,
+				16,
+				3
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				14,
+				16,
+				4
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				14,
+				16,
+				6
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				14,
+				16,
+				7
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				14,
+				16,
+				8
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				14,
+				16,
+				9
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				15,
+				16,
+				3
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				15,
+				16,
+				4
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				15,
+				16,
+				6
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				15,
+				16,
+				7
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				15,
+				16,
+				8
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				15,
+				16,
+				9
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				16,
+				16,
+				3
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				16,
+				16,
+				4
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				16,
+				16,
+				5
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				16,
+				16,
+				6
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				16,
+				16,
+				7
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				16,
+				16,
+				8
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				16,
+				16,
+				9
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				17,
+				16,
+				3
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				17,
+				16,
+				4
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				17,
+				16,
+				5
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				17,
+				16,
+				6
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				17,
+				16,
+				7
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				17,
+				16,
+				8
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				17,
+				16,
+				9
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				13,
+				15,
+				5
+			],
+			"block": "minecraft:purpur_slab"
+		},
+		{
+			"pos": [
+				15,
+				15,
+				5
+			],
+			"block": "minecraft:purpur_slab"
+		},
+		{
+			"pos": [
+				11,
+				16,
+				2
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				12,
+				16,
+				2
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				13,
+				16,
+				2
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				14,
+				16,
+				2
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				15,
+				16,
+				2
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				15,
+				16,
+				5
+			],
+			"block": "minecraft:purpur_slab"
+		},
+		{
+			"pos": [
+				16,
+				16,
+				2
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				17,
+				16,
+				2
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				18,
+				16,
+				2
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				18,
+				16,
+				3
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				18,
+				16,
+				4
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				18,
+				16,
+				5
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				18,
+				16,
+				6
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				18,
+				16,
+				7
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				18,
+				16,
+				8
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				18,
+				16,
+				9
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				11,
+				17,
+				4
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				11,
+				17,
+				6
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				12,
+				17,
+				4
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				12,
+				17,
+				6
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				13,
+				17,
+				4
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				13,
+				17,
+				6
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				16,
+				6,
+				10
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				14,
+				8,
+				7
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				14,
+				8,
+				8
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				14,
+				8,
+				9
+			],
+			"block": "minecraft:purpur_slab"
+		},
+		{
+			"pos": [
+				15,
+				8,
+				9
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				15,
+				8,
+				10
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				15,
+				8,
+				11
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				14,
+				8,
+				12
+			],
+			"block": "minecraft:purpur_block"
+		},
+		{
+			"pos": [
+				14,
+				9,
+				11
+			],
+			"block": "minecraft:purpur_slab"
+		},
+		{
+			"pos": [
+				16,
+				10,
+				10
+			],
+			"block": "minecraft:purpur_stairs"
+		},
+		{
+			"pos": [
+				10,
+				21,
+				10
+			],
+			"block": "minecraft:end_rod"
+		},
+		{
+			"pos": [
+				10,
+				21,
+				9
+			],
+			"block": "minecraft:end_rod"
+		},
+		{
+			"pos": [
+				10,
+				21,
+				8
+			],
+			"block": "minecraft:end_rod"
+		}
+	]
+}

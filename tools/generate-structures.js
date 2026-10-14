@@ -33,8 +33,8 @@ class Build {
 		this.phantoms = [];
 	}
 	/** A phantom in the air; it anchors itself where it wakes, so it circles the ruin. */
-	phantom(x, y, z) {
-		this.phantoms.push([x, y, z]);
+	phantom(x, y, z, deathLoot) {
+		this.phantoms.push([x, y, z, deathLoot]);
 	}
 	/** A shulker sitting on the block at x, y - 1, z (the design caps these: a few per ruin). */
 	shulker(x, y, z) {
@@ -74,7 +74,11 @@ class Build {
 			s.set(x, y, z, state, n);
 		}
 		for (const [x, y, z] of this.shulkers) s.addEntity(x + 0.5, y, z + 0.5, { id: 'minecraft:shulker', PersistenceRequired: byte(1) });
-		for (const [x, y, z] of this.phantoms) s.addEntity(x + 0.5, y, z + 0.5, { id: 'minecraft:phantom', size: 1, PersistenceRequired: byte(1) });
+		for (const [x, y, z, deathLoot] of this.phantoms) {
+			const n = { id: 'minecraft:phantom', size: 1, PersistenceRequired: byte(1) };
+			if (deathLoot) n.DeathLootTable = deathLoot;
+			s.addEntity(x + 0.5, y, z + 0.5, n);
+		}
 		return s.toNbt();
 	}
 }
@@ -279,9 +283,16 @@ function graveyard() {
 	for (let x = cx - 6; x <= cx + 6; x++) for (let z = 12; z <= 34; z++) {
 		if (Math.hypot(x - cx, (z - 23) * 0.55) <= 6 && !b.get(x, 0, z)) b.set(x, 0, z, 'minecraft:end_stone_bricks');
 	}
-	b.set(cx + 3, 1, 20, 'minecraft:chest[facing=west,type=single,waterlogged=false]', { LootTable: `${NS}:chests/graveyard` });
-	b.phantom(cx, 14, 20);
-	b.phantom(cx + 3, 15, 30);
+	// The vault at the heart holds the Aphelite Upgrade template, one per player; its key drops
+	// from the phantoms wheeling overhead (see phantomLoot below). A plain chest sits by the spine.
+	b.set(cx + 3, 1, 20, 'minecraft:vault[facing=west,ominous=false,vault_state=inactive]', { config: { loot_table: `${NS}:chests/graveyard_vault` } });
+	b.set(cx - 3, 1, 26, 'minecraft:chest[facing=east,type=single,waterlogged=false]', { LootTable: `${NS}:chests/graveyard` });
+	// Four phantoms, each carrying a key: a vault rewards each player once, so a party needs a
+	// key apiece (trial keys from the Overworld's trial chambers open it too).
+	b.phantom(cx, 14, 20, `${NS}:entities/graveyard_phantom`);
+	b.phantom(cx + 3, 15, 30, `${NS}:entities/graveyard_phantom`);
+	b.phantom(cx - 4, 16, 12, `${NS}:entities/graveyard_phantom`);
+	b.phantom(cx + 5, 15, 40, `${NS}:entities/graveyard_phantom`);
 	// A few scattered bones.
 	for (let i = 0; i < 16; i++) {
 		const x = 1 + Math.floor(rand() * 27), z = 1 + Math.floor(rand() * 45);
@@ -353,11 +364,20 @@ function sinkingCity() {
 	return b;
 }
 
-function generate(name, intact, missing, title, intro) {
+function generate(name, intact, missing, title, intro, lectern) {
 	const theBook = book(title, intro, missing, intact);
 	for (const [, v] of intact.blocks) if (v.nbt && v.nbt.Book) v.nbt.Book = theBook;
 	out(`structure/${name}.nbt`, intact.toNbt());
 	out(`structure/${name}_ruin.nbt`, intact.ruin(missing).toNbt());
+	// What the restoration code checks: each missing block's template position and block id,
+	// plus where the lectern is (the respawn spot, and where the chart is read from).
+	const plan = {
+		size: intact.size,
+		lectern,
+		missing: missing.filter(([x, y, z]) => intact.get(x, y, z) && intact.get(x, y, z).state !== 'minecraft:air')
+			.map(([x, y, z]) => ({ pos: [x, y, z], block: intact.get(x, y, z).state.replace(/\[.*$/, '') })),
+	};
+	out(`restoration/${name}.json`, JSON.stringify(plan, null, '\t') + '\n');
 	console.log(`${name}: ${intact.blocks.size} blocks, ruin missing ${missing.length}`);
 }
 
@@ -368,7 +388,8 @@ function generateOne(name, build) {
 
 const obs = observatory();
 generate('observatory', obs.build, observatoryMissing(obs), 'Keeper\'s Notes',
-	'The storm took the roof\'s corner, the east wall and the eyepiece. Put back what is listed here and she will see again.\n\nThe watch ends when the last piece is set.');
+	'The storm took the roof\'s corner, the east wall and the eyepiece. Put back what is listed here and she will see again.\n\nThe watch ends when the last piece is set.',
+	[10 - 2, obs.floor, 10 + 3]);
 generateOne('wreck', wreck());
 generateOne('graveyard', graveyard());
 generateOne('sinking_city', sinkingCity());

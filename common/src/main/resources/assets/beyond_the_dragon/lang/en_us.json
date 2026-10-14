@@ -33,5 +33,8 @@
 	"item.beyond_the_dragon.smithing_template.aphelite_upgrade.additions_slot_description": "Add Aphelite Ingot",
 	"upgrade.beyond_the_dragon.aphelite_upgrade": "Aphelite Upgrade",
 	"trim_pattern.beyond_the_dragon.dragon_scale": "Dragon Scale Armor Trim",
-	"block.beyond_the_dragon.aphelite_ore": "Aphelite Ore"
+	"block.beyond_the_dragon.aphelite_ore": "Aphelite Ore",
+	"title.beyond_the_dragon.observatory.restored": "The Observatory Sees Again",
+	"title.beyond_the_dragon.observatory.chart_hint": "Sneak at the lectern for the keeper's chart",
+	"item.beyond_the_dragon.keepers_chart": "Keeper's Chart"
 }

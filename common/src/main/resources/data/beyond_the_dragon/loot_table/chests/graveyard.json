@@ -102,6 +102,11 @@
 							}
 						}
 					]
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:trial_key",
+					"weight": 7
 				}
 			]
 		},
@@ -112,11 +117,6 @@
 				"ring": "outer"
 			},
 			"entries": [
-				{
-					"type": "minecraft:item",
-					"name": "beyond_the_dragon:aphelite_upgrade_smithing_template",
-					"weight": 2
-				},
 				{
 					"type": "minecraft:item",
 					"name": "beyond_the_dragon:aphelite_shard",

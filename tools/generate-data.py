@@ -301,10 +301,42 @@ chest_loot("graveyard", uniform(3, 5), [
     item("minecraft:bone_block", 8, 4, 10), item("minecraft:bone", 8, 6, 16), item("minecraft:dragon_breath", 6, 2, 5),
     item("minecraft:ender_pearl", 5, 2, 4), item("minecraft:experience_bottle", 6, 4, 10), item("minecraft:end_crystal", 2),
     item("minecraft:popped_chorus_fruit", 6, 4, 8),
-], [item(ns("aphelite_upgrade_smithing_template"), 2), item(ns("aphelite_shard"), 3, 1, 3), {"type": "minecraft:empty", "weight": 1}])
+    item("minecraft:trial_key", 7),
+], [item(ns("aphelite_shard"), 3, 1, 3), {"type": "minecraft:empty", "weight": 1}])
 chest_loot("sinking_city", uniform(4, 7), [
     item("minecraft:purpur_block", 8, 6, 16), item("minecraft:end_rod", 6, 3, 8), item("minecraft:magenta_stained_glass", 5, 4, 12),
     item("minecraft:diamond", 4, 1, 3), item("minecraft:emerald", 4, 2, 5), item("minecraft:shulker_shell", 3, 1, 2),
     item("minecraft:ender_pearl", 6, 2, 5), item("minecraft:chorus_fruit", 8, 4, 10), item("minecraft:experience_bottle", 6, 3, 8),
     item("minecraft:saddle", 2), item("minecraft:golden_apple", 3, 1, 2),
 ], [item(ns("aphelite_shard"), 4, 2, 5), item(ns("aphelite_ingot"), 1), {"type": "minecraft:empty", "weight": 1}])
+
+# The graveyard's vault: one template per player who brings a trial key, plus a little extra.
+write(DATA / "loot_table" / "chests" / "graveyard_vault.json", {
+    "type": "minecraft:chest",
+    "pools": [
+        {"rolls": 1, "entries": [item(ns("aphelite_upgrade_smithing_template"), 1)]},
+        {"rolls": 1, "entries": [item("minecraft:dragon_breath", 3, 2, 4), item("minecraft:experience_bottle", 3, 4, 8), item(ns("aphelite_shard"), 2, 1, 2)]},
+    ],
+})
+# The graveyard's phantoms carry the key.
+write(DATA / "loot_table" / "entities" / "graveyard_phantom.json", {
+    "type": "minecraft:entity",
+    "pools": [
+        {"rolls": 1, "entries": [item("minecraft:trial_key", 1)]},
+        {"rolls": 1, "entries": [item("minecraft:phantom_membrane", 1, 0, 1)]},
+    ],
+})
+
+def enchanted_book(weight, lo=20, hi=39):
+    return {"type": "minecraft:item", "name": "minecraft:book", "weight": weight,
+            "modifier": [{"type": "minecraft:enchant_with_levels", "levels": {"type": "minecraft:uniform", "min": lo, "max": hi}}]}
+
+# Enchanted books in the observatory and the city, a disc in the city (edits to the tables above).
+import json as _json
+def amend(name, extra_common):
+    f = DATA / "loot_table" / "chests" / f"{name}.json"
+    d = _json.loads(f.read_text(encoding="utf-8"))
+    d["pools"][0]["entries"].extend(extra_common)
+    write(f, d)
+amend("observatory", [enchanted_book(3)])
+amend("sinking_city", [enchanted_book(3), item("minecraft:music_disc_otherside", 1)])
