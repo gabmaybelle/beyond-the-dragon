@@ -12,9 +12,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:bone_block",
 					"weight": 8,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 4,
@@ -27,9 +27,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:bone",
 					"weight": 8,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 6,
@@ -42,9 +42,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:dragon_breath",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -57,9 +57,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:ender_pearl",
 					"weight": 5,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -72,9 +72,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:experience_bottle",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 4,
@@ -92,9 +92,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:popped_chorus_fruit",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 4,
@@ -112,18 +112,20 @@
 		},
 		{
 			"rolls": 1,
-			"condition": {
-				"type": "beyond_the_dragon:in_ring",
-				"ring": "outer"
-			},
+			"conditions": [
+				{
+					"condition": "beyond_the_dragon:in_ring",
+					"ring": "outer"
+				}
+			],
 			"entries": [
 				{
 					"type": "minecraft:item",
 					"name": "beyond_the_dragon:aphelite_shard",
 					"weight": 3,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 1,

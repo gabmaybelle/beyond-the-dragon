@@ -31,7 +31,7 @@ public record InRingCondition(Rings ring) implements LootItemCondition {
 		if (context.getLevel().dimension() != Level.END) {
 			return false;
 		}
-		Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
+		Vec3 origin = context.getOptionalParameter(LootContextParams.ORIGIN);
 		return origin != null && Rings.at(origin.x, origin.z).ordinal() >= ring.ordinal();
 	}
 }

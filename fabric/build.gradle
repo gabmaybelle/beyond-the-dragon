@@ -22,14 +22,10 @@ dependencies {
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	// Compatibility runs: `./gradlew :fabric:runClientGameTest -PtestBetterEnd` (or -PtestStellarity,
-	// -PtestNullscape) plays the in-game test with that mod installed, fetched from Modrinth's maven
-	// by version id. Nothing here is bundled or required.
-	if (project.hasProperty("testBetterEnd")) {
-		runtimeOnly "maven.modrinth:betterend:${project.betterend_version}"
-		runtimeOnly "maven.modrinth:bclib:${project.bclib_version}"
-		runtimeOnly "maven.modrinth:worldweaver:${project.worldweaver_version}"
-	}
+	// Compatibility runs: `./gradlew :fabric:runClientGameTest -PtestStellarity` (or -PtestNullscape)
+	// plays the in-game test with that mod installed, fetched from Modrinth's maven by version id.
+	// Nothing here is bundled or required. BetterEnd is not among them on this branch: its 26.1
+	// builds need a Fabric API that only exists for 26.2, so they can't load on 26.1.2.
 	if (project.hasProperty("testStellarity")) {
 		runtimeOnly "maven.modrinth:stellarity:${project.stellarity_version}"
 	}

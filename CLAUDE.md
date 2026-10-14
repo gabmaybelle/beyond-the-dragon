@@ -1,6 +1,7 @@
 # Beyond the Dragon
 
-A Fabric and NeoForge mod for Minecraft 26.3 (mod ID `beyond_the_dragon`): a reason to keep
+A Fabric and NeoForge mod for Minecraft 26.1.2 on this branch (`26.1`; `main` is 26.3; mod ID
+`beyond_the_dragon`): a reason to keep
 playing after the Ender Dragon. Ruins drift through the outer End, the dragon gets harder every
 time it's respawned, and aphelite (a metal a step past netherite) only exists far from the centre.
 The design doc with every decision is Gabby's Claude doc "Beyond the Dragon — design doc"; this
@@ -26,7 +27,7 @@ One codebase, two jars:
   loot, worldgen, item models with all trim overlays); `TrimGen.java` draws the Dragon Scale
   trim sheets (`java tools/TrimGen.java common/src/main/resources/assets/beyond_the_dragon`); `generate-structures.js` builds the
   structure templates by remixing vanilla's End City and fossil pieces, read straight from the
-  game jar (`--jar`, default: Loom's 26.3 merged jar under `~/.gradle`), through `structure.js`
+  game jar (`--jar`, default: Loom's merged jar for this branch's version under `~/.gradle`), through `structure.js`
   + `nbt.js`; the observatory comes as an intact template (what restoration compares against)
   and a `_ruin` (what generates), with the lectern book written from the difference.
   `render-structure.js <template.nbt> --out <png> --jar <jar>` draws a template isometrically
@@ -46,17 +47,23 @@ registrations in its registry event, so its `Platform` queues them and the resul
 
 - `./gradlew build`: jars in `fabric/build/libs/` and `neoforge/build/libs/`.
 - `./gradlew :fabric:runClientGameTest`: the settings file and the in-game checks, in a real game
-  window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestBetterEnd`,
-  `-PtestStellarity` or `-PtestNullscape` to play it with that mod installed (fetched from
-  Modrinth's maven, never bundled); CI runs all four. `BTD_TEST_ONLY=structures` (or
+  window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestNullscape` (or
+  `-PtestStellarity`, by hand) to play it with that mod installed (fetched from Modrinth's
+  maven, never bundled); CI runs it on its own and with Nullscape. BetterEnd is left out on
+  this branch: every BetterEnd build that claims 26.1 requires Fabric API 0.155+, which only
+  exists for 26.2, so none loads on 26.1.2. Stellarity is out of CI here too: 6.0.1 and later
+  carry 26.2-format data that fails registry loading on 26.1.2, 5.4.3 never reached the title
+  screen, and 5.5.5 (the pinned id) passes the whole test when it starts but hangs at startup
+  about one time in three (the log stops right after the resource reload). Gabby has also had
+  trouble with BetterEnd on a server, especially alongside Stellarity; the two are never tested
+  together. `BTD_TEST_ONLY=structures` (or
   `=aphelite`) in the environment plays only that part of the test, in a couple of minutes, for
   tuning. `BTD_SCREENSHOTS=<folder>` keeps the test's
   screenshots (titles, each ruin from the air, the egg on the beacon, each dragon tier) there;
   the run directory they land in is thrown away otherwise. With a mod that reworks the dragon fight
-  installed, the test expects our tier attacks to stay off. BetterEnd keeps the fight but
-  replaces the respawn check (crystals four blocks from the End's origin, on bedrock, any
-  height); the ladder test places them there when it is loaded.
-- NeoForge load check: `node ~/mods-dev/tools/neoforge-server-test.js <scratch folder> --mod neoforge/build/libs/<jar>`
+  installed, the test expects our tier attacks to stay off. (On 26.3, BetterEnd keeps the fight
+  but replaces the respawn check; the ladder test still carries that case.)
+- NeoForge load check: `node ~/mods-dev/tools/neoforge-server-test.js <scratch folder> --minecraft 26.1.2 --mod neoforge/build/libs/<jar>`
   starts a NeoForge server with the jar and fails on any data or mod error.
 - Fresh test worlds and background game driving: `~/mods-dev/tools/README.md`
   (`new-test-world.js`, `mcf.js`).
@@ -142,6 +149,16 @@ or test names. Check the diff for these before every push.
 - Keep the credit line: "made by Gabby with help from Claude, an AI assistant".
 - Gabby publishes on Modrinth herself. Don't upload anything there.
 
-**Minecraft.** Fabric and NeoForge on Minecraft 26.3 (Mojang names; Loom 1.18.4, ModDevGradle
-2.0, Java 25). Vanilla names changed a lot in 26.x: check the merged jar rather than older docs
+**Minecraft.** Fabric and NeoForge (Mojang names; Loom 1.18.4, ModDevGradle 2.0, Java 25).
+Version branches: `main` is the newest Minecraft (26.3), `26.1` is 26.1.2, and older versions get
+a branch each. Behaviour changes land on `main` and are cherry-picked to the version branches,
+where only the version differences are edited; CI runs on every branch. This branch is `26.1`.
+The data formats differ too (loot `functions`/`conditions` here against `modifier`/`condition` on
+26.3, `worldgen/configured_feature` against `worldgen/feature`, an `armor_trims` atlas for the
+trim): `generate-data.py` writes everything in the 26.3 shape and converts under its `FORMAT`
+constant, which is the only line that differs between the branches' generators. Structure
+templates differ as well: `structure.js` writes palette entries as `Name`/`Properties` here
+(`id`/`properties` on 26.3) and stamps this version's `DATA_VERSION` (4790); a template with
+either of those wrong loads with its box but places no blocks, silently. Regenerate the
+templates on this branch from this version's jar (`generate-structures.js` defaults to it). Vanilla names changed a lot in 26.x: check the merged jar rather than older docs
 (for example `iron_chain`, `pink_petals[flower_amount=N]`, timelines instead of `time query daytime`).

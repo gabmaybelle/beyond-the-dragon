@@ -205,7 +205,9 @@ public final class Observatories {
 	}
 
 	private static void mark(ServerLevel level, ItemStack map, BlockPos centre, Holder<Structure> structure, String name, boolean ours) {
-		BlockPos found = level.findNearestMapStructure(HolderSet.direct(structure), centre, CHART_SEARCH_CHUNKS, false);
+		// 26.1's level has only the tag form of the locator; the generator's takes a holder set and answers with the structure too.
+		var nearest = level.getChunkSource().getGenerator().findNearestMapStructure(level, HolderSet.direct(structure), centre, CHART_SEARCH_CHUNKS, false);
+		BlockPos found = nearest == null ? null : nearest.getFirst();
 		if (found != null) {
 			MapItemSavedData.addTargetDecoration(map, found, BeyondTheDragon.MOD_ID + ":" + name, ours ? MapDecorationTypes.TARGET_X : MapDecorationTypes.RED_X);
 		}

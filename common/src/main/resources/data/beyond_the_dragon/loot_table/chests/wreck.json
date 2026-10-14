@@ -12,9 +12,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:diamond",
 					"weight": 5,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 1,
@@ -27,9 +27,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:iron_ingot",
 					"weight": 8,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -42,9 +42,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:gold_ingot",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -57,9 +57,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:emerald",
 					"weight": 4,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 1,
@@ -72,9 +72,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:firework_rocket",
 					"weight": 10,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 8,
@@ -87,9 +87,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:ender_pearl",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -102,9 +102,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:chorus_fruit",
 					"weight": 8,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 4,
@@ -122,9 +122,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:experience_bottle",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 3,
@@ -137,9 +137,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:phantom_membrane",
 					"weight": 5,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -152,18 +152,20 @@
 		},
 		{
 			"rolls": 1,
-			"condition": {
-				"type": "beyond_the_dragon:in_ring",
-				"ring": "outer"
-			},
+			"conditions": [
+				{
+					"condition": "beyond_the_dragon:in_ring",
+					"ring": "outer"
+				}
+			],
 			"entries": [
 				{
 					"type": "minecraft:item",
 					"name": "beyond_the_dragon:aphelite_shard",
 					"weight": 3,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,

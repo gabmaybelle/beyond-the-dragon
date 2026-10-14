@@ -12,9 +12,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:ender_pearl",
 					"weight": 10,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -27,9 +27,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:chorus_fruit",
 					"weight": 10,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 3,
@@ -42,9 +42,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:end_rod",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -57,9 +57,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:purpur_block",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 4,
@@ -77,9 +77,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:experience_bottle",
 					"weight": 5,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -92,9 +92,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:amethyst_shard",
 					"weight": 5,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -112,9 +112,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:book",
 					"weight": 3,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:enchant_with_levels",
+							"function": "minecraft:enchant_with_levels",
 							"levels": {
 								"type": "minecraft:uniform",
 								"min": 20,
@@ -127,18 +127,20 @@
 		},
 		{
 			"rolls": 1,
-			"condition": {
-				"type": "beyond_the_dragon:in_ring",
-				"ring": "outer"
-			},
+			"conditions": [
+				{
+					"condition": "beyond_the_dragon:in_ring",
+					"ring": "outer"
+				}
+			],
 			"entries": [
 				{
 					"type": "minecraft:item",
 					"name": "beyond_the_dragon:aphelite_shard",
 					"weight": 3,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 1,

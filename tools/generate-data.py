@@ -16,7 +16,44 @@ TOOLS = ["sword", "pickaxe", "axe", "shovel", "hoe"]
 TRIM_MATERIALS = ["amethyst", "copper", "diamond", "emerald", "gold", "iron", "lapis", "netherite", "quartz", "redstone", "resin"]
 
 
+# The data formats this branch's Minecraft reads. "26.3": loot entries take "modifier"/"condition",
+# configured features live in worldgen/feature with a flat config and plain block ids, trims are
+# coloured from the texture's palette metadata. "26.1": loot takes "functions"/"conditions",
+# features live in worldgen/configured_feature under "config" with {"Name": id} states, and a trim
+# pattern must be listed in an armor_trims atlas. Everything else below is written once, in the
+# 26.3 shape, and converted here; keep this the only place the versions differ.
+FORMAT = "26.1"
+
+SILK_TOUCH = {"condition": "minecraft:match_tool", "predicate": {"predicates": {
+    "minecraft:enchantments": [{"enchantments": "minecraft:silk_touch", "levels": {"min": 1}}]}}}
+
+
+def old_loot(obj):
+    """A loot table in the 26.3 shape, rewritten for 26.1."""
+    if isinstance(obj, list):
+        return [old_loot(x) for x in obj]
+    if not isinstance(obj, dict):
+        return obj
+    out = {}
+    for key, value in obj.items():
+        if key in ("functions", "conditions"):
+            out[key] = value  # already in the 26.1 shape (a table read back and amended)
+        elif key == "modifier":
+            out["functions"] = [{"function": f["type"], **{k: v for k, v in f.items() if k != "type"}} for f in value]
+        elif key == "condition":
+            if isinstance(value, str):
+                assert value == "minecraft:tool/can_silk_touch", value
+                out["conditions"] = [SILK_TOUCH]
+            else:
+                out["conditions"] = [{"condition": value["type"], **{k: old_loot(v) for k, v in value.items() if k != "type"}}]
+        else:
+            out[key] = old_loot(value)
+    return out
+
+
 def write(path, content):
+    if FORMAT == "26.1" and "loot_table" in path.parts:
+        content = old_loot(content)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(content, indent="\t") + "\n", encoding="utf-8")
 
@@ -96,13 +133,16 @@ write(DATA / "loot_table" / "blocks" / "aphelite_ore.json", {
     }],
     "random_sequence": ns("blocks/aphelite_ore"),
 })
-write(DATA / "worldgen" / "feature" / "aphelite_ore.json", {
-    "type": "minecraft:ore",
+ore_config = {
     "size": 4,
     "discard_chance_on_air_exposure": 0.0,
-    "targets": [{"state": ns("aphelite_ore"),
+    "targets": [{"state": ns("aphelite_ore") if FORMAT == "26.3" else {"Name": ns("aphelite_ore")},
                  "target": {"predicate_type": "minecraft:block_match", "block": "minecraft:end_stone"}}],
-})
+}
+if FORMAT == "26.3":
+    write(DATA / "worldgen" / "feature" / "aphelite_ore.json", {"type": "minecraft:ore", **ore_config})
+else:
+    write(DATA / "worldgen" / "configured_feature" / "aphelite_ore.json", {"type": "minecraft:ore", "config": ore_config})
 write(DATA / "worldgen" / "placed_feature" / "aphelite_ore.json", {
     "feature": ns("aphelite_ore"),
     "placement": [
@@ -123,6 +163,16 @@ write(DATA / "neoforge" / "biome_modifier" / "aphelite_ore.json", {
 })
 
 # --- the trim pattern -----------------------------------------------------------------------
+if FORMAT == "26.1":
+    # 26.1 colours trims through an atlas of palette permutations; the pattern has to be listed.
+    materials = ["amethyst", "copper", "copper_darker", "diamond", "diamond_darker", "emerald", "gold", "gold_darker",
+                 "iron", "iron_darker", "lapis", "netherite", "netherite_darker", "quartz", "redstone", "resin"]
+    write(ASSETS / "atlases" / "armor_trims.json", {"sources": [{
+        "type": "minecraft:paletted_permutations",
+        "palette_key": "minecraft:trims/color_palettes/trim_palette",
+        "permutations": {m: f"minecraft:trims/color_palettes/{m}" for m in materials},
+        "textures": [ns("trims/entity/humanoid/dragon_scale"), ns("trims/entity/humanoid_leggings/dragon_scale")],
+    }]})
 write(DATA / "trim_pattern" / "dragon_scale.json", {
     "asset_id": ns("dragon_scale"),
     "decal": False,
@@ -285,7 +335,9 @@ def structure(name, pool_name, template, size, spacing, separation, salt, extra_
     })
 
 structure("wreck", "wreck", "wreck", 40, 28, 12, 20261015)
-structure("graveyard", "graveyard", "graveyard", 48, 36, 16, 20261016)
+# The graveyard's box is the longest that must be wholly on land (29 by 50), so it takes a little
+# more slope than the others; on rugged modded Ends it was the rarest ruin by far.
+structure("graveyard", "graveyard", "graveyard", 48, 36, 16, 20261016, max_slope=12)
 # The city hangs over the edge by design: only its lowest house (the south cluster's base, template
 # x 14-27, z 56-69) must be on land, and the rest may stand over the void. Closer together than the
 # others too; with the whole box required to be on land it was one city per 2,500 blocks.

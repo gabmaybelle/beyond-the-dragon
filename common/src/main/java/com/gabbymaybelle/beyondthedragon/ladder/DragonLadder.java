@@ -35,6 +35,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.level.dimension.end.EnderDragonFight;
+import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -174,7 +175,7 @@ public final class DragonLadder {
 		ResourceKey<LootTable> key = ResourceKey.create(Registries.LOOT_TABLE,
 				Identifier.fromNamespaceAndPath(BeyondTheDragon.MOD_ID, "dragon_ladder/tier_" + tier));
 		LootTable table = end.getServer().reloadableRegistries().getLootTable(key);
-		BlockPos podium = end.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EnderDragonFight.getPodiumLocation(origin));
+		BlockPos podium = end.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(origin));
 		Vec3 drop = Vec3.atBottomCenterOf(podium.above());
 		LootParams params = new LootParams.Builder(end)
 				.withParameter(LootContextParams.ORIGIN, drop)

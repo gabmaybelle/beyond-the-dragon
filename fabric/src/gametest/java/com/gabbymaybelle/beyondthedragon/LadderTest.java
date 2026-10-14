@@ -15,7 +15,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
@@ -30,6 +30,7 @@ import com.gabbymaybelle.beyondthedragon.mixin.BeaconBlockEntityAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.level.dimension.end.EnderDragonFight;
+import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -121,7 +122,7 @@ final class LadderTest {
 		server.runOnServer(s -> {
 			ServerLevel end = end(s);
 			ServerPlayer player = player(s);
-			player.setPermanentlyInvulnerable(true);
+			player.setInvulnerable(true);
 			player.setGameMode(GameType.SURVIVAL);
 			// Beside the arena's centre column, never on it: the podium and portal are placed by the
 			// heightmap at (0, 0), and a block there would move them.
@@ -229,7 +230,7 @@ final class LadderTest {
 	private static int rewardsAtPortal(TestServerContext server, BlockPos origin) {
 		return server.computeOnServer(s -> {
 			ServerLevel end = end(s);
-			BlockPos podium = end.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EnderDragonFight.getPodiumLocation(origin));
+			BlockPos podium = end.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(origin));
 			int count = 0;
 			for (ItemEntity item : end.getEntitiesOfClass(ItemEntity.class, new AABB(podium).inflate(8))) {
 				if (item.getItem().is(Items.DRAGON_BREATH)) {
@@ -246,7 +247,7 @@ final class LadderTest {
 			ServerLevel end = end(s);
 			// The exit portal's level is where its end portal blocks are; the fight keeps that
 			// position privately, so read it off the blocks. The crystals go on the bedrock ring.
-			BlockPos podium = EnderDragonFight.getPodiumLocation(origin);
+			BlockPos podium = EndPodiumFeature.getLocation(origin);
 			long sx = 0;
 			long sy = 0;
 			long sz = 0;
@@ -285,7 +286,7 @@ final class LadderTest {
 					}
 					BeyondTheDragon.LOGGER.info("[test] BetterEnd crystal at {} on {}", pos, end.getBlockState(pos.below()).getBlock());
 				}
-				EndCrystal crystal = EntityTypes.END_CRYSTAL.create(end, EntitySpawnReason.COMMAND);
+				EndCrystal crystal = EntityType.END_CRYSTAL.create(end, EntitySpawnReason.COMMAND);
 				crystal.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
 				end.addFreshEntity(crystal);
 			}

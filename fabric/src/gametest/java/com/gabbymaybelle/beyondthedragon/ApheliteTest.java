@@ -22,7 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Shulker;
@@ -89,7 +89,7 @@ final class ApheliteTest {
 					stack.set(DataComponents.TRIM, trim);
 					player.setItemSlot(slots[i], stack);
 				}
-				player.setPermanentlyInvulnerable(true);
+				player.setInvulnerable(true);
 				player.setGameMode(GameType.CREATIVE);
 				player.getAbilities().flying = true;
 				player.onUpdateAbilities();
@@ -112,18 +112,14 @@ final class ApheliteTest {
 			ctx.runOnClient(mc -> {
 				mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
 				mc.options.fov().set(45);
-				if (!mc.gui.hud.isHidden()) {
-					mc.gui.hud.toggle();
-				}
+				mc.options.hideGui = true;
 			});
 			ctx.waitTicks(60);
 			BeyondTheDragonClientTest.screenshot(ctx, TestScreenshotOptions.of("beyond_the_dragon_trim_" + material).withSize(1280, 720));
 			ctx.runOnClient(mc -> {
 				mc.options.setCameraType(CameraType.FIRST_PERSON);
 				mc.options.fov().set(fov);
-				if (mc.gui.hud.isHidden()) {
-					mc.gui.hud.toggle();
-				}
+				mc.options.hideGui = false;
 			});
 		}
 		server.runOnServer(s -> {
@@ -171,7 +167,7 @@ final class ApheliteTest {
 			ServerLevel end = s.getLevel(Level.END);
 			ServerPlayer player = player(s);
 			// Stand beside the ore so its chunk ticks and the drops are visible to entity queries.
-			player.setPermanentlyInvulnerable(true);
+			player.setInvulnerable(true);
 			player.setGameMode(GameType.SURVIVAL);
 			end.setBlockAndUpdate(base.offset(-2, -1, -2), Blocks.OBSIDIAN.defaultBlockState());
 			player.teleportTo(end, base.getX() - 1.5, base.getY(), base.getZ() - 1.5, java.util.Set.of(), 0, 0, false);
@@ -279,18 +275,18 @@ final class ApheliteTest {
 		float[] landing = server.computeOnServer(s -> {
 			ServerLevel end = s.getLevel(Level.END);
 			ServerPlayer player = player(s);
-			player.setPermanentlyInvulnerable(false);
+			player.setInvulnerable(false);
 			player.setHealth(20.0F);
 			wear(player, 4);
 			boolean fallHurt = player.hurtServer(end, end.damageSources().fall(), 6.0F);
 			boolean crashHurt = player.hurtServer(end, end.damageSources().flyIntoWall(), 6.0F);
 			float afterSet = player.getHealth();
 			wear(player, 2);
-			player.setInvulnerableTime(0);
+			player.invulnerableTime = 0;
 			boolean twoPiecesHurt = player.hurtServer(end, end.damageSources().fall(), 6.0F);
 			float afterTwo = player.getHealth();
 			player.setHealth(20.0F);
-			player.setPermanentlyInvulnerable(true);
+			player.setInvulnerable(true);
 			wear(player, 0);
 			return new float[] {fallHurt ? 1 : 0, crashHurt ? 1 : 0, afterSet, twoPiecesHurt ? 1 : 0, afterTwo};
 		});
@@ -306,7 +302,7 @@ final class ApheliteTest {
 			ServerPlayer player = player(s);
 			player.removeAllEffects();
 			wear(player, pieces);
-			Shulker shulker = EntityTypes.SHULKER.create(end, EntitySpawnReason.COMMAND);
+			Shulker shulker = EntityType.SHULKER.create(end, EntitySpawnReason.COMMAND);
 			player.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 200), shulker);
 			MobEffectInstance effect = player.getEffect(MobEffects.LEVITATION);
 			int duration = effect == null ? 0 : effect.getDuration();

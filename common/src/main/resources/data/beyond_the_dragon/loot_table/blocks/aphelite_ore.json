@@ -9,20 +9,36 @@
 					"children": [
 						{
 							"type": "minecraft:item",
-							"condition": "minecraft:tool/can_silk_touch",
+							"conditions": [
+								{
+									"condition": "minecraft:match_tool",
+									"predicate": {
+										"predicates": {
+											"minecraft:enchantments": [
+												{
+													"enchantments": "minecraft:silk_touch",
+													"levels": {
+														"min": 1
+													}
+												}
+											]
+										}
+									}
+								}
+							],
 							"name": "beyond_the_dragon:aphelite_ore"
 						},
 						{
 							"type": "minecraft:item",
 							"name": "beyond_the_dragon:aphelite_shard",
-							"modifier": [
+							"functions": [
 								{
-									"type": "minecraft:apply_bonus",
+									"function": "minecraft:apply_bonus",
 									"enchantment": "minecraft:fortune",
 									"formula": "minecraft:ore_drops"
 								},
 								{
-									"type": "minecraft:explosion_decay"
+									"function": "minecraft:explosion_decay"
 								}
 							]
 						}
@@ -32,12 +48,14 @@
 		},
 		{
 			"rolls": 1,
-			"condition": {
-				"type": "minecraft:match_tool",
-				"predicate": {
-					"items": "beyond_the_dragon:aphelite_pickaxe"
+			"conditions": [
+				{
+					"condition": "minecraft:match_tool",
+					"predicate": {
+						"items": "beyond_the_dragon:aphelite_pickaxe"
+					}
 				}
-			},
+			],
 			"entries": [
 				{
 					"type": "minecraft:item",

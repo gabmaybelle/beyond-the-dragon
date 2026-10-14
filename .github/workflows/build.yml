@@ -20,10 +20,6 @@ jobs:
         include:
           - variant: 'on its own'
             test_args: ''
-          - variant: 'with BetterEnd'
-            test_args: '-PtestBetterEnd'
-          - variant: 'with Stellarity'
-            test_args: '-PtestStellarity'
           - variant: 'with Nullscape'
             test_args: '-PtestNullscape'
     name: build (${{ matrix.variant }})

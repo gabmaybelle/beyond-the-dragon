@@ -18,9 +18,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:dragon_breath",
 					"weight": 3,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -33,9 +33,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:experience_bottle",
 					"weight": 3,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 4,
@@ -48,9 +48,9 @@
 					"type": "minecraft:item",
 					"name": "beyond_the_dragon:aphelite_shard",
 					"weight": 2,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 1,

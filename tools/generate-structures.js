@@ -16,7 +16,7 @@ const ROOT = path.join(__dirname, '..', 'common', 'src', 'main', 'resources', 'd
 const args = process.argv.slice(2);
 const opt = (n, d) => { const i = args.indexOf('--' + n); return i >= 0 ? args[i + 1] : d; };
 const JAR = opt('jar', path.join(os.homedir(), '.gradle', 'caches', 'fabric-loom', 'minecraftMaven', 'net', 'minecraft',
-	'minecraft-merged-deobf', '26.3', 'minecraft-merged-deobf-26.3.jar'));
+	'minecraft-merged-deobf', '26.1.2', 'minecraft-merged-deobf-26.1.2.jar'));
 const jar = openZip(JAR);
 const out = (rel, buf) => {
 	const f = path.join(ROOT, ...rel.split('/'));

@@ -1,6 +1,7 @@
 # Beyond the Dragon
 
-A Fabric and NeoForge mod for Minecraft 26.3. You killed the dragon; that was the tutorial.
+A Fabric and NeoForge mod for Minecraft 26.1.2 (this is the `26.1` branch; `main` is for 26.3).
+You killed the dragon; that was the tutorial.
 
 Beyond the Dragon is for players who have done it all. It leaves the game you know alone and
 adds reasons to pack your elytra and keep flying: ruins at the edge of the End, a dragon that
@@ -46,8 +47,10 @@ run).
 ## Works with
 
 Vanilla blocks and vanilla mechanics throughout, so resource packs and shaders just work.
-Structures generate on vanilla or modded End terrain and the game test runs with BetterEnd,
-Stellarity and Nullscape installed. Recipes use the crafting and smithing tables, so JEI, REI
+Structures generate on vanilla or modded End terrain and the game test runs with Nullscape
+installed. BetterEnd and Stellarity are tested on the 26.3 branch only: BetterEnd's 26.1 builds
+don't load on 26.1.2, and Stellarity's start hangs there now and then (its 5.5.5 build does play
+through the whole test when it starts). Recipes use the crafting and smithing tables, so JEI, REI
 and EMI show them. Nothing scans the world while you play: the rings and titles are one check
 per player per second, and structure lookups come from the seed.
 
