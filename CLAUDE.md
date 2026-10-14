@@ -18,7 +18,28 @@ One codebase, two jars:
   fails if you do.
 - `fabric/` and `neoforge/`: the entrypoints and a `Platform` each. Their `build.gradle` compiles
   `common`'s sources straight into their jar.
-- `fabric/src/gametest/`: the client game test (`BeyondTheDragonClientTest`).
+- `fabric/src/gametest/`: the client game test (`BeyondTheDragonClientTest`, which runs
+  `ApheliteTest` and `LadderTest`).
+- `tools/`: `TextureGen.java` draws the aphelite textures from vanilla's netherite ones (run it
+  with `java tools/TextureGen.java <unpacked vanilla textures> common/src/main/resources/assets/beyond_the_dragon`);
+  `generate-data.py` writes every aphelite and structure data and asset JSON (recipes, tags,
+  loot, worldgen, item models with all trim overlays); `generate-structures.js` builds the
+  structure templates by remixing vanilla's End City and fossil pieces, read straight from the
+  game jar (`--jar`, default: Loom's 26.3 merged jar under `~/.gradle`), through `structure.js`
+  + `nbt.js`; the observatory comes as an intact template (what restoration compares against)
+  and a `_ruin` (what generates), with the lectern book written from the difference.
+  `render-structure.js <template.nbt> --out <png> --jar <jar>` draws a template isometrically
+  with vanilla textures (`render-blocks.js` is the gazebo mod's renderer, taught the End blocks)
+  for looking at designs without starting the game. Edit the scripts, not their output.
+- `common/.../structures/`: `EndJigsawStructure` (the `beyond_the_dragon:end_jigsaw` structure
+  type: a jigsaw that refuses to start unless the footprint's corners are on an island) and
+  `InRingCondition` (the `beyond_the_dragon:in_ring` loot condition).
+
+Registering anything (items, blocks, placement modifiers) goes through
+`Services.PLATFORM.register(...)`, never `Registry.register` directly: NeoForge only accepts
+registrations in its registry event, so its `Platform` queues them and the result is a
+`Supplier`. The same goes for creative tabs (`addToCreativeTab`) and End ore placement
+(`addOreToEndBiomes`; NeoForge does that one through `data/.../neoforge/biome_modifier/`).
 
 ## Build and test
 

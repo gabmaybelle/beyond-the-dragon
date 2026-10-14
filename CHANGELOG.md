@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Aphelite, a metal a step past netherite. Its ore only forms in end stone past the outer ring (5,000 blocks out); four shards and four popped chorus fruit make an ingot, and an ingot with an Aphelite Upgrade template turns any netherite piece into aphelite at a smithing table. The armour has a little more toughness and durability than netherite and takes enchantments better; the tools mine a touch faster and hit a touch harder. Its real worth is in what it does: each piece worn cuts a shulker's levitation by 15%, helmet, leggings and boots together make every fall and elytra crash in the End harmless, and an aphelite pickaxe sometimes pulls an extra shard from the ore.
+- The Outer Reaches: four kinds of ruin on the End's highlands and midlands, each built from the End's own architecture.
+  - **Abandoned observatories**: a fat purpur tower with a telescope of end rods on the roof, a corner of the roof and a stretch of wall gone, and a lectern inside whose book lists exactly what the ruin is missing. Restoring one doesn't do anything yet; that comes next.
+  - **Wrecks**: an End ship run aground, sails gone, the mast snapped across the deck, the hull torn open on one side.
+  - **Dragon graveyards**: a skull of bone blocks with the dragon's head on its brow, a spine of fossils and arches of ribs over the hollow where the heart was. Their chests are where Aphelite Upgrade templates are found.
+  - **Sinking cities**: houses and towers joined by bridges, the far side slipping away into the void.
+  - Every chest holds End odds and ends, and past the outer ring, aphelite shards.
+- Two new smithing templates: the Aphelite Upgrade and the Dragon Scale armour trim. Both duplicate the usual way, with diamonds round an End block.
+- The Dragon Ladder now pays out properly: tier 1 drops the Dragon Scale trim template, tiers 2 and 3 an Aphelite Upgrade template, plus dragon's breath.
 - The Dragon Ladder. Sneak to set the dragon egg on a lit beacon and the dragon takes notice: every time you respawn it after that, it comes back one tier stronger, up to tier 3. Tier 1 fires shulker bullets at you, tier 2 breathes pools that drag you in, tier 3 dive-bombs. The first time you beat each tier, a reward drops at the exit portal; beating a tier again gives only the usual dragon's breath and experience. Every attack has its own setting, and with a mod that reworks the dragon fight installed the new attacks stay off unless you turn them on.
 - A title when you enter a new biome, in any dimension, after you've been there a few seconds and never more than once every fifteen. Each dimension can be switched off on its own.
 - The End's five biomes get names of their own: The Dragon's Island, The Shattered Isles, The Pale Flats, The Chorus Heights and The Void's Edge. The vanilla names are a setting away.

@@ -1,0 +1,18 @@
+{
+	"placement": {
+		"type": "minecraft:random_spread",
+		"spacing": 36,
+		"separation": 16,
+		"salt": 20261016,
+		"exclusion_zone": {
+			"other_set": "minecraft:end_cities",
+			"chunk_count": 2
+		}
+	},
+	"structures": [
+		{
+			"structure": "beyond_the_dragon:graveyard",
+			"weight": 1
+		}
+	]
+}

@@ -6,9 +6,21 @@
 			"entries": [
 				{
 					"type": "minecraft:item",
+					"name": "beyond_the_dragon:dragon_scale_armor_trim_smithing_template"
+				}
+			]
+		},
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
 					"name": "minecraft:dragon_breath",
 					"modifier": [
-						{ "type": "minecraft:set_count", "count": 4 }
+						{
+							"type": "minecraft:set_count",
+							"count": 4
+						}
 					]
 				}
 			]

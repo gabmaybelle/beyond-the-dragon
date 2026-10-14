@@ -1,0 +1,15 @@
+{
+	"name": "beyond_the_dragon:observatory/start",
+	"fallback": "minecraft:empty",
+	"elements": [
+		{
+			"weight": 1,
+			"element": {
+				"element_type": "minecraft:single_pool_element",
+				"location": "beyond_the_dragon:observatory_ruin",
+				"processors": "minecraft:empty",
+				"projection": "rigid"
+			}
+		}
+	]
+}

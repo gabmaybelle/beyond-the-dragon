@@ -6,9 +6,21 @@
 			"entries": [
 				{
 					"type": "minecraft:item",
+					"name": "beyond_the_dragon:aphelite_upgrade_smithing_template"
+				}
+			]
+		},
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
 					"name": "minecraft:dragon_breath",
 					"modifier": [
-						{ "type": "minecraft:set_count", "count": 8 }
+						{
+							"type": "minecraft:set_count",
+							"count": 8
+						}
 					]
 				}
 			]

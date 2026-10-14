@@ -1,0 +1,9 @@
+{
+	"type": "minecraft:smithing_transform",
+	"template": "beyond_the_dragon:aphelite_upgrade_smithing_template",
+	"base": "minecraft:netherite_helmet",
+	"addition": "#beyond_the_dragon:aphelite_tool_materials",
+	"result": {
+		"id": "beyond_the_dragon:aphelite_helmet"
+	}
+}

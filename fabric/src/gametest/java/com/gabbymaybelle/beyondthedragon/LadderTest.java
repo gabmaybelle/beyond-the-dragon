@@ -14,7 +14,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
@@ -134,36 +136,11 @@ final class LadderTest {
 		check(rewardsAtPortal(server, origin) == 0, "killing the tier 0 dragon drops no ladder reward");
 
 		// Four crystals round the portal: the respawn sequence runs and the ladder climbs.
-		server.runOnServer(s -> {
-			ServerLevel end = end(s);
-			// The exit portal's level is where its end portal blocks are; the fight keeps that
-			// position privately, so read it off the blocks. The crystals go on the bedrock ring.
-			BlockPos podium = EnderDragonFight.getPodiumLocation(origin);
-			BlockPos portal = null;
-			for (int y = end.getMinY(); y < end.getMaxY() && portal == null; y++) {
-				if (end.getBlockState(new BlockPos(podium.getX() + 2, y, podium.getZ())).is(Blocks.END_PORTAL)) {
-					portal = new BlockPos(podium.getX(), y, podium.getZ());
-				}
-			}
-			if (portal == null) {
-				throw new IllegalStateException("no exit portal found under the podium at " + podium);
-			}
-			BlockPos center = portal.above(1);
-			for (Direction direction : Direction.Plane.HORIZONTAL) {
-				BlockPos pos = center.relative(direction, 3);
-				EndCrystal crystal = EntityTypes.END_CRYSTAL.create(end, EntitySpawnReason.COMMAND);
-				crystal.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
-				end.addFreshEntity(crystal);
-			}
-			end.getDragonFight().tryRespawn();
-		});
-		int respawnTicks = waitOnServer(ctx, server, s -> tier(s) == 1 && !end(s).getDragons().isEmpty(), 2400);
-		check(tier(server) == 1, "the respawned dragon is tier 1 (respawn took " + respawnTicks + " ticks)");
+		respawn(ctx, server, origin, 1);
 
 		// Tier 1 fires shulker bullets at us.
 		waitOnServer(ctx, server, s -> !bulletsFromDragon(s).isEmpty(), 300);
-		List<ShulkerBullet> bullets = server.computeOnServer(LadderTest::bulletsFromDragon);
-		check(!bullets.isEmpty(), "the tier 1 dragon fires shulker bullets owned by the dragon");
+		check(!server.computeOnServer(LadderTest::bulletsFromDragon).isEmpty(), "the tier 1 dragon fires shulker bullets owned by the dragon");
 		ctx.takeScreenshot("beyond_the_dragon_tier_1");
 
 		// Killing the tier 1 dragon drops tier 1's loot at the portal, and only once.
@@ -175,6 +152,29 @@ final class LadderTest {
 		check(dropped == 4, "killing the tier 1 dragon drops its reward at the portal (got " + dropped + " dragon's breath, expected 4)");
 		server.runOnServer(s -> DragonLadder.onDragonKilled(end(s), tierOneDragon, origin));
 		check(rewardsAtPortal(server, origin) == dropped, "a second kill at the same tier drops nothing more");
+
+		// Tier 2 breathes a pulling cloud under us.
+		respawn(ctx, server, origin, 2);
+		waitOnServer(ctx, server, s -> !cloudsFromDragon(s).isEmpty(), 400);
+		check(!server.computeOnServer(LadderTest::cloudsFromDragon).isEmpty(), "the tier 2 dragon breathes a cloud it owns");
+		ctx.takeScreenshot("beyond_the_dragon_tier_2");
+		// The respawn's crystal explosions clear whatever lay on the podium, so count from here.
+		int beforeTwo = rewardsAtPortal(server, origin);
+		killDragon(server);
+		waitOnServer(ctx, server, s -> end(s).getDragons().isEmpty(), 600);
+		ctx.waitTicks(20);
+		int afterTwo = rewardsAtPortal(server, origin);
+		check(afterTwo == beforeTwo + 8, "the tier 2 reward is tier 2's loot (got " + (afterTwo - beforeTwo) + " more dragon's breath, expected 8)");
+
+		// Tier 3 charges us, and the ladder stops there.
+		respawn(ctx, server, origin, 3);
+		waitOnServer(ctx, server, s -> charging(s), 600);
+		check(server.computeOnServer(LadderTest::charging), "the tier 3 dragon dive-bombs (its phase is charging a player)");
+		ctx.takeScreenshot("beyond_the_dragon_tier_3");
+		killDragon(server);
+		waitOnServer(ctx, server, s -> end(s).getDragons().isEmpty(), 600);
+		respawn(ctx, server, origin, 3);
+		check(tier(server) == 3, "a fourth respawn stays at tier 3");
 	}
 
 	private void placeEgg(TestServerContext server, BlockPos beacon) {
@@ -223,6 +223,51 @@ final class LadderTest {
 			}
 			return count;
 		});
+	}
+
+	/** Summons the four crystals round the portal, starts the respawn and waits for the tier. */
+	private void respawn(ClientGameTestContext ctx, TestServerContext server, BlockPos origin, int expectedTier) {
+		server.runOnServer(s -> {
+			ServerLevel end = end(s);
+			// The exit portal's level is where its end portal blocks are; the fight keeps that
+			// position privately, so read it off the blocks. The crystals go on the bedrock ring.
+			BlockPos podium = EnderDragonFight.getPodiumLocation(origin);
+			BlockPos portal = null;
+			for (int y = end.getMinY(); y < end.getMaxY() && portal == null; y++) {
+				if (end.getBlockState(new BlockPos(podium.getX() + 2, y, podium.getZ())).is(Blocks.END_PORTAL)) {
+					portal = new BlockPos(podium.getX(), y, podium.getZ());
+				}
+			}
+			if (portal == null) {
+				throw new IllegalStateException("no exit portal found under the podium at " + podium);
+			}
+			BlockPos center = portal.above(1);
+			for (Direction direction : Direction.Plane.HORIZONTAL) {
+				BlockPos pos = center.relative(direction, 3);
+				EndCrystal crystal = EntityTypes.END_CRYSTAL.create(end, EntitySpawnReason.COMMAND);
+				crystal.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+				end.addFreshEntity(crystal);
+			}
+			end.getDragonFight().tryRespawn();
+		});
+		int ticks = waitOnServer(ctx, server, s -> !end(s).getDragons().isEmpty() && tier(s) >= Math.min(expectedTier, DragonLadder.MAX_TIER), 2400);
+		check(tier(server) == expectedTier, "the respawned dragon is tier " + expectedTier + " (respawn took " + ticks + " ticks, tier " + tier(server) + ")");
+		ctx.waitTicks(20);
+	}
+
+	private static List<AreaEffectCloud> cloudsFromDragon(MinecraftServer s) {
+		ServerLevel end = end(s);
+		if (end.getDragons().isEmpty()) {
+			return List.of();
+		}
+		EnderDragon dragon = end.getDragons().get(0);
+		return end.getEntitiesOfClass(AreaEffectCloud.class, dragon.getBoundingBox().inflate(160), cloud -> cloud.getOwner() == dragon);
+	}
+
+	private static boolean charging(MinecraftServer s) {
+		ServerLevel end = end(s);
+		return !end.getDragons().isEmpty()
+				&& end.getDragons().get(0).getPhaseManager().getCurrentPhase().getPhase() == EnderDragonPhase.CHARGING_PLAYER;
 	}
 
 	private static List<ShulkerBullet> bulletsFromDragon(MinecraftServer s) {

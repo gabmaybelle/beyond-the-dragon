@@ -35,11 +35,15 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 	@Override
 	public void runTest(ClientGameTestContext ctx) {
 		settingsFile();
-		try (TestSingleplayerContext world = ctx.worldBuilder().create()) {
+		// The test world is flat (one biome, quick to make), but flat worlds switch structures off
+		// by default and the End still needs them.
+		try (TestSingleplayerContext world = ctx.worldBuilder().adjustSettings(ui -> ui.setGenerateStructures(true)).create()) {
 			world.getConnection().waitForChunksRender();
 			boolean loaded = world.getServer().computeOnServer(server -> FabricLoader.getInstance().isModLoaded(BeyondTheDragon.MOD_ID));
 			check(loaded, "the mod is loaded in a new world");
 			titles(ctx, world.getServer());
+			new ApheliteTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
+			new StructuresTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
 			new LadderTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
 		}
 		if (!failures.isEmpty()) {

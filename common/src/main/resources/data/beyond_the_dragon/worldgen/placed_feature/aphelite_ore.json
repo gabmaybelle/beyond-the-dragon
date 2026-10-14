@@ -1,0 +1,31 @@
+{
+	"feature": "beyond_the_dragon:aphelite_ore",
+	"placement": [
+		{
+			"type": "minecraft:count",
+			"count": 6
+		},
+		{
+			"type": "minecraft:in_square"
+		},
+		{
+			"type": "minecraft:height_range",
+			"height": {
+				"type": "minecraft:uniform",
+				"min_inclusive": {
+					"absolute": 8
+				},
+				"max_inclusive": {
+					"absolute": 90
+				}
+			}
+		},
+		{
+			"type": "beyond_the_dragon:in_ring",
+			"ring": "outer"
+		},
+		{
+			"type": "minecraft:biome"
+		}
+	]
+}

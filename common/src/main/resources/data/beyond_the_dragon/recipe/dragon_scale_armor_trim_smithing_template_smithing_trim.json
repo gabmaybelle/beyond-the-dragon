@@ -1,0 +1,7 @@
+{
+	"type": "minecraft:smithing_trim",
+	"template": "beyond_the_dragon:dragon_scale_armor_trim_smithing_template",
+	"base": "#minecraft:trimmable_armor",
+	"addition": "#minecraft:trim_materials",
+	"pattern": "beyond_the_dragon:dragon_scale"
+}

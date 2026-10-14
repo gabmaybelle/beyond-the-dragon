@@ -1,0 +1,14 @@
+{
+	"layers": {
+		"humanoid": [
+			{
+				"texture": "beyond_the_dragon:aphelite"
+			}
+		],
+		"humanoid_leggings": [
+			{
+				"texture": "beyond_the_dragon:aphelite"
+			}
+		]
+	}
+}

@@ -6,7 +6,8 @@
 		"BeaconBlockEntityAccessor",
 		"BlockItemMixin",
 		"EnderDragonFightMixin",
-		"EnderDragonMixin"
+		"EnderDragonMixin",
+		"LivingEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

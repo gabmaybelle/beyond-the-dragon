@@ -1,0 +1,6 @@
+{
+	"type": "neoforge:add_features",
+	"biomes": "#minecraft:is_end",
+	"features": "beyond_the_dragon:aphelite_ore",
+	"step": "underground_ores"
+}
