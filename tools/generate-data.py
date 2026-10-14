@@ -189,9 +189,10 @@ print("data and assets written")
 # Every template stands on PLINTH blocks of end stone (generate-structures.js); the start sinks
 # by as much so the plinth is buried on flat ground and is the foundation on a slope. MAX_SLOPE
 # is how uneven (highest minus lowest surface, in blocks) the template's box may be: the plinth covers
-# that much of a drop. beard_box fills under the box on vanilla terrain but not on every modded
-# End (Stellarity's density ignores it), so the plinth does the real work.
-PLINTH = 8
+# that much of a drop. No terrain adaptation: beard_box laid a flat slab the size of the whole box
+# under the sinking city and square terraces round the observatory, and did nothing on Stellarity;
+# the plinth does the footing instead.
+PLINTH = 10
 MAX_SLOPE = 10
 write(MC_DATA.parent / NS / "tags" / "worldgen" / "biome" / "has_structure" / "outer_reaches.json",
       {"values": ["#minecraft:is_end"]})
@@ -199,7 +200,7 @@ write(DATA / "worldgen" / "structure" / "observatory.json", {
     "type": ns("end_jigsaw"),
     "biomes": f"#{NS}:has_structure/outer_reaches",
     "step": "surface_structures",
-    "terrain_adaptation": "beard_box",
+    "terrain_adaptation": "none",
     "spawn_overrides": {},
     "start_pool": ns("observatory/start"),
     "size": 1,
@@ -253,7 +254,7 @@ def structure(name, pool_name, template, size, spacing, separation, salt, extra_
         "type": ns("end_jigsaw"),
         "biomes": f"#{NS}:has_structure/outer_reaches",
         "step": "surface_structures",
-        "terrain_adaptation": "beard_box",
+        "terrain_adaptation": "none",
         "spawn_overrides": {},
         "start_pool": ns(f"{pool_name}/start"),
         "size": 1,

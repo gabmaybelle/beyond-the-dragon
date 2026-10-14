@@ -49,7 +49,9 @@ registrations in its registry event, so its `Platform` queues them and the resul
   `-PtestStellarity` or `-PtestNullscape` to play it with that mod installed (fetched from
   Modrinth's maven, never bundled); CI runs all four. `BTD_TEST_ONLY=structures` in the
   environment plays only the structure checks (footing, placement yield, restoration, respawn)
-  in about two minutes, for tuning placement. With a mod that reworks the dragon fight
+  in about two minutes, for tuning placement. `BTD_SCREENSHOTS=<folder>` keeps the test's
+  screenshots (titles, each ruin from the air, the egg on the beacon, each dragon tier) there;
+  the run directory they land in is thrown away otherwise. With a mod that reworks the dragon fight
   installed, the test expects our tier attacks to stay off. BetterEnd keeps the fight but
   replaces the respawn check (crystals four blocks from the End's origin, on bedrock, any
   height); the ladder test places them there when it is loaded.
@@ -79,8 +81,9 @@ registrations in its registry event, so its `Platform` queues them and the resul
   placement-yield check prints, per ruin and per End mod, how many candidate chunks were
   rejected for void and for slope; tune from those numbers. Every template also stands on a plinth of
   end stone (`PLINTH` in both generator scripts) and starts that deep below the surface, so the
-  plinth is buried on flat ground and is the foundation on a slope. `beard_box` stays on but
-  can't be relied on: Stellarity's End density ignores it.
+  plinth is buried on flat ground and is the foundation on a slope. Terrain adaptation is off:
+  `beard_box` laid a flat slab the size of the whole box under the city and square terraces round
+  the observatory, and did nothing on Stellarity anyway.
 - **Nothing ticks across the world.** Rings and titles are one check per player per second;
   structure lookups are computed from the seed, never by loading chunks.
 - Vanilla names changed a lot in 26.x: check the merged jar rather than older docs. Data files

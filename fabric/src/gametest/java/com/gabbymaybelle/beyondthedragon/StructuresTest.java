@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
+import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
@@ -64,9 +66,76 @@ final class StructuresTest {
 			if (kind.equals("observatory")) {
 				check(report.contains("1 lectern(s)") && !report.contains(" 0 chest(s)"), "the observatory has its lectern and chests (" + report + ")");
 			}
+			tour(ctx, server, kind, report);
 		}
 		placementYield(server);
 		restoration(ctx, server);
+	}
+
+	/** A look at the ruin from the air, for the eyes: the screenshot is what the design reviews are made from. */
+	private static void tour(ClientGameTestContext ctx, TestServerContext server, String kind, String report) {
+		var m = java.util.regex.Pattern.compile("box from (-?\\d+),(-?\\d+),(-?\\d+) to (-?\\d+),(-?\\d+),(-?\\d+)").matcher(report);
+		if (!m.find()) {
+			return;
+		}
+		int[] b = new int[6];
+		for (int i = 0; i < 6; i++) {
+			b[i] = Integer.parseInt(m.group(i + 1));
+		}
+		double cx = (b[0] + b[3]) / 2.0;
+		double cy = (b[1] + b[4]) / 2.0;
+		double cz = (b[2] + b[5]) / 2.0;
+		int span = Math.max(b[3] - b[0], b[5] - b[2]);
+		// From the south-west, above, far enough back to take the whole box in.
+		double distance = span * 0.65 + 10;
+		double ex = cx - distance * 0.7071;
+		double ez = cz + distance * 0.7071;
+		double wantedY = b[4] + span * 0.3 + 4;
+		server.runOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			// Above the ground between the viewpoint and the ruin too: a modded End can have a ridge there.
+			double ey = wantedY;
+			for (int i = 0; i <= 4; i++) {
+				int sx = (int) (ex + (cx - ex) * i / 4);
+				int sz = (int) (ez + (cz - ez) * i / 4);
+				end.getChunk(sx >> 4, sz >> 4);
+				ey = Math.max(ey, end.getHeight(Heightmap.Types.MOTION_BLOCKING, sx, sz) + 6);
+			}
+			double dx = cx - ex;
+			double dz = cz - ez;
+			double dy = cy - ey;
+			float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+			float pitch = (float) Math.toDegrees(-Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
+			ServerPlayer player = player(s);
+			player.setGameMode(GameType.SPECTATOR);
+			player.teleportTo(end, ex, ey, ez, java.util.Set.of(), yaw, pitch, false);
+		});
+		// The chunks have to reach the client and render (a modded End's generation can be slow);
+		// the picture is taken without the HUD (titles, chat, toasts) and with the gamma up, since
+		// the End is dim.
+		int chunkX = (int) cx >> 4;
+		int chunkZ = (int) cz >> 4;
+		try {
+			ctx.waitFor(mc -> mc.level != null && mc.level.getChunkSource().hasChunk(chunkX, chunkZ), 2400);
+		} catch (AssertionError slow) {
+			BeyondTheDragon.LOGGER.warn("[test] the {}'s chunk never reached the client; its picture may be empty", kind);
+		}
+		ctx.waitTicks(200);
+		double gamma = ctx.computeOnClient(mc -> mc.options.gamma().get());
+		ctx.runOnClient(mc -> {
+			if (!mc.gui.hud.isHidden()) {
+				mc.gui.hud.toggle();
+			}
+			mc.options.gamma().set(1.0);
+		});
+		ctx.waitTicks(5);
+		BeyondTheDragonClientTest.screenshot(ctx, TestScreenshotOptions.of("beyond_the_dragon_" + kind).withSize(1280, 720));
+		ctx.runOnClient(mc -> {
+			if (mc.gui.hud.isHidden()) {
+				mc.gui.hud.toggle();
+			}
+			mc.options.gamma().set(gamma);
+		});
 	}
 
 	/**

@@ -384,9 +384,25 @@ function withPlinth(b, depth) {
 	const shift = depth - minY;
 	const r = new Build([b.size[0], b.size[1] + shift, b.size[2]]);
 	for (const [x, y, z, e] of b.all()) if (y + shift >= 0) r.blocks.set(`${x},${y + shift},${z}`, e);
-	for (const [k, y0] of lowest) {
-		if (y0 - minY > 4) continue;
-		for (let d = 0; d < y0 + shift; d++) r.blocks.set(`${k.split(',')[0]},${d},${k.split(',')[1]}`, { state: 'minecraft:end_stone' });
+	// Which columns get a plinth, and how far in from the plinth's edge each one is.
+	const footed = new Set([...lowest].filter(([, y0]) => y0 - minY <= 4).map(([k]) => k));
+	const inside = (k) => {
+		const [x, z] = k.split(',').map(Number);
+		for (let r = 1; r <= 3; r++) {
+			for (let dx = -r; dx <= r; dx++) for (let dz = -r; dz <= r; dz++) {
+				if (Math.max(Math.abs(dx), Math.abs(dz)) === r && !footed.has(`${x + dx},${z + dz}`)) return r - 1;
+			}
+		}
+		return 3;
+	};
+	// The plinth is full depth three columns in and shallows toward the edge (4, 6, 8 deep, with a
+	// block of jitter), so where the island falls away it looks eroded, not like a cut pedestal.
+	const rand = rng(31);
+	for (const k of footed) {
+		const y0 = lowest.get(k);
+		const top = y0 + shift;
+		const deep = Math.min(top, inside(k) >= 3 ? top : 4 + 2 * inside(k) + Math.floor(rand() * 2));
+		for (let d = top - deep; d < top; d++) r.blocks.set(`${k.split(',')[0]},${d},${k.split(',')[1]}`, { state: 'minecraft:end_stone' });
 	}
 	r.shulkers = b.shulkers.map(([x, y, z]) => [x, y + shift, z]);
 	r.phantoms = b.phantoms.map(([x, y, z, loot]) => [x, y + shift, z, loot]);
@@ -394,7 +410,7 @@ function withPlinth(b, depth) {
 }
 
 // Keep in step with PLINTH in generate-data.py (the structures' start height).
-const PLINTH = 8;
+const PLINTH = 10;
 
 function generate(name, intact, missing, title, intro, lectern) {
 	const theBook = book(title, intro, missing, intact);

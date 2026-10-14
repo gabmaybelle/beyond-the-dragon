@@ -113,7 +113,7 @@ final class LadderTest {
 		BeyondTheDragon.LOGGER.info("[test] beacon before the lit attempt: {}", beaconState);
 		placeEgg(server, beacon);
 		check(unlocked(server), "the egg on a lit beacon unlocks the ladder (" + beaconState + ")");
-		ctx.takeScreenshot("beyond_the_dragon_egg_on_beacon");
+		BeyondTheDragonClientTest.screenshot(ctx, "beyond_the_dragon_egg_on_beacon");
 	}
 
 	private void climb(ClientGameTestContext ctx, TestServerContext server) {
@@ -152,7 +152,7 @@ final class LadderTest {
 		check(otherDragonMod ? !bullets : bullets, otherDragonMod
 				? "with another dragon mod installed the tier 1 attacks stay off (no bullets from the dragon)"
 				: "the tier 1 dragon fires shulker bullets owned by the dragon");
-		ctx.takeScreenshot("beyond_the_dragon_tier_1");
+		BeyondTheDragonClientTest.screenshot(ctx, "beyond_the_dragon_tier_1");
 
 		// Killing the tier 1 dragon drops tier 1's loot at the portal, and only once.
 		EnderDragon tierOneDragon = server.computeOnServer(s -> end(s).getDragons().get(0));
@@ -170,7 +170,7 @@ final class LadderTest {
 			waitOnServer(ctx, server, s -> !cloudsFromDragon(s).isEmpty(), 400);
 			check(!server.computeOnServer(LadderTest::cloudsFromDragon).isEmpty(), "the tier 2 dragon breathes a cloud it owns");
 		}
-		ctx.takeScreenshot("beyond_the_dragon_tier_2");
+		BeyondTheDragonClientTest.screenshot(ctx, "beyond_the_dragon_tier_2");
 		// The respawn's crystal explosions clear whatever lay on the podium, so count from here.
 		int beforeTwo = rewardsAtPortal(server, origin);
 		killDragon(server);
@@ -185,7 +185,7 @@ final class LadderTest {
 			waitOnServer(ctx, server, s -> charging(s), 600);
 			check(server.computeOnServer(LadderTest::charging), "the tier 3 dragon dive-bombs (its phase is charging a player)");
 		}
-		ctx.takeScreenshot("beyond_the_dragon_tier_3");
+		BeyondTheDragonClientTest.screenshot(ctx, "beyond_the_dragon_tier_3");
 		killDragon(server);
 		waitOnServer(ctx, server, s -> end(s).getDragons().isEmpty(), 600);
 		respawn(ctx, server, origin, 3);

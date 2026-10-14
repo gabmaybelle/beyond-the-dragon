@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -108,7 +110,7 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 		// then a moment more so the screenshot catches it faded in.
 		ctx.waitFor(mc -> TitleWatcher.shownBiome(id).equals(Optional.of(Biomes.THE_END)), cooldown + 40);
 		ctx.waitTicks(15);
-		ctx.takeScreenshot("beyond_the_dragon_end_title");
+		screenshot(ctx, "beyond_the_dragon_end_title");
 		check(TitleWatcher.shownBiome(id).equals(Optional.of(Biomes.THE_END)),
 				"after the cooldown the End's title shows (The Dragon's Island)");
 		check(TitleWatcher.shownRing(id).map(ring -> ring.name().equals("INNER")).orElse(false),
@@ -118,9 +120,40 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 		server.runOnServer(s -> player(s).teleportTo(Config.ringMiddle + 100.5, 90, 0.5));
 		ctx.waitFor(mc -> TitleWatcher.shownRing(id).map(ring -> ring.name().equals("MIDDLE")).orElse(false), cooldown + dwell + 40);
 		ctx.waitTicks(15);
-		ctx.takeScreenshot("beyond_the_dragon_ring_title");
+		screenshot(ctx, "beyond_the_dragon_ring_title");
 		check(TitleWatcher.shownRing(id).map(ring -> ring.name().equals("MIDDLE")).orElse(false),
 				"crossing into the middle ring shows the ring subtitle");
+	}
+
+	/**
+	 * A screenshot, kept: the test's run directory is thrown away afterwards, so the file is
+	 * copied to the folder named by BTD_SCREENSHOTS in the environment, when there is one.
+	 */
+	static Path screenshot(ClientGameTestContext ctx, String name) {
+		return screenshot(ctx, name, ctx.takeScreenshot(name));
+	}
+
+	static Path screenshot(ClientGameTestContext ctx, TestScreenshotOptions options) {
+		Path shot = ctx.takeScreenshot(options);
+		return screenshot(ctx, stripPng(shot.getFileName().toString()), shot);
+	}
+
+	private static String stripPng(String fileName) {
+		return fileName.endsWith(".png") ? fileName.substring(0, fileName.length() - 4) : fileName;
+	}
+
+	private static Path screenshot(ClientGameTestContext ctx, String name, Path shot) {
+		String keep = System.getenv("BTD_SCREENSHOTS");
+		if (keep != null && !keep.isBlank()) {
+			try {
+				Path dir = Path.of(keep);
+				Files.createDirectories(dir);
+				Files.copy(shot, dir.resolve(name + ".png"), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				BeyondTheDragon.LOGGER.warn("[test] couldn't keep the screenshot {}: {}", name, e.toString());
+			}
+		}
+		return shot;
 	}
 
 	private static ServerPlayer player(MinecraftServer server) {
