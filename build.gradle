@@ -1,0 +1,39 @@
+// Shared settings for the three subprojects. Each subproject's own build.gradle says how it
+// compiles; versions live in gradle.properties.
+subprojects {
+	apply plugin: 'java'
+
+	group = rootProject.group
+	version = rootProject.version
+
+	repositories {
+		mavenCentral()
+		exclusiveContent {
+			forRepository {
+				maven { url = 'https://api.modrinth.com/maven' }
+			}
+			filter {
+				includeGroup 'maven.modrinth'
+			}
+		}
+	}
+
+	tasks.withType(JavaCompile).configureEach {
+		it.options.release = 25
+		it.options.encoding = 'UTF-8'
+	}
+
+	java {
+		withSourcesJar()
+		sourceCompatibility = JavaVersion.VERSION_25
+		targetCompatibility = JavaVersion.VERSION_25
+	}
+
+	// Captured outside the closure: the configuration cache can't serialise `rootProject` itself.
+	def licenseSuffix = "_" + rootProject.name
+	jar {
+		from(rootProject.file('LICENSE')) {
+			rename { it + licenseSuffix }
+		}
+	}
+}

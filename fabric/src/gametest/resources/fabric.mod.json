@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "beyond_the_dragon_gametest",
+	"version": "1.0.0",
+	"name": "Beyond the Dragon game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"com.gabbymaybelle.beyondthedragon.BeyondTheDragonClientTest"
+		]
+	},
+	"depends": {
+		"beyond_the_dragon": "*"
+	}
+}

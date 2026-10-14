@@ -1,0 +1,48 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+// The common sources are compiled straight into this jar (no common jar to bundle), so the
+// Fabric mod is one file and Loom can add the mixin refmap the common mixins need.
+sourceSets.main {
+	java.srcDir project(':common').file('src/main/java')
+	resources.srcDir project(':common').file('src/main/resources')
+}
+
+loom {
+	mods {
+		"beyond_the_dragon" {
+			sourceSet sourceSets.main
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.named('jar') { archiveBaseName = "${rootProject.name}-fabric" }
+tasks.named('sourcesJar') { archiveBaseName = "${rootProject.name}-fabric" }
+
+// Client game tests: `./gradlew :fabric:runClientGameTest` starts a real game and plays through
+// the checks in src/gametest. Nothing there ships in the jar.
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "beyond_the_dragon_gametest"
+		enableGameTests = false
+		enableClientGameTests = true
+		eula = true
+	}
+}

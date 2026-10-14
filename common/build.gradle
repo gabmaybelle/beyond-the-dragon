@@ -1,0 +1,29 @@
+// Loader-neutral code and data. This project is compiled on its own so a Fabric or NeoForge
+// import can't sneak in: only Minecraft, Mixin and the JDK are on the classpath. Nothing here
+// ships as a jar; `fabric` and `neoforge` compile these sources into theirs.
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	// Only for the Mixin annotations and the launch-side classes they need. No Fabric API here.
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	// Plain unit tests for the pure logic (rings, title timing): `./gradlew :common:test`.
+	testImplementation platform('org.junit:junit-bom:5.11.4')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+	useJUnitPlatform()
+}
+
+loom {
+	mods {
+		"beyond_the_dragon" {
+			sourceSet sourceSets.main
+		}
+	}
+}

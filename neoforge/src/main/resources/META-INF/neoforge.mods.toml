@@ -1,0 +1,27 @@
+license = "MIT"
+issueTrackerURL = "https://github.com/gabmaybelle/beyond-the-dragon/issues"
+
+[[mods]]
+modId = "beyond_the_dragon"
+version = "${version}"
+displayName = "Beyond the Dragon"
+authors = "Gabby"
+description = '''A reason to keep playing after the Ender Dragon: ruins at the edge of the End, a dragon that gets harder every time, and a metal that only exists far from home.'''
+displayURL = "https://github.com/gabmaybelle/beyond-the-dragon"
+
+[[mixins]]
+config = "beyond_the_dragon.mixins.json"
+
+[[dependencies.beyond_the_dragon]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26.3,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.beyond_the_dragon]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.3,26.4)"
+ordering = "NONE"
+side = "BOTH"

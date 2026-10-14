@@ -1,0 +1,55 @@
+# Builds both jars on every push and pull request, then runs the Fabric in-game test
+# (fabric/src/gametest) on a virtual display, so a broken build or a crash in game shows up
+# straight away. The built jars are attached to each run under "Artifacts", and the game test's
+# screenshots alongside them.
+
+name: build
+on: [pull_request, push]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    # A pull request from a branch in this repo is already built by its push; only build forks' twice.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v6
+      - name: validate gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+      - name: setup jdk
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'microsoft'
+      - name: setup gradle (with caching)
+        uses: gradle/actions/setup-gradle@v6
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: build
+        run: ./gradlew build
+      - name: install EGL
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libegl1 libegl-mesa0
+      - name: run game test
+        # 26.3 asks for an sRGB-capable window, which Xvfb's GLX can't give, so the game would
+        # hang at startup. Mesa's EGL can; SDL uses it with this set.
+        env:
+          SDL_VIDEO_FORCE_EGL: '1'
+        timeout-minutes: 15
+        run: xvfb-run -a ./gradlew :fabric:runClientGameTest
+      - name: capture game test screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Game test screenshots
+          path: fabric/build/run/clientGameTest/screenshots/
+          if-no-files-found: ignore
+      - name: capture build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: Artifacts
+          path: |
+            fabric/build/libs/
+            neoforge/build/libs/
