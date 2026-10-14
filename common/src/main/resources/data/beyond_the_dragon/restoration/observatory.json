@@ -1,19 +1,19 @@
 {
 	"size": [
 		21,
-		24,
+		29,
 		21
 	],
 	"lectern": [
 		8,
-		13,
+		18,
 		13
 	],
 	"missing": [
 		{
 			"pos": [
 				11,
-				15,
+				20,
 				4
 			],
 			"block": "minecraft:end_stone_bricks"
@@ -21,7 +21,7 @@
 		{
 			"pos": [
 				11,
-				15,
+				20,
 				9
 			],
 			"block": "minecraft:purpur_pillar"
@@ -29,7 +29,7 @@
 		{
 			"pos": [
 				12,
-				15,
+				20,
 				4
 			],
 			"block": "minecraft:end_stone_bricks"
@@ -37,7 +37,7 @@
 		{
 			"pos": [
 				13,
-				15,
+				20,
 				4
 			],
 			"block": "minecraft:end_stone_bricks"
@@ -45,7 +45,7 @@
 		{
 			"pos": [
 				14,
-				15,
+				20,
 				4
 			],
 			"block": "minecraft:end_stone_bricks"
@@ -53,7 +53,7 @@
 		{
 			"pos": [
 				14,
-				15,
+				20,
 				5
 			],
 			"block": "minecraft:purpur_block"
@@ -61,7 +61,7 @@
 		{
 			"pos": [
 				15,
-				15,
+				20,
 				4
 			],
 			"block": "minecraft:end_stone_bricks"
@@ -69,7 +69,7 @@
 		{
 			"pos": [
 				16,
-				15,
+				20,
 				4
 			],
 			"block": "minecraft:purpur_pillar"
@@ -77,7 +77,7 @@
 		{
 			"pos": [
 				16,
-				15,
+				20,
 				5
 			],
 			"block": "minecraft:end_stone_bricks"
@@ -85,7 +85,7 @@
 		{
 			"pos": [
 				16,
-				15,
+				20,
 				6
 			],
 			"block": "minecraft:end_stone_bricks"
@@ -93,7 +93,7 @@
 		{
 			"pos": [
 				16,
-				15,
+				20,
 				7
 			],
 			"block": "minecraft:end_stone_bricks"
@@ -101,7 +101,7 @@
 		{
 			"pos": [
 				16,
-				15,
+				20,
 				8
 			],
 			"block": "minecraft:end_stone_bricks"
@@ -109,7 +109,7 @@
 		{
 			"pos": [
 				16,
-				15,
+				20,
 				9
 			],
 			"block": "minecraft:magenta_stained_glass"
@@ -117,7 +117,7 @@
 		{
 			"pos": [
 				11,
-				16,
+				21,
 				3
 			],
 			"block": "minecraft:purpur_block"
@@ -125,7 +125,7 @@
 		{
 			"pos": [
 				11,
-				16,
+				21,
 				4
 			],
 			"block": "minecraft:purpur_block"
@@ -133,7 +133,7 @@
 		{
 			"pos": [
 				11,
-				16,
+				21,
 				6
 			],
 			"block": "minecraft:purpur_block"
@@ -141,7 +141,7 @@
 		{
 			"pos": [
 				11,
-				16,
+				21,
 				7
 			],
 			"block": "minecraft:purpur_block"
@@ -149,7 +149,7 @@
 		{
 			"pos": [
 				11,
-				16,
+				21,
 				8
 			],
 			"block": "minecraft:purpur_block"
@@ -157,7 +157,7 @@
 		{
 			"pos": [
 				11,
-				16,
+				21,
 				9
 			],
 			"block": "minecraft:purpur_block"
@@ -165,7 +165,7 @@
 		{
 			"pos": [
 				12,
-				16,
+				21,
 				3
 			],
 			"block": "minecraft:purpur_block"
@@ -173,7 +173,7 @@
 		{
 			"pos": [
 				12,
-				16,
+				21,
 				4
 			],
 			"block": "minecraft:purpur_block"
@@ -181,7 +181,7 @@
 		{
 			"pos": [
 				12,
-				16,
+				21,
 				6
 			],
 			"block": "minecraft:purpur_block"
@@ -189,7 +189,7 @@
 		{
 			"pos": [
 				12,
-				16,
+				21,
 				7
 			],
 			"block": "minecraft:purpur_block"
@@ -197,7 +197,7 @@
 		{
 			"pos": [
 				12,
-				16,
+				21,
 				8
 			],
 			"block": "minecraft:purpur_block"
@@ -205,7 +205,7 @@
 		{
 			"pos": [
 				12,
-				16,
+				21,
 				9
 			],
 			"block": "minecraft:purpur_block"
@@ -213,7 +213,7 @@
 		{
 			"pos": [
 				13,
-				16,
+				21,
 				3
 			],
 			"block": "minecraft:purpur_block"
@@ -221,7 +221,7 @@
 		{
 			"pos": [
 				13,
-				16,
+				21,
 				4
 			],
 			"block": "minecraft:purpur_block"
@@ -229,7 +229,7 @@
 		{
 			"pos": [
 				13,
-				16,
+				21,
 				6
 			],
 			"block": "minecraft:purpur_block"
@@ -237,7 +237,7 @@
 		{
 			"pos": [
 				13,
-				16,
+				21,
 				7
 			],
 			"block": "minecraft:purpur_block"
@@ -245,7 +245,7 @@
 		{
 			"pos": [
 				13,
-				16,
+				21,
 				8
 			],
 			"block": "minecraft:purpur_block"
@@ -253,7 +253,7 @@
 		{
 			"pos": [
 				13,
-				16,
+				21,
 				9
 			],
 			"block": "minecraft:purpur_block"
@@ -261,7 +261,7 @@
 		{
 			"pos": [
 				14,
-				16,
+				21,
 				3
 			],
 			"block": "minecraft:purpur_block"
@@ -269,7 +269,7 @@
 		{
 			"pos": [
 				14,
-				16,
+				21,
 				4
 			],
 			"block": "minecraft:purpur_block"
@@ -277,7 +277,7 @@
 		{
 			"pos": [
 				14,
-				16,
+				21,
 				6
 			],
 			"block": "minecraft:purpur_block"
@@ -285,7 +285,7 @@
 		{
 			"pos": [
 				14,
-				16,
+				21,
 				7
 			],
 			"block": "minecraft:purpur_block"
@@ -293,7 +293,7 @@
 		{
 			"pos": [
 				14,
-				16,
+				21,
 				8
 			],
 			"block": "minecraft:purpur_block"
@@ -301,7 +301,7 @@
 		{
 			"pos": [
 				14,
-				16,
+				21,
 				9
 			],
 			"block": "minecraft:purpur_block"
@@ -309,7 +309,7 @@
 		{
 			"pos": [
 				15,
-				16,
+				21,
 				3
 			],
 			"block": "minecraft:purpur_block"
@@ -317,7 +317,7 @@
 		{
 			"pos": [
 				15,
-				16,
+				21,
 				4
 			],
 			"block": "minecraft:purpur_block"
@@ -325,7 +325,7 @@
 		{
 			"pos": [
 				15,
-				16,
+				21,
 				6
 			],
 			"block": "minecraft:purpur_block"
@@ -333,7 +333,7 @@
 		{
 			"pos": [
 				15,
-				16,
+				21,
 				7
 			],
 			"block": "minecraft:purpur_block"
@@ -341,7 +341,7 @@
 		{
 			"pos": [
 				15,
-				16,
+				21,
 				8
 			],
 			"block": "minecraft:purpur_block"
@@ -349,7 +349,7 @@
 		{
 			"pos": [
 				15,
-				16,
+				21,
 				9
 			],
 			"block": "minecraft:purpur_block"
@@ -357,7 +357,7 @@
 		{
 			"pos": [
 				16,
-				16,
+				21,
 				3
 			],
 			"block": "minecraft:purpur_block"
@@ -365,7 +365,7 @@
 		{
 			"pos": [
 				16,
-				16,
+				21,
 				4
 			],
 			"block": "minecraft:purpur_block"
@@ -373,7 +373,7 @@
 		{
 			"pos": [
 				16,
-				16,
+				21,
 				5
 			],
 			"block": "minecraft:purpur_block"
@@ -381,7 +381,7 @@
 		{
 			"pos": [
 				16,
-				16,
+				21,
 				6
 			],
 			"block": "minecraft:purpur_block"
@@ -389,7 +389,7 @@
 		{
 			"pos": [
 				16,
-				16,
+				21,
 				7
 			],
 			"block": "minecraft:purpur_block"
@@ -397,7 +397,7 @@
 		{
 			"pos": [
 				16,
-				16,
+				21,
 				8
 			],
 			"block": "minecraft:purpur_block"
@@ -405,7 +405,7 @@
 		{
 			"pos": [
 				16,
-				16,
+				21,
 				9
 			],
 			"block": "minecraft:purpur_block"
@@ -413,7 +413,7 @@
 		{
 			"pos": [
 				17,
-				16,
+				21,
 				3
 			],
 			"block": "minecraft:purpur_block"
@@ -421,7 +421,7 @@
 		{
 			"pos": [
 				17,
-				16,
+				21,
 				4
 			],
 			"block": "minecraft:purpur_block"
@@ -429,7 +429,7 @@
 		{
 			"pos": [
 				17,
-				16,
+				21,
 				5
 			],
 			"block": "minecraft:purpur_block"
@@ -437,7 +437,7 @@
 		{
 			"pos": [
 				17,
-				16,
+				21,
 				6
 			],
 			"block": "minecraft:purpur_block"
@@ -445,7 +445,7 @@
 		{
 			"pos": [
 				17,
-				16,
+				21,
 				7
 			],
 			"block": "minecraft:purpur_block"
@@ -453,7 +453,7 @@
 		{
 			"pos": [
 				17,
-				16,
+				21,
 				8
 			],
 			"block": "minecraft:purpur_block"
@@ -461,7 +461,7 @@
 		{
 			"pos": [
 				17,
-				16,
+				21,
 				9
 			],
 			"block": "minecraft:purpur_block"
@@ -469,23 +469,23 @@
 		{
 			"pos": [
 				13,
-				15,
-				5
-			],
-			"block": "minecraft:purpur_slab"
-		},
-		{
-			"pos": [
-				15,
-				15,
+				20,
 				5
 			],
 			"block": "minecraft:purpur_slab"
 		},
 		{
 			"pos": [
+				15,
+				20,
+				5
+			],
+			"block": "minecraft:purpur_slab"
+		},
+		{
+			"pos": [
 				11,
-				16,
+				21,
 				2
 			],
 			"block": "minecraft:purpur_stairs"
@@ -493,7 +493,7 @@
 		{
 			"pos": [
 				12,
-				16,
+				21,
 				2
 			],
 			"block": "minecraft:purpur_stairs"
@@ -501,7 +501,7 @@
 		{
 			"pos": [
 				13,
-				16,
+				21,
 				2
 			],
 			"block": "minecraft:purpur_stairs"
@@ -509,7 +509,7 @@
 		{
 			"pos": [
 				14,
-				16,
+				21,
 				2
 			],
 			"block": "minecraft:purpur_stairs"
@@ -517,7 +517,7 @@
 		{
 			"pos": [
 				15,
-				16,
+				21,
 				2
 			],
 			"block": "minecraft:purpur_stairs"
@@ -525,7 +525,7 @@
 		{
 			"pos": [
 				15,
-				16,
+				21,
 				5
 			],
 			"block": "minecraft:purpur_slab"
@@ -533,7 +533,7 @@
 		{
 			"pos": [
 				16,
-				16,
+				21,
 				2
 			],
 			"block": "minecraft:purpur_stairs"
@@ -541,7 +541,7 @@
 		{
 			"pos": [
 				17,
-				16,
+				21,
 				2
 			],
 			"block": "minecraft:purpur_stairs"
@@ -549,7 +549,7 @@
 		{
 			"pos": [
 				18,
-				16,
+				21,
 				2
 			],
 			"block": "minecraft:purpur_stairs"
@@ -557,7 +557,7 @@
 		{
 			"pos": [
 				18,
-				16,
+				21,
 				3
 			],
 			"block": "minecraft:purpur_stairs"
@@ -565,7 +565,7 @@
 		{
 			"pos": [
 				18,
-				16,
+				21,
 				4
 			],
 			"block": "minecraft:purpur_stairs"
@@ -573,7 +573,7 @@
 		{
 			"pos": [
 				18,
-				16,
+				21,
 				5
 			],
 			"block": "minecraft:purpur_stairs"
@@ -581,7 +581,7 @@
 		{
 			"pos": [
 				18,
-				16,
+				21,
 				6
 			],
 			"block": "minecraft:purpur_stairs"
@@ -589,7 +589,7 @@
 		{
 			"pos": [
 				18,
-				16,
+				21,
 				7
 			],
 			"block": "minecraft:purpur_stairs"
@@ -597,7 +597,7 @@
 		{
 			"pos": [
 				18,
-				16,
+				21,
 				8
 			],
 			"block": "minecraft:purpur_stairs"
@@ -605,7 +605,7 @@
 		{
 			"pos": [
 				18,
-				16,
+				21,
 				9
 			],
 			"block": "minecraft:purpur_stairs"
@@ -613,7 +613,7 @@
 		{
 			"pos": [
 				11,
-				17,
+				22,
 				4
 			],
 			"block": "minecraft:purpur_stairs"
@@ -621,7 +621,7 @@
 		{
 			"pos": [
 				11,
-				17,
+				22,
 				6
 			],
 			"block": "minecraft:purpur_stairs"
@@ -629,7 +629,7 @@
 		{
 			"pos": [
 				12,
-				17,
+				22,
 				4
 			],
 			"block": "minecraft:purpur_stairs"
@@ -637,7 +637,7 @@
 		{
 			"pos": [
 				12,
-				17,
+				22,
 				6
 			],
 			"block": "minecraft:purpur_stairs"
@@ -645,7 +645,7 @@
 		{
 			"pos": [
 				13,
-				17,
+				22,
 				4
 			],
 			"block": "minecraft:purpur_stairs"
@@ -653,7 +653,7 @@
 		{
 			"pos": [
 				13,
-				17,
+				22,
 				6
 			],
 			"block": "minecraft:purpur_stairs"
@@ -661,7 +661,7 @@
 		{
 			"pos": [
 				16,
-				6,
+				11,
 				10
 			],
 			"block": "minecraft:purpur_stairs"
@@ -669,7 +669,7 @@
 		{
 			"pos": [
 				14,
-				8,
+				13,
 				7
 			],
 			"block": "minecraft:purpur_block"
@@ -677,7 +677,7 @@
 		{
 			"pos": [
 				14,
-				8,
+				13,
 				8
 			],
 			"block": "minecraft:purpur_block"
@@ -685,7 +685,7 @@
 		{
 			"pos": [
 				14,
-				8,
+				13,
 				9
 			],
 			"block": "minecraft:purpur_slab"
@@ -693,7 +693,7 @@
 		{
 			"pos": [
 				15,
-				8,
+				13,
 				9
 			],
 			"block": "minecraft:purpur_block"
@@ -701,7 +701,7 @@
 		{
 			"pos": [
 				15,
-				8,
+				13,
 				10
 			],
 			"block": "minecraft:purpur_block"
@@ -709,7 +709,7 @@
 		{
 			"pos": [
 				15,
-				8,
+				13,
 				11
 			],
 			"block": "minecraft:purpur_block"
@@ -717,7 +717,7 @@
 		{
 			"pos": [
 				14,
-				8,
+				13,
 				12
 			],
 			"block": "minecraft:purpur_block"
@@ -725,7 +725,7 @@
 		{
 			"pos": [
 				14,
-				9,
+				14,
 				11
 			],
 			"block": "minecraft:purpur_slab"
@@ -733,7 +733,7 @@
 		{
 			"pos": [
 				16,
-				10,
+				15,
 				10
 			],
 			"block": "minecraft:purpur_stairs"
@@ -741,7 +741,7 @@
 		{
 			"pos": [
 				10,
-				21,
+				26,
 				10
 			],
 			"block": "minecraft:end_rod"
@@ -749,7 +749,7 @@
 		{
 			"pos": [
 				10,
-				21,
+				26,
 				9
 			],
 			"block": "minecraft:end_rod"
@@ -757,7 +757,7 @@
 		{
 			"pos": [
 				10,
-				21,
+				26,
 				8
 			],
 			"block": "minecraft:end_rod"

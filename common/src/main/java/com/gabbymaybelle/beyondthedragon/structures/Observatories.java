@@ -69,6 +69,11 @@ public final class Observatories {
 	private Observatories() {
 	}
 
+	/** Where the plan puts the lectern, relative to the template. */
+	public static BlockPos plannedLectern() {
+		return plan().lectern();
+	}
+
 	private static Plan plan() {
 		if (plan == null) {
 			try (Reader in = new InputStreamReader(Observatories.class.getResourceAsStream("/data/beyond_the_dragon/restoration/observatory.json"), StandardCharsets.UTF_8)) {

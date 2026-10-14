@@ -62,33 +62,31 @@ final class StructuresTest {
 				return "no structure start at " + start;
 			}
 			var box = starts.get(0).getBoundingBox();
+			// The building's columns are the ones with End City masonry in them; each stands on
+			// the template's bottom row (its end stone plinth, sunk into the island), and that row
+			// must have ground, not air, beneath it.
 			int lecterns = 0;
 			int chests = 0;
 			int airUnderBase = 0;
 			int baseBlocks = 0;
-			int baseY = Integer.MAX_VALUE;
+			int baseY = box.minY();
 			for (int x = box.minX(); x <= box.maxX(); x++) {
 				for (int z = box.minZ(); z <= box.maxZ(); z++) {
+					boolean building = false;
 					for (int y = box.minY(); y <= box.maxY(); y++) {
 						var state = end.getBlockState(new BlockPos(x, y, z));
 						if (state.is(Blocks.LECTERN)) {
 							lecterns++;
 						} else if (state.is(Blocks.CHEST)) {
 							chests++;
-						} else if (state.is(Blocks.END_STONE_BRICKS)) {
-							baseY = Math.min(baseY, y);
+						} else if (state.is(Blocks.END_STONE_BRICKS) || state.is(Blocks.PURPUR_BLOCK) || state.is(Blocks.PURPUR_PILLAR)) {
+							building = true;
 						}
 					}
-				}
-			}
-			if (baseY != Integer.MAX_VALUE) {
-				for (int x = box.minX(); x <= box.maxX(); x++) {
-					for (int z = box.minZ(); z <= box.maxZ(); z++) {
-						if (end.getBlockState(new BlockPos(x, baseY, z)).is(Blocks.END_STONE_BRICKS)) {
-							baseBlocks++;
-							if (end.getBlockState(new BlockPos(x, baseY - 1, z)).isAir()) {
-								airUnderBase++;
-							}
+					if (building && !end.getBlockState(new BlockPos(x, baseY, z)).isAir()) {
+						baseBlocks++;
+						if (end.getBlockState(new BlockPos(x, baseY - 1, z)).isAir()) {
+							airUnderBase++;
 						}
 					}
 				}
@@ -124,7 +122,7 @@ final class StructuresTest {
 				return "nothing missing";
 			}
 			// Stand by the lectern so the restored title and the chart reach a real player.
-			BlockPos lectern = Observatories.worldPos(piece, new BlockPos(8, 13, 13));
+			BlockPos lectern = Observatories.worldPos(piece, Observatories.plannedLectern());
 			player.setGameMode(GameType.CREATIVE);
 			player.teleportTo(end, lectern.getX() + 1.5, lectern.getY(), lectern.getZ() + 1.5, java.util.Set.of(), 0, 0, false);
 			player.getInventory().clearContent();

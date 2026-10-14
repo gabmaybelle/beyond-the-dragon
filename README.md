@@ -2,14 +2,61 @@
 
 A Fabric and NeoForge mod for Minecraft 26.3. You killed the dragon; that was the tutorial.
 
-Beyond the Dragon is in development. What's planned for the first release:
+Beyond the Dragon is for players who have done it all. It leaves the game you know alone and
+adds reasons to pack your elytra and keep flying: ruins at the edge of the End, a dragon that
+comes back harder every time, and a metal that only exists very far from home. No magic, no
+machines, nothing that fights your other mods.
 
-- **Ruins at the edge of the End.** The farther you fly, the more there is to find.
-- **A dragon that isn't done with you.** Respawn it and it comes back harder, with new tricks, and new rewards for beating it.
-- **Aphelite.** A metal a step past netherite, found only far from the centre, made for fighting what lives in the End.
-- **Observatories you can restore**, which chart what's around them and give you somewhere to respawn in the End.
-- **A title when you enter a new biome**, in any dimension, with the End's biomes given proper names.
+**It's in development.** Everything below works and is tested in game, but the first release
+isn't out yet.
 
-Everything is built from vanilla blocks and vanilla mechanics, so resource packs and shaders just work, it runs on vanilla or modded End terrain, and it's light on servers.
+## What's in it
 
-Made by Gabby with help from Claude, an AI assistant.
+- **The Far End.** The End gets more rewarding the farther you fly from the centre. A title
+  tells you when you cross into the Middle Reaches (2,000 blocks out), the Outer Reaches (5,000)
+  or the Edge (10,000), and some things only exist past the outer ring.
+- **Names for the End's biomes**, and a title when you enter any new biome, in any dimension.
+- **The Outer Reaches.** Four kinds of ruin on the End's islands, built from the End's own
+  architecture: abandoned observatories, wrecked End ships, dragon graveyards and cities sinking
+  into the void. A few shulkers and phantoms guard them. Chests hold End odds and ends and, past
+  the outer ring, aphelite.
+- **Restore an observatory** and it sees again: its lectern gives the Keeper's Chart, a map
+  marking the nearest ruin of each kind and the nearest End City, and from then on anyone who
+  dies in the End comes back there. Beds explode in the End and anchors don't work, so this is
+  the End's first respawn point. The book on the lectern lists exactly what's missing.
+- **The Dragon Ladder.** Sneak to set the dragon egg on a lit beacon and the dragon takes
+  notice: every time you respawn it after that, it comes back one tier stronger, up to tier 3,
+  with a new attack each tier. The first kill at each tier drops a reward at the exit portal.
+- **Aphelite.** A metal a step past netherite. Its ore forms in end stone past the outer ring;
+  four shards and four popped chorus fruit make an ingot; an ingot and an Aphelite Upgrade
+  template turn any netherite piece into aphelite at a smithing table. Its real worth is what
+  it does: each piece worn cuts a shulker's levitation, helmet, leggings and boots together make
+  every fall and elytra crash in the End harmless, and an aphelite pickaxe sometimes pulls an
+  extra shard from the ore. The upgrade template waits in a vault at every dragon graveyard
+  (bring a trial key; the graveyard's phantoms carry them) and drops from the tier 2 and 3
+  dragons; the Dragon Scale armour trim drops from the tier 1 dragon.
+
+## Settings
+
+In `config/beyond_the_dragon.properties`: the ring distances, every title, every dragon attack,
+the aphelite perks, and the list of mods that count as reworking the dragon fight (with one of
+those installed, the new attacks stay off unless you turn them on; the tiers and rewards still
+run).
+
+## Works with
+
+Vanilla blocks and vanilla mechanics throughout, so resource packs and shaders just work.
+Structures generate on vanilla or modded End terrain and the game test runs with BetterEnd,
+Stellarity and Nullscape installed. Recipes use the crafting and smithing tables, so JEI, REI
+and EMI show them. Nothing scans the world while you play: the rings and titles are one check
+per player per second, and structure lookups come from the seed.
+
+Servers: flying fast into new territory is the heaviest thing any player can do to a server,
+with or without mods. Pre-generating the End with Chunky keeps things smooth.
+
+## Building
+
+`./gradlew build` makes both jars (`fabric/build/libs/`, `neoforge/build/libs/`).
+`./gradlew :fabric:runClientGameTest` plays the in-game test. See `CLAUDE.md` for the layout.
+
+Made by Gabby with help from Claude, an AI assistant. MIT licence.

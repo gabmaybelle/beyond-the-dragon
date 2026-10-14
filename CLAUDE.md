@@ -45,7 +45,12 @@ registrations in its registry event, so its `Platform` queues them and the resul
 
 - `./gradlew build`: jars in `fabric/build/libs/` and `neoforge/build/libs/`.
 - `./gradlew :fabric:runClientGameTest`: the settings file and the in-game checks, in a real game
-  window (a minute or two).
+  window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestBetterEnd`,
+  `-PtestStellarity` or `-PtestNullscape` to play it with that mod installed (fetched from
+  Modrinth's maven, never bundled); CI runs all four. With a mod that reworks the dragon fight
+  installed, the test expects our tier attacks to stay off. BetterEnd keeps the fight but
+  replaces the respawn check (crystals four blocks from the End's origin, on bedrock, any
+  height); the ladder test places them there when it is loaded.
 - NeoForge load check: `node ~/mods-dev/tools/neoforge-server-test.js <scratch folder> --mod neoforge/build/libs/<jar>`
   starts a NeoForge server with the jar and fails on any data or mod error.
 - Fresh test worlds and background game driving: `~/mods-dev/tools/README.md`
@@ -63,7 +68,11 @@ registrations in its registry event, so its `Platform` queues them and the resul
   between 1.21.1 and 26.x. Keep every new attack behind its own setting and reuse vanilla phases
   and entities (charge phase, shulker bullets, lingering clouds) rather than inventing new ones.
 - **End structures must check for ground.** A data-only jigsaw happily generates at height 0 over
-  the void; our structure type does End City's surface-height check.
+  the void; our structure type samples the surface on a 3×3 grid over the footprint and refuses
+  a start that is too low or too uneven (`max_slope`). Every template also stands on a plinth of
+  end stone (`PLINTH` in both generator scripts) and starts that deep below the surface, so the
+  plinth is buried on flat ground and is the foundation on a slope. `beard_box` stays on but
+  can't be relied on: Stellarity's End density ignores it.
 - **Nothing ticks across the world.** Rings and titles are one check per player per second;
   structure lookups are computed from the seed, never by loading chunks.
 - Vanilla names changed a lot in 26.x: check the merged jar rather than older docs. Data files

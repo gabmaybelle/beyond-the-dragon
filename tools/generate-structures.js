@@ -185,7 +185,7 @@ function observatoryMissing(o) {
 		if (y >= roof - 2 && y <= roof && x >= 11 && z <= 9 && e.state !== 'minecraft:air') missing.push([x, y, z]);
 	}
 	// A bite from the middle floor's east wall.
-	for (let y = 6; y <= 10; y++) for (let z = 7; z <= 12; z++) for (let x = 14; x <= 16; x++) {
+	for (let y = 6 + PLINTH; y <= 10 + PLINTH; y++) for (let z = 7; z <= 12; z++) for (let x = 14; x <= 16; x++) {
 		const e = b.get(x, y, z);
 		if (e && e.state !== 'minecraft:air' && !e.state.includes('pillar')) missing.push([x, y, z]);
 	}
@@ -364,6 +364,38 @@ function sinkingCity() {
 	return b;
 }
 
+/**
+ * The build raised on a plinth: end stone `depth` deep under every column whose lowest block is
+ * within the bottom few layers (a ship's hull or a tilted city gets a foundation under its whole
+ * underside, not just its keel). The structure's start height sinks the template by the same
+ * depth, so on flat ground the plinth is buried and on a ragged or sloping island it is the
+ * foundation the ruin stands on.
+ */
+function withPlinth(b, depth) {
+	// Empty layers under the build go first, so its lowest block ends up right on the plinth.
+	let minY = b.size[1];
+	const lowest = new Map();
+	for (const [x, y, z, e] of b.all()) {
+		if (e.state === 'minecraft:air') continue;
+		minY = Math.min(minY, y);
+		const k = `${x},${z}`;
+		if (!lowest.has(k) || y < lowest.get(k)) lowest.set(k, y);
+	}
+	const shift = depth - minY;
+	const r = new Build([b.size[0], b.size[1] + shift, b.size[2]]);
+	for (const [x, y, z, e] of b.all()) if (y + shift >= 0) r.blocks.set(`${x},${y + shift},${z}`, e);
+	for (const [k, y0] of lowest) {
+		if (y0 - minY > 3) continue;
+		for (let d = 0; d < y0 + shift; d++) r.blocks.set(`${k.split(',')[0]},${d},${k.split(',')[1]}`, { state: 'minecraft:end_stone' });
+	}
+	r.shulkers = b.shulkers.map(([x, y, z]) => [x, y + shift, z]);
+	r.phantoms = b.phantoms.map(([x, y, z, loot]) => [x, y + shift, z, loot]);
+	return r;
+}
+
+// Keep in step with PLINTH in generate-data.py (the structures' start height).
+const PLINTH = 5;
+
 function generate(name, intact, missing, title, intro, lectern) {
 	const theBook = book(title, intro, missing, intact);
 	for (const [, v] of intact.blocks) if (v.nbt && v.nbt.Book) v.nbt.Book = theBook;
@@ -387,9 +419,12 @@ function generateOne(name, build) {
 }
 
 const obs = observatory();
+obs.build = withPlinth(obs.build, PLINTH);
+obs.roof += PLINTH;
+obs.floor += PLINTH;
 generate('observatory', obs.build, observatoryMissing(obs), 'Keeper\'s Notes',
 	'The storm took the roof\'s corner, the east wall and the eyepiece. Put back what is listed here and she will see again.\n\nThe watch ends when the last piece is set.',
 	[10 - 2, obs.floor, 10 + 3]);
-generateOne('wreck', wreck());
-generateOne('graveyard', graveyard());
-generateOne('sinking_city', sinkingCity());
+generateOne('wreck', withPlinth(wreck(), PLINTH));
+generateOne('graveyard', withPlinth(graveyard(), PLINTH));
+generateOne('sinking_city', withPlinth(sinkingCity(), PLINTH));

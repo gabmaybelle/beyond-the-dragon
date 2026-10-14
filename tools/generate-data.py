@@ -184,20 +184,31 @@ print("data and assets written")
 
 # --- the Outer Reaches structures -------------------------------------------------------------
 # Templates come from tools/generate-structures.js; this is the worldgen and loot around them.
+# Every End biome, vanilla or modded; the structure type's own height and distance checks keep
+# the ruins off the void and away from the dragon's island.
+# Every template stands on PLINTH blocks of end stone (generate-structures.js); the start sinks
+# by as much so the plinth is buried on flat ground and is the foundation on a slope. MAX_SLOPE
+# is how uneven (highest minus lowest surface, in blocks) the footprint may be: the plinth covers
+# that much of a drop. beard_box fills under the box on vanilla terrain but not on every modded
+# End (Stellarity's density ignores it), so the plinth does the real work.
+PLINTH = 5
+MAX_SLOPE = 6
 write(MC_DATA.parent / NS / "tags" / "worldgen" / "biome" / "has_structure" / "outer_reaches.json",
-      {"values": ["minecraft:end_highlands", "minecraft:end_midlands"]})
+      {"values": ["#minecraft:is_end"]})
 write(DATA / "worldgen" / "structure" / "observatory.json", {
     "type": ns("end_jigsaw"),
     "biomes": f"#{NS}:has_structure/outer_reaches",
     "step": "surface_structures",
-    "terrain_adaptation": "beard_thin",
+    "terrain_adaptation": "beard_box",
     "spawn_overrides": {},
     "start_pool": ns("observatory/start"),
     "size": 1,
-    "start_height": {"absolute": 0},
+    "start_height": {"absolute": -PLINTH},
     "max_distance_from_center": 32,
     "min_surface_y": 50,
     "footprint": 21,
+    "max_slope": MAX_SLOPE,
+    "min_distance": 1000,
 })
 write(DATA / "worldgen" / "structure_set" / "observatories.json", {
     "placement": {
@@ -243,14 +254,16 @@ def structure(name, pool_name, template, size, footprint, spacing, separation, s
         "type": ns("end_jigsaw"),
         "biomes": f"#{NS}:has_structure/outer_reaches",
         "step": "surface_structures",
-        "terrain_adaptation": "beard_thin",
+        "terrain_adaptation": "beard_box",
         "spawn_overrides": {},
         "start_pool": ns(f"{pool_name}/start"),
         "size": 1,
-        "start_height": {"absolute": 0},
+        "start_height": {"absolute": -PLINTH},
         "max_distance_from_center": size,
         "min_surface_y": min_surface_y,
         "footprint": footprint,
+        "max_slope": MAX_SLOPE,
+        "min_distance": 1000,
     })
     write(DATA / "worldgen" / "structure_set" / f"{name}s.json", {
         "placement": {

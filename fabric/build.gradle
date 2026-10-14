@@ -21,6 +21,21 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Compatibility runs: `./gradlew :fabric:runClientGameTest -PtestBetterEnd` (or -PtestStellarity,
+	// -PtestNullscape) plays the in-game test with that mod installed, fetched from Modrinth's maven
+	// by version id. Nothing here is bundled or required.
+	if (project.hasProperty("testBetterEnd")) {
+		runtimeOnly "maven.modrinth:betterend:${project.betterend_version}"
+		runtimeOnly "maven.modrinth:bclib:${project.bclib_version}"
+		runtimeOnly "maven.modrinth:worldweaver:${project.worldweaver_version}"
+	}
+	if (project.hasProperty("testStellarity")) {
+		runtimeOnly "maven.modrinth:stellarity:${project.stellarity_version}"
+	}
+	if (project.hasProperty("testNullscape")) {
+		runtimeOnly "maven.modrinth:nullscape:${project.nullscape_version}"
+	}
 }
 
 processResources {

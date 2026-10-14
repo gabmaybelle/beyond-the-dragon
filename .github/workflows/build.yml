@@ -14,6 +14,19 @@ jobs:
     runs-on: ubuntu-24.04
     # A pull request from a branch in this repo is already built by its push; only build forks' twice.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: 'on its own'
+            test_args: ''
+          - variant: 'with BetterEnd'
+            test_args: '-PtestBetterEnd'
+          - variant: 'with Stellarity'
+            test_args: '-PtestStellarity'
+          - variant: 'with Nullscape'
+            test_args: '-PtestNullscape'
+    name: build (${{ matrix.variant }})
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
@@ -37,16 +50,17 @@ jobs:
         # hang at startup. Mesa's EGL can; SDL uses it with this set.
         env:
           SDL_VIDEO_FORCE_EGL: '1'
-        timeout-minutes: 15
-        run: xvfb-run -a ./gradlew :fabric:runClientGameTest
+        timeout-minutes: 20
+        run: xvfb-run -a ./gradlew :fabric:runClientGameTest ${{ matrix.test_args }}
       - name: capture game test screenshots
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: Game test screenshots
+          name: Game test screenshots (${{ matrix.variant }})
           path: fabric/build/run/clientGameTest/screenshots/
           if-no-files-found: ignore
       - name: capture build artifacts
+        if: matrix.variant == 'on its own'
         uses: actions/upload-artifact@v7
         with:
           name: Artifacts
