@@ -54,6 +54,9 @@ short of the test's count there (they still generate). Recipes use the crafting 
 tables, so recipe viewers show them; the game test loads with JEI and with REI. Nothing scans the world while you play: the rings and titles are one check per
 player per second, and structure lookups come from the seed.
 
+Other mods can find aphelite without knowing about this one: the ingot and the ore carry the
+shared tags mods look for (`c:ingots/aphelite`, `c:ores/aphelite`).
+
 Servers: flying fast into new territory is the heaviest thing any player can do to a server,
 with or without mods. Pre-generating the End with Chunky keeps things smooth.
 
