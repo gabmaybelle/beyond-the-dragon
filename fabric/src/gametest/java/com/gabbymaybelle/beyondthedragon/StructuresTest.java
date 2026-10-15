@@ -77,8 +77,8 @@ final class StructuresTest {
 			tour(ctx, server, kind, report);
 			found(ctx, server, kind, report);
 		}
-		placementYield(server);
-		endCityOverlap(server);
+		placementYield(ctx, server);
+		endCityOverlap(ctx, server);
 		lore(server);
 		restoration(ctx, server);
 	}
@@ -186,54 +186,37 @@ final class StructuresTest {
 	}
 
 	/**
+	 * Columns of chunks per server call in the two seed scans below. Fabric's test keeps the client
+	 * in step with the server, so one call that scans all 501 columns froze the test window for
+	 * minutes on a heavy modded End (and a window closed by hand ends the run); a tick between
+	 * slices keeps it drawing.
+	 */
+	private static final int SLICE = 25;
+
+	/**
 	 * How often each kind's placement actually yields a start, asked of the seed alone the way
 	 * the locator does (no chunks loaded): every candidate chunk of the structure set within
 	 * 4,000 blocks of the centre, against the surface and slope checks. A kind that passes too
 	 * rarely is one players would never find.
 	 */
-	private void placementYield(TestServerContext server) {
-		String report = server.computeOnServer(s -> {
-			ServerLevel end = s.getLevel(Level.END);
-			var state = end.getChunkSource().getGeneratorState();
-			var generator = end.getChunkSource().getGenerator();
-			StringBuilder out = new StringBuilder();
-			for (String kind : KINDS) {
-				Holder<Structure> holder = end.registryAccess().lookupOrThrow(Registries.STRUCTURE)
-						.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind)));
-				EndJigsawStructure structure = (EndJigsawStructure) holder.value();
-				int candidates = 0;
-				int starts = 0;
-				int voids = 0;
-				int steep = 0;
-				for (StructurePlacement placement : state.getPlacementsForStructure(holder)) {
-					for (int cx = -250; cx <= 250; cx++) {
-						for (int cz = -250; cz <= 250; cz++) {
-							if (!placement.isStructureChunk(state, cx, cz)) {
-								continue;
-							}
-							candidates++;
-							var context = new Structure.GenerationContext(end.registryAccess(), generator, generator.getBiomeSource(), state.randomState(),
-									s.getStructureManager(), end.getSeed(), new ChunkPos(cx, cz), end, holder.value().biomes()::contains);
-							if (holder.value().findValidGenerationPoint(context).isPresent()) {
-								starts++;
-							} else {
-								var surface = structure.surface(context);
-								if (surface.isEmpty() || surface.get().lowest() < structure.minSurfaceY()) {
-									voids++;
-								} else if (surface.get().highest() - surface.get().lowest() > structure.maxSlope()) {
-									steep++;
-								}
-							}
-						}
-					}
+	private void placementYield(ClientGameTestContext ctx, TestServerContext server) {
+		StringBuilder out = new StringBuilder();
+		for (String kind : KINDS) {
+			int[] total = new int[4];
+			for (int x0 = -250; x0 <= 250; x0 += SLICE) {
+				int from = x0;
+				int to = Math.min(x0 + SLICE - 1, 250);
+				int[] part = server.computeOnServer(s -> yieldSlice(s, kind, from, to));
+				for (int i = 0; i < 4; i++) {
+					total[i] += part[i];
 				}
-				out.append(kind).append(' ').append(starts).append(" of ").append(candidates)
-						.append(" (void ").append(voids).append(", steep ").append(steep).append("); ");
-				// A line per kind: on a heavy modded End this scan takes minutes, and silence reads as a hang.
-				BeyondTheDragon.LOGGER.info("[test] yield so far: {}", out);
+				ctx.waitTicks(1);
 			}
-			return out.toString();
-		});
+			out.append(kind).append(' ').append(total[1]).append(" of ").append(total[0])
+					.append(" (void ").append(total[2]).append(", steep ").append(total[3]).append("); ");
+			BeyondTheDragon.LOGGER.info("[test] yield so far: {}", out);
+		}
+		String report = out.toString();
 		BeyondTheDragon.LOGGER.info("[test] yield within 4000 blocks: {}", report);
 		for (String kind : KINDS) {
 			var m = java.util.regex.Pattern.compile(kind + " (\\d+) of (\\d+)").matcher(report);
@@ -242,64 +225,109 @@ final class StructuresTest {
 		}
 	}
 
+	/** Candidates, starts, and rejections for void and for slope, for one kind in chunk columns fromX to toX. */
+	private static int[] yieldSlice(MinecraftServer s, String kind, int fromX, int toX) {
+		ServerLevel end = s.getLevel(Level.END);
+		var state = end.getChunkSource().getGeneratorState();
+		var generator = end.getChunkSource().getGenerator();
+		Holder<Structure> holder = end.registryAccess().lookupOrThrow(Registries.STRUCTURE)
+				.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind)));
+		EndJigsawStructure structure = (EndJigsawStructure) holder.value();
+		int[] counts = new int[4];
+		for (StructurePlacement placement : state.getPlacementsForStructure(holder)) {
+			for (int cx = fromX; cx <= toX; cx++) {
+				for (int cz = -250; cz <= 250; cz++) {
+					if (!placement.isStructureChunk(state, cx, cz)) {
+						continue;
+					}
+					counts[0]++;
+					var context = new Structure.GenerationContext(end.registryAccess(), generator, generator.getBiomeSource(), state.randomState(),
+							s.getStructureManager(), end.getSeed(), new ChunkPos(cx, cz), end, holder.value().biomes()::contains);
+					if (holder.value().findValidGenerationPoint(context).isPresent()) {
+						counts[1]++;
+					} else {
+						var surface = structure.surface(context);
+						if (surface.isEmpty() || surface.get().lowest() < structure.minSurfaceY()) {
+							counts[2]++;
+						} else if (surface.get().highest() - surface.get().lowest() > structure.maxSlope()) {
+							counts[3]++;
+						}
+					}
+				}
+			}
+		}
+		return counts;
+	}
+
 	/**
 	 * No ruin overlaps a vanilla End City. Every End City and every ruin within 4,000 blocks of the
 	 * centre is built from the seed alone, the way chunk generation would build it (no chunks
 	 * loaded), and their pieces' boxes are compared. The structure sets keep a ruin two chunks from
 	 * a city's start chunk, but a city sprawls further than that, so this is measured, not assumed.
 	 */
-	private void endCityOverlap(TestServerContext server) {
-		String report = server.computeOnServer(s -> {
-			ServerLevel end = s.getLevel(Level.END);
-			var structures = end.registryAccess().lookupOrThrow(Registries.STRUCTURE);
-			List<StructureStart> cities = starts(s, end, structures.getOrThrow(BuiltinStructures.END_CITY));
-			int ruins = 0;
-			int overlaps = 0;
-			StringBuilder where = new StringBuilder();
-			int closest = Integer.MAX_VALUE;
-			int reach = 0;
-			for (StructureStart city : cities) {
-				BoundingBox box = city.getBoundingBox();
-				ChunkPos at = city.getChunkPos();
-				reach = Math.max(reach, Math.max(Math.max(at.x() - (box.minX() >> 4), (box.maxX() >> 4) - at.x()),
-						Math.max(at.z() - (box.minZ() >> 4), (box.maxZ() >> 4) - at.z())));
-			}
-			for (String kind : KINDS) {
-				for (StructureStart ruin : starts(s, end, structures.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind))))) {
-					ruins++;
-					BoundingBox box = ruin.getBoundingBox();
-					for (StructureStart city : cities) {
-						closest = Math.min(closest, gap(box, city.getBoundingBox()));
-						if (!box.intersects(city.getBoundingBox())) {
-							continue;
+	private void endCityOverlap(ClientGameTestContext ctx, TestServerContext server) {
+		List<StructureStart> cities = startsSliced(ctx, server,
+				s -> s.getLevel(Level.END).registryAccess().lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.END_CITY));
+		int ruins = 0;
+		int overlaps = 0;
+		StringBuilder where = new StringBuilder();
+		int closest = Integer.MAX_VALUE;
+		int reach = 0;
+		for (StructureStart city : cities) {
+			BoundingBox box = city.getBoundingBox();
+			ChunkPos at = city.getChunkPos();
+			reach = Math.max(reach, Math.max(Math.max(at.x() - (box.minX() >> 4), (box.maxX() >> 4) - at.x()),
+					Math.max(at.z() - (box.minZ() >> 4), (box.maxZ() >> 4) - at.z())));
+		}
+		for (String kind : KINDS) {
+			for (StructureStart ruin : startsSliced(ctx, server, s -> s.getLevel(Level.END).registryAccess().lookupOrThrow(Registries.STRUCTURE)
+					.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind))))) {
+				ruins++;
+				BoundingBox box = ruin.getBoundingBox();
+				for (StructureStart city : cities) {
+					closest = Math.min(closest, gap(box, city.getBoundingBox()));
+					if (!box.intersects(city.getBoundingBox())) {
+						continue;
+					}
+					boolean touching = false;
+					for (StructurePiece a : ruin.getPieces()) {
+						for (StructurePiece b : city.getPieces()) {
+							touching |= a.getBoundingBox().intersects(b.getBoundingBox());
 						}
-						boolean touching = false;
-						for (StructurePiece a : ruin.getPieces()) {
-							for (StructurePiece b : city.getPieces()) {
-								touching |= a.getBoundingBox().intersects(b.getBoundingBox());
-							}
-						}
-						if (touching) {
-							overlaps++;
-							where.append(' ').append(kind).append(" at ").append(box.getCenter().toShortString());
-						}
+					}
+					if (touching) {
+						overlaps++;
+						where.append(' ').append(kind).append(" at ").append(box.getCenter().toShortString());
 					}
 				}
 			}
-			return cities.size() + " End Cities, " + ruins + " ruins, " + overlaps + " overlap(s)" + where
-					+ "; closest boxes " + closest + " blocks apart; cities reach " + reach + " chunks from their start";
-		});
+		}
+		String report = cities.size() + " End Cities, " + ruins + " ruins, " + overlaps + " overlap(s)" + where
+				+ "; closest boxes " + closest + " blocks apart; cities reach " + reach + " chunks from their start";
 		BeyondTheDragon.LOGGER.info("[test] End City overlap within 4000 blocks: {}", report);
-		check(report.contains(" 0 overlap(s)") && !report.startsWith("0 End Cities"), "no ruin overlaps an End City within 4000 blocks (" + report + ")");
+		check(overlaps == 0 && !cities.isEmpty(), "no ruin overlaps an End City within 4000 blocks (" + report + ")");
 	}
 
-	/** Every start of a structure within 4,000 blocks of the centre, built from the seed alone. */
-	private static List<StructureStart> starts(MinecraftServer s, ServerLevel end, Holder<Structure> holder) {
+	/** Every start of a structure within 4,000 blocks of the centre, built from the seed a slice of columns at a time. */
+	private static List<StructureStart> startsSliced(ClientGameTestContext ctx, TestServerContext server,
+			java.util.function.Function<MinecraftServer, Holder<Structure>> structure) {
+		List<StructureStart> out = new java.util.ArrayList<>();
+		for (int x0 = -250; x0 <= 250; x0 += SLICE) {
+			int from = x0;
+			int to = Math.min(x0 + SLICE - 1, 250);
+			out.addAll(server.computeOnServer(s -> starts(s, s.getLevel(Level.END), structure.apply(s), from, to)));
+			ctx.waitTicks(1);
+		}
+		return out;
+	}
+
+	/** Every start of a structure in chunk columns fromX to toX (rows -250 to 250), built from the seed alone. */
+	private static List<StructureStart> starts(MinecraftServer s, ServerLevel end, Holder<Structure> holder, int fromX, int toX) {
 		var state = end.getChunkSource().getGeneratorState();
 		var generator = end.getChunkSource().getGenerator();
 		List<StructureStart> out = new java.util.ArrayList<>();
 		for (StructurePlacement placement : state.getPlacementsForStructure(holder)) {
-			for (int cx = -250; cx <= 250; cx++) {
+			for (int cx = fromX; cx <= toX; cx++) {
 				for (int cz = -250; cz <= 250; cz++) {
 					if (!placement.isStructureChunk(state, cx, cz)) {
 						continue;
