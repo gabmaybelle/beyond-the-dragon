@@ -26,7 +26,37 @@ TOOLS = ["sword", "pickaxe", "axe", "shovel", "hoe"]
 # equipment asset, trim sheets live under trims/models/armor, and there is no resin trim.
 # Everything else below is written once, in the 26.3 shape, and converted here; keep this the
 # only place the versions differ.
+<<<<<<< HEAD
 FORMAT = "1.21.1"
+
+TRIM_MATERIALS = ["amethyst", "copper", "diamond", "emerald", "gold", "iron", "lapis", "netherite", "quartz", "redstone"]
+if FORMAT != "1.21.1":
+    TRIM_MATERIALS.append("resin")
+# 1.21.1 picks a trimmed item model by this predicate value, one per material.
+TRIM_TYPE = {"quartz": 0.1, "iron": 0.2, "netherite": 0.3, "redstone": 0.4, "copper": 0.5,
+             "gold": 0.6, "emerald": 0.7, "diamond": 0.8, "lapis": 0.9, "amethyst": 1.0}
+
+
+def ingredient(value):
+    """A recipe ingredient in the 26.3 shape (an id, or #tag), rewritten for 1.21.1."""
+    if isinstance(value, list):
+        return [ingredient(v) for v in value]
+    return {"tag": value[1:]} if value.startswith("#") else {"item": value}
+
+
+def old_recipe(recipe):
+    """A recipe in the 26.3 shape, rewritten for 1.21.1."""
+    out = dict(recipe)
+    for key in ("ingredients", "template", "base", "addition"):
+        if key in out:
+            out[key] = ingredient(out[key])
+    if "key" in out:
+        out["key"] = {k: ingredient(v) for k, v in out["key"].items()}
+    out.pop("pattern", None) if out["type"] == "minecraft:smithing_trim" else None
+    return out
+=======
+FORMAT = "1.21.1"
+>>>>>>> feb3911 (The data generator knows all three versions' formats, and the trim atlas goes where the game reads it)
 
 TRIM_MATERIALS = ["amethyst", "copper", "diamond", "emerald", "gold", "iron", "lapis", "netherite", "quartz", "redstone"]
 if FORMAT != "1.21.1":
@@ -244,7 +274,13 @@ if FORMAT != "26.3":
         materials = ["amethyst", "copper", "diamond", "diamond_darker", "emerald", "gold", "gold_darker",
                      "iron", "iron_darker", "lapis", "netherite", "netherite_darker", "quartz", "redstone"]
         textures = [ns("trims/models/armor/dragon_scale"), ns("trims/models/armor/dragon_scale_leggings")]
+<<<<<<< HEAD
     write(ASSETS / "atlases" / "armor_trims.json", {"sources": [{
+=======
+    # The game merges every pack's minecraft:armor_trims atlas; one in our own namespace is a
+    # different atlas and the trim never reaches the armour.
+    write(MC_ASSETS / "atlases" / "armor_trims.json", {"sources": [{
+>>>>>>> feb3911 (The data generator knows all three versions' formats, and the trim atlas goes where the game reads it)
         "type": "minecraft:paletted_permutations",
         "palette_key": "minecraft:trims/color_palettes/trim_palette",
         "permutations": {m: f"minecraft:trims/color_palettes/{m}" for m in materials},
