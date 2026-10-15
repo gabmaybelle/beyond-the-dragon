@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0 (2026-10-14)
 
 - Aphelite, a metal a step past netherite. Its ore only forms in end stone past the outer ring (5,000 blocks out); four shards and four popped chorus fruit make an ingot, and an ingot with an Aphelite Upgrade template turns any netherite piece into aphelite at a smithing table. The armour has a little more toughness and durability than netherite and takes enchantments better; the tools mine a touch faster and hit a touch harder. Its real worth is in what it does: each piece worn cuts a shulker's levitation by 15%, helmet, leggings and boots together make every fall and elytra crash in the End harmless, and an aphelite pickaxe sometimes pulls an extra shard from the ore.
 - The Outer Reaches: four kinds of ruin on the End's highlands and midlands, each built from the End's own architecture.
