@@ -1,0 +1,35 @@
+# Progress
+
+What's done, what's broken, what's next. Newest entry first. Each session adds a row before it
+ends, saying what changed, what the game test counted, what the proof run was (the feature off,
+which checks fail, code put back), what was learned, and what was deliberately not done.
+
+## Where things stand
+
+- **Done:** v1 as the design doc defines it, on all three versions (`main` 26.3, `26.1` 26.1.2,
+  `1.21.1`): rings and titles, the four ruins with the notes and the advancements tab, observatory
+  restoration with the chart and the End respawn, the Dragon Ladder, aphelite with its perks and
+  trim. 102 game-test checks on its own; CI runs each branch's own matrix (26.3 with BetterEnd,
+  Stellarity and Nullscape; 26.1.2 with Nullscape; 1.21.1 with Stellarity). GitHub pre-release
+  `v0.1.0` carries the six jars. Textures and the trim approved by Gabby.
+- **Broken:** nothing known. Nullscape's 1.21.1 End is sparse enough that the placement-yield
+  check comes up one graveyard short of five in 4,000 blocks (they generate; the kind is just
+  rare there), so Nullscape is out of the 1.21.1 matrix. BetterEnd's last 1.21.1 jars don't load
+  together, so it's out of that matrix too.
+- **Next:** Gabby's play test and the Modrinth upload (she publishes there herself). Then, from
+  feedback: the End City overlap and elytra tick-time measurements the design doc lists,
+  graveyard frequency on sparse modded Ends, `c:ingots/aphelite` and `c:ores/aphelite` tags so
+  other mods find the metal without naming it (Forgemark names it by id today), and v1.1
+  (Rumours, Xaero's and JourneyMap waypoints from restored observatories).
+
+## Log
+
+| Date | Session | What happened |
+| --- | --- | --- |
+| 2026-10-14 | Release prep and the 1.21.1 port | The `1.21.1` branch: the same mod built against 1.21.1 for both loaders (classic Loom plugin id with Mojang mappings, `Tier` and a registered armour material, NBT saved data, `DimensionTransition`, `EndDragonFight`, the data generator's `FORMAT` grown to cover 1.21.1's recipe, model, trim and texture layouts). Fabric's client game test API doesn't exist there, so `fabric/src/gametest/harness/` is a small stand-in; the tests are the same. Found and fixed on the way, on all branches: the "stands on land" check read the template's empty bottom row (now it counts island under the floor, minus the plinth); two of the sinking city's chests were empty (stamped without a loot table); the armour-trim atlas sat in our namespace, where the game ignores it, so the trim never rendered on 26.1 or 1.21.1. From Gabby's play: more chests per ruin (observatory 3, wreck 4, graveyard 2 plus the vault, city 3) and notes that point past the outer ring; aphelite recoloured (void violet to a teal glint) and the Dragon Scale trim redrawn as line work (spine, brow ridges, claw marks, belt, boot rims), both from previews. Ore now forms up to the top of the End for tall modded terrain, with attempts scaled so vanilla's density is unchanged. Apotheosis 9.1.0 on 26.1.2: loads clean beside us and treats aphelite as a melee weapon and chest armour (an epic reforge rolled five affixes). Forgemark 0.1.0: aphelite tempers like netherite (their side). Changelog dated, tags `v0.1.0`, `v0.1.0+26.1`, `v0.1.0+1.21.1`, GitHub pre-release with the six jars built from the tags, repo description and topics, name check clear on Modrinth and CurseForge. **Mistakes:** scripted chains committed a conflicted cherry-pick, put one branch's files on another, and sent the ore change to all branches before its Nullscape run showed it had cut density by two thirds; all superseded by tested commits, and the rule is in CLAUDE.md now. Proof runs: the footing check on the thin-island seed (0 base blocks before, 800 blocks of ground after); the ore density (7 to 20 veins in the samples where there had been 0). Not done: the Modrinth upload (Gabby's), `c:` tags. |
+| 2026-10-14 | 26.1 branch | The `26.1` branch for 26.1.2: a handful of names and shapes in code, loot `functions`/`conditions`, `configured_feature`, an armour-trim atlas, templates with `Name`/`Properties` and data version 4790, all under the generator's `FORMAT`. The graveyard tolerates a slope of twelve (it was the rarest ruin on rugged Ends). BetterEnd and Stellarity are out of this branch's matrix (their 26.1 builds don't load, or hang at startup now and then). |
+| 2026-10-14 | The guide | A "Beyond the Dragon" advancements tab (seventeen entries, each a hint at the next step, granted from the moments the mod already notices) and a short note in every ruin's chest. The test checks every grant and every note, and can load with Lootr (`-PtestLootr`). Housekeeping: the structure-found criterion written per version by the generator; the ore-drop check counts a shard already picked up. |
+| 2026-10-14 | Ruins on modded Ends | The `beyond_the_dragon:end_jigsaw` structure type samples the surface on a 3x3 grid over the start template's footing and refuses the void and steep ground; every template stands on a plinth of end stone that is an eroded ledge rather than a cut pedestal; the game test photographs each ruin from the air and measures placement yield per kind. The Dragon Scale trim became its own pattern. Recipe viewers (JEI, REI) load checks. The data generator shared with the version branches under one `FORMAT` line. |
+| 2026-10-14 | Aphelite, the Outer Reaches, restoration | Aphelite (ore past the outer ring, shards and chorus fruit to the ingot, smithing from netherite, the levitation, landing and bonus-shard perks) and the four ruins built from vanilla's End City and fossil pieces by `tools/generate-structures.js`. Observatory restoration against a plan written from the intact/ruin difference; the Keeper's Chart; a death in the End respawns at the nearest restored observatory; the graveyard's vault wants a trial key the phantoms carry. |
+| 2026-10-14 | The Dragon Ladder | The egg sneak-placed on a lit beacon unlocks it; each respawn climbs a tier to three; tier attacks (shulker volleys, pulling breath, a dive-bomb through vanilla's charge phase), first-kill rewards at the exit portal, each attack behind a setting, and the attacks off by default beside a mod that reworks the fight. |
+| 2026-10-14 | Beginnings | The skeleton: common code compiled into a Fabric jar and a NeoForge jar, the `Platform` service, the settings file, biome and ring titles, the Fabric client game test and CI. |
