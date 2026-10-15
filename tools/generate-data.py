@@ -304,7 +304,8 @@ for piece in ARMOR:
         write(ASSETS / "models" / "item" / f"{overlay}.json",
               generated(ns(f"item/{item}"), f"minecraft:trims/items/{piece}_trim_{material}"))
         cases.append({"when": f"minecraft:{material}", "model": model_ref(overlay)})
-        overrides.append({"model": ns(f"item/{overlay}"), "predicate": {"trim_type": TRIM_TYPE[material]}})
+        if not definitions:
+            overrides.append({"model": ns(f"item/{overlay}"), "predicate": {"trim_type": TRIM_TYPE[material]}})
     base = generated(ns(f"item/{item}"))
     if definitions:
         write(ASSETS / "items" / f"{item}.json", {"model": {
