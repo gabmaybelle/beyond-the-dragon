@@ -17,6 +17,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -62,6 +63,7 @@ final class ApheliteTest {
 	void run(ClientGameTestContext ctx, TestServerContext server) {
 		registry();
 		recipes(server);
+		sharedTags(server);
 		oreDrops(ctx, server);
 		oreGeneration(server);
 		perks(server);
@@ -154,6 +156,19 @@ final class ApheliteTest {
 			check(BuiltInRegistries.ITEM.getOptional(ResourceKey.create(Registries.ITEM, Aphelite.id(name))).isPresent(), "item " + name + " is registered");
 		}
 		check(BuiltInRegistries.BLOCK.getOptional(Aphelite.ORE_KEY).isPresent(), "the ore block is registered");
+	}
+
+	/** The shared "c" tags name the ingot and the ore, so other mods find them without our ids. */
+	private void sharedTags(TestServerContext server) {
+		for (String[] t : new String[][] {{"item", "ingots/aphelite", "aphelite_ingot"}, {"item", "ingots", "aphelite_ingot"},
+				{"item", "ores/aphelite", "aphelite_ore"}, {"item", "ores", "aphelite_ore"},
+				{"block", "ores/aphelite", "aphelite_ore"}, {"block", "ores", "aphelite_ore"}}) {
+			Identifier tag = Identifier.fromNamespaceAndPath("c", t[1]);
+			boolean in = server.computeOnServer(s -> t[0].equals("item")
+					? new ItemStack(BuiltInRegistries.ITEM.getValue(Aphelite.id(t[2]))).is(TagKey.create(Registries.ITEM, tag))
+					: BuiltInRegistries.BLOCK.getValue(Aphelite.id(t[2])).defaultBlockState().is(TagKey.create(Registries.BLOCK, tag)));
+			check(in, t[0] + " tag c:" + t[1] + " holds " + t[2]);
+		}
 	}
 
 	private void recipes(TestServerContext server) {

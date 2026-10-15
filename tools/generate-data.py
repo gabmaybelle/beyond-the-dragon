@@ -176,6 +176,13 @@ for tag, items in {
     write(MC_DATA / "tags" / "item" / f"{tag}.json", {"values": [ns(i) for i in items]})
 for tag in ("mineable/pickaxe", "needs_diamond_tool"):
     write(MC_DATA / "tags" / "block" / f"{tag}.json", {"values": [ns("aphelite_ore")]})
+# The shared ("c") tags, so other mods find the metal and the ore without naming them.
+C_DATA = ROOT / "data" / "c"
+for kind, items in (("item", {"ingots": "aphelite_ingot", "ores": "aphelite_ore"}),
+                    ("block", {"ores": "aphelite_ore"})):
+    for tag, thing in items.items():
+        write(C_DATA / "tags" / kind / tag / "aphelite.json", {"values": [ns(thing)]})
+        write(C_DATA / "tags" / kind / f"{tag}.json", {"values": [f"#c:{tag}/aphelite"]})
 
 # --- the ore's loot and worldgen ------------------------------------------------------------
 write(DATA / "loot_table" / "blocks" / "aphelite_ore.json", {
