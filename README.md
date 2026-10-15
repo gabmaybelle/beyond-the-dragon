@@ -47,8 +47,9 @@ run).
 ## Works with
 
 Vanilla blocks and vanilla mechanics throughout, so resource packs and shaders just work.
-Structures generate on vanilla or modded End terrain and the game test runs with BetterEnd,
-Stellarity and Nullscape installed (each on its own). Recipes use the crafting and smithing
+Structures generate on vanilla or modded End terrain and the game test runs with Stellarity
+and Nullscape installed (each on its own). BetterEnd isn't tested: it doesn't sit well in most
+modpacks. Recipes use the crafting and smithing
 tables, so recipe viewers show them; the game test loads with JEI and with REI (EMI has no
 26.3 build yet). Nothing scans the world while you play: the rings and titles are one check per
 player per second, and structure lookups come from the seed.

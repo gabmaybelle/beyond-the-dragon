@@ -56,9 +56,10 @@ registrations in its registry event, so its `Platform` queues them and the resul
 
 - `./gradlew build`: jars in `fabric/build/libs/` and `neoforge/build/libs/`.
 - `./gradlew :fabric:runClientGameTest`: the settings file and the in-game checks, in a real game
-  window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestBetterEnd`,
-  `-PtestStellarity` or `-PtestNullscape` to play it with that mod installed (fetched from
-  Modrinth's maven, never bundled); CI runs all four. `-PtestJei` / `-PtestRei` load the game
+  window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestStellarity` or
+  `-PtestNullscape` to play it with that mod installed (fetched from Modrinth's maven, never
+  bundled); CI runs all three. `-PtestBetterEnd` still works but is out of CI and not run
+  locally: Gabby finds BetterEnd poorly compatible in modpacks (2026-10-15). `-PtestJei` / `-PtestRei` load the game
   with that recipe viewer (and what it needs) for a load check; the recipes are plain JSON, so
   the viewers list them on their own. `BTD_TEST_ONLY=structures` (or
   `=aphelite`) in the environment plays only that part of the test, in a couple of minutes, for
@@ -181,5 +182,5 @@ its `FORMAT` constant, the one line that differs between the branches' generator
 templates differ too: `structure.js` writes palette entries as `id`/`properties` here and
 `Name`/`Properties` on 26.1, and stamps each version's `DATA_VERSION`; a template with either
 wrong loads with its box but places no blocks, silently. Each branch's test matrix is its own:
-BetterEnd and Stellarity run here but not on 26.1 (their 26.1 builds don't load or hang). Vanilla names changed a lot in 26.x: check the merged jar rather than older docs
+Stellarity runs here but not on 26.1, and BetterEnd is tested nowhere (their 26.1 builds don't load or hang). Vanilla names changed a lot in 26.x: check the merged jar rather than older docs
 (for example `iron_chain`, `pink_petals[flower_amount=N]`, timelines instead of `time query daytime`).
