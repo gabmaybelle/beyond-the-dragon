@@ -13,16 +13,52 @@ MC_ASSETS = ROOT / "assets" / "minecraft"
 
 ARMOR = ["helmet", "chestplate", "leggings", "boots"]
 TOOLS = ["sword", "pickaxe", "axe", "shovel", "hoe"]
-TRIM_MATERIALS = ["amethyst", "copper", "diamond", "emerald", "gold", "iron", "lapis", "netherite", "quartz", "redstone", "resin"]
 
 
 # The data formats this branch's Minecraft reads. "26.3": loot entries take "modifier"/"condition",
 # configured features live in worldgen/feature with a flat config and plain block ids, trims are
 # coloured from the texture's palette metadata. "26.1": loot takes "functions"/"conditions",
 # features live in worldgen/configured_feature under "config" with {"Name": id} states, and a trim
+<<<<<<< HEAD
 # pattern must be listed in an armor_trims atlas. Everything else below is written once, in the
 # 26.3 shape, and converted here; keep this the only place the versions differ.
 FORMAT = "26.1"
+=======
+# pattern must be listed in an armor_trims atlas. "1.21.1": as 26.1, and besides: recipe
+# ingredients are {"item"}/{"tag"} objects, a trim recipe names no pattern (the pattern names its
+# template item), trimmed item models are "overrides" on a trim_type predicate rather than item
+# definitions, armour textures are the material's layer_1/layer_2 sheets rather than an
+# equipment asset, trim sheets live under trims/models/armor, and there is no resin trim.
+# Everything else below is written once, in the 26.3 shape, and converted here; keep this the
+# only place the versions differ.
+FORMAT = "26.1"
+>>>>>>> feb3911 (The data generator knows all three versions' formats, and the trim atlas goes where the game reads it)
+
+TRIM_MATERIALS = ["amethyst", "copper", "diamond", "emerald", "gold", "iron", "lapis", "netherite", "quartz", "redstone"]
+if FORMAT != "1.21.1":
+    TRIM_MATERIALS.append("resin")
+# 1.21.1 picks a trimmed item model by this predicate value, one per material.
+TRIM_TYPE = {"quartz": 0.1, "iron": 0.2, "netherite": 0.3, "redstone": 0.4, "copper": 0.5,
+             "gold": 0.6, "emerald": 0.7, "diamond": 0.8, "lapis": 0.9, "amethyst": 1.0}
+
+
+def ingredient(value):
+    """A recipe ingredient in the 26.3 shape (an id, or #tag), rewritten for 1.21.1."""
+    if isinstance(value, list):
+        return [ingredient(v) for v in value]
+    return {"tag": value[1:]} if value.startswith("#") else {"item": value}
+
+
+def old_recipe(recipe):
+    """A recipe in the 26.3 shape, rewritten for 1.21.1."""
+    out = dict(recipe)
+    for key in ("ingredients", "template", "base", "addition"):
+        if key in out:
+            out[key] = ingredient(out[key])
+    if "key" in out:
+        out["key"] = {k: ingredient(v) for k, v in out["key"].items()}
+    out.pop("pattern", None) if out["type"] == "minecraft:smithing_trim" else None
+    return out
 
 SILK_TOUCH = {"condition": "minecraft:match_tool", "predicate": {"predicates": {
     "minecraft:enchantments": [{"enchantments": "minecraft:silk_touch", "levels": {"min": 1}}]}}}
@@ -52,8 +88,10 @@ def old_loot(obj):
 
 
 def write(path, content):
-    if FORMAT == "26.1" and "loot_table" in path.parts:
+    if FORMAT != "26.3" and "loot_table" in path.parts:
         content = old_loot(content)
+    if FORMAT == "1.21.1" and "recipe" in path.parts:
+        content = old_recipe(content)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(content, indent="\t") + "\n", encoding="utf-8")
 
@@ -201,21 +239,33 @@ write(DATA / "neoforge" / "biome_modifier" / "aphelite_ore.json", {
 })
 
 # --- the trim pattern -----------------------------------------------------------------------
-if FORMAT == "26.1":
-    # 26.1 colours trims through an atlas of palette permutations; the pattern has to be listed.
-    materials = ["amethyst", "copper", "copper_darker", "diamond", "diamond_darker", "emerald", "gold", "gold_darker",
-                 "iron", "iron_darker", "lapis", "netherite", "netherite_darker", "quartz", "redstone", "resin"]
-    write(ASSETS / "atlases" / "armor_trims.json", {"sources": [{
+if FORMAT != "26.3":
+    # 26.1 and 1.21.1 colour trims through an atlas of palette permutations; the pattern has to
+    # be listed. 1.21.1 keeps the sheets under trims/models/armor and has no resin.
+    if FORMAT == "26.1":
+        materials = ["amethyst", "copper", "copper_darker", "diamond", "diamond_darker", "emerald", "gold", "gold_darker",
+                     "iron", "iron_darker", "lapis", "netherite", "netherite_darker", "quartz", "redstone", "resin"]
+        textures = [ns("trims/entity/humanoid/dragon_scale"), ns("trims/entity/humanoid_leggings/dragon_scale")]
+    else:
+        materials = ["amethyst", "copper", "diamond", "diamond_darker", "emerald", "gold", "gold_darker",
+                     "iron", "iron_darker", "lapis", "netherite", "netherite_darker", "quartz", "redstone"]
+        textures = [ns("trims/models/armor/dragon_scale"), ns("trims/models/armor/dragon_scale_leggings")]
+    # The game merges every pack's minecraft:armor_trims atlas; one in our own namespace is a
+    # different atlas and the trim never reaches the armour.
+    write(MC_ASSETS / "atlases" / "armor_trims.json", {"sources": [{
         "type": "minecraft:paletted_permutations",
         "palette_key": "minecraft:trims/color_palettes/trim_palette",
         "permutations": {m: f"minecraft:trims/color_palettes/{m}" for m in materials},
-        "textures": [ns("trims/entity/humanoid/dragon_scale"), ns("trims/entity/humanoid_leggings/dragon_scale")],
+        "textures": textures,
     }]})
-write(DATA / "trim_pattern" / "dragon_scale.json", {
+trim_pattern = {
     "asset_id": ns("dragon_scale"),
     "decal": False,
     "description": {"translate": f"trim_pattern.{NS}.dragon_scale"},
-})
+}
+if FORMAT == "1.21.1":
+    trim_pattern["template_item"] = ns("dragon_scale_armor_trim_smithing_template")
+write(DATA / "trim_pattern" / "dragon_scale.json", trim_pattern)
 
 # --- the ladder's rewards --------------------------------------------------------------------
 def reward(template, breath):
@@ -243,30 +293,43 @@ def model_ref(name):
 
 simple_items = ["aphelite_shard", "aphelite_ingot", "aphelite_upgrade_smithing_template",
                 "dragon_scale_armor_trim_smithing_template"] + [f"aphelite_{t}" for t in TOOLS]
+# 1.21.1 has no item definitions (the model is found by the item's name) and no equipment
+# assets (the armour material names its layer sheets); the trimmed models are overrides.
+definitions = FORMAT != "1.21.1"
 for item in simple_items:
     parent = "minecraft:item/handheld" if item.split("_")[-1] in TOOLS else "minecraft:item/generated"
     write(ASSETS / "models" / "item" / f"{item}.json", {"parent": parent, "textures": {"layer0": ns(f"item/{item}")}})
-    write(ASSETS / "items" / f"{item}.json", {"model": model_ref(item)})
+    if definitions:
+        write(ASSETS / "items" / f"{item}.json", {"model": model_ref(item)})
 for piece in ARMOR:
     item = f"aphelite_{piece}"
-    write(ASSETS / "models" / "item" / f"{item}.json", generated(ns(f"item/{item}")))
     cases = []
+    overrides = []
     for material in TRIM_MATERIALS:
         overlay = f"{item}_{material}_trim"
         write(ASSETS / "models" / "item" / f"{overlay}.json",
               generated(ns(f"item/{item}"), f"minecraft:trims/items/{piece}_trim_{material}"))
         cases.append({"when": f"minecraft:{material}", "model": model_ref(overlay)})
-    write(ASSETS / "items" / f"{item}.json", {"model": {
-        "type": "minecraft:select", "property": "minecraft:trim_material",
-        "cases": cases, "fallback": model_ref(item),
-    }})
+        overrides.append({"model": ns(f"item/{overlay}"), "predicate": {"trim_type": TRIM_TYPE[material]}})
+    base = generated(ns(f"item/{item}"))
+    if definitions:
+        write(ASSETS / "items" / f"{item}.json", {"model": {
+            "type": "minecraft:select", "property": "minecraft:trim_material",
+            "cases": cases, "fallback": model_ref(item),
+        }})
+    else:
+        base["overrides"] = sorted(overrides, key=lambda o: o["predicate"]["trim_type"])
+    write(ASSETS / "models" / "item" / f"{item}.json", base)
 write(ASSETS / "blockstates" / "aphelite_ore.json", {"variants": {"": {"model": ns("block/aphelite_ore")}}})
 write(ASSETS / "models" / "block" / "aphelite_ore.json", {"parent": "minecraft:block/cube_all", "textures": {"all": ns("block/aphelite_ore")}})
-write(ASSETS / "items" / "aphelite_ore.json", {"model": {"type": "minecraft:model", "model": ns("block/aphelite_ore")}})
-write(ASSETS / "equipment" / "aphelite.json", {"layers": {
-    "humanoid": [{"texture": ns("aphelite")}],
-    "humanoid_leggings": [{"texture": ns("aphelite")}],
-}})
+if definitions:
+    write(ASSETS / "items" / "aphelite_ore.json", {"model": {"type": "minecraft:model", "model": ns("block/aphelite_ore")}})
+    write(ASSETS / "equipment" / "aphelite.json", {"layers": {
+        "humanoid": [{"texture": ns("aphelite")}],
+        "humanoid_leggings": [{"texture": ns("aphelite")}],
+    }})
+else:
+    write(ASSETS / "models" / "item" / "aphelite_ore.json", {"parent": ns("block/aphelite_ore")})
 
 print("data and assets written")
 
