@@ -35,12 +35,14 @@ import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 
 /**
  * The Outer Reaches structures in a real game: the nearest ruin of each kind to the End's centre
- * is found by the game's own locator and stands on land (its columns have ground, not air,
- * under them); each kind's placement yields starts often enough across the seed; the
+ * is found by the game's own locator and stands on land (there is island under its floor, not
+ * just its own plinth); each kind's placement yields starts often enough across the seed; the
  * observatory has its lectern and chests, putting back every missing block restores it, which
  * hands out the keeper's chart with markers on it; a death in the End comes back at its
  * lectern, and a death at home does not.
@@ -64,10 +66,8 @@ final class StructuresTest {
 			if (report.startsWith("none") || report.startsWith("no structure")) {
 				continue;
 			}
-			check(report.matches(".*base y -?\\d+.*") && !report.contains(" 0 base blocks"), "the " + kind + "'s base was found (" + report + ")");
-			int overAir = airUnderBase(report);
-			int base = baseBlocks(report);
-			check(overAir >= 0 && overAir * 10 <= base, "the " + kind + " stands on land, not the void (" + report + ")");
+			check(report.matches(".*floor y -?\\d+.*"), "the " + kind + "'s floor was found (" + report + ")");
+			check(groundBlocks(report) >= 200, "the " + kind + " stands on land, not the void (" + report + ")");
 			if (kind.equals("observatory")) {
 				check(report.contains("1 lectern(s)") && !report.contains(" 0 chest(s)"), "the observatory has its lectern and chests (" + report + ")");
 			}
@@ -284,41 +284,55 @@ final class StructuresTest {
 				end.getChunk(cx, cz);
 			}
 		}
-		{
-			// The building's columns are the ones with End City masonry in them; each stands on
-			// the template's bottom row (its end stone plinth, sunk into the island), and that row
-			// must have ground, not air, beneath it.
-			int lecterns = 0;
-			int chests = 0;
-			String chestBlock = "";
-			int airUnderBase = 0;
-			int baseBlocks = 0;
-			int baseY = box.minY();
-			for (int x = box.minX(); x <= box.maxX(); x++) {
-				for (int z = box.minZ(); z <= box.maxZ(); z++) {
-					boolean building = false;
-					for (int y = box.minY(); y <= box.maxY(); y++) {
-						var state = end.getBlockState(new BlockPos(x, y, z));
-						if (state.is(Blocks.LECTERN)) {
-							lecterns++;
-						} else if (state.is(Blocks.CHEST) || BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().contains("chest")) {
-							chests++; // Lootr swaps loot chests for its own block; the report names it
-							chestBlock = state.is(Blocks.CHEST) ? "" : " [" + BuiltInRegistries.BLOCK.getKey(state.getBlock()) + "]";
-						} else if (state.is(Blocks.END_STONE_BRICKS) || state.is(Blocks.PURPUR_BLOCK) || state.is(Blocks.PURPUR_PILLAR) || state.is(Blocks.BONE_BLOCK)) {
-							building = true;
-						}
-					}
-					if (building && !end.getBlockState(new BlockPos(x, baseY, z)).isAir()) {
-						baseBlocks++;
-						if (end.getBlockState(new BlockPos(x, baseY - 1, z)).isAir()) {
-							airUnderBase++;
-						}
+		// The building's columns are the ones with End City masonry in them, and its floor is the
+		// lowest row with any. Under the floor the template carries its plinth (an eroded ledge of
+		// end stone, up to ten rows), and the island carries the rest: what's solid below the floor
+		// beyond the plinth's own blocks is ground, and a ruin over the void has next to none.
+		int lecterns = 0;
+		int chests = 0;
+		String chestBlock = "";
+		int floorY = Integer.MAX_VALUE;
+		for (int x = box.minX(); x <= box.maxX(); x++) {
+			for (int z = box.minZ(); z <= box.maxZ(); z++) {
+				for (int y = box.minY(); y <= box.maxY(); y++) {
+					var state = end.getBlockState(new BlockPos(x, y, z));
+					if (state.is(Blocks.LECTERN)) {
+						lecterns++;
+					} else if (state.is(Blocks.CHEST) || BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().contains("chest")) {
+						chests++; // Lootr swaps loot chests for its own block; the report names it
+						chestBlock = state.is(Blocks.CHEST) ? "" : " [" + BuiltInRegistries.BLOCK.getKey(state.getBlock()) + "]";
+					} else if (state.is(Blocks.END_STONE_BRICKS) || state.is(Blocks.PURPUR_BLOCK) || state.is(Blocks.PURPUR_PILLAR) || state.is(Blocks.BONE_BLOCK)) {
+						floorY = Math.min(floorY, y);
 					}
 				}
 			}
-			return "box from " + box.minX() + "," + box.minY() + "," + box.minZ() + " to " + box.maxX() + "," + box.maxY() + "," + box.maxZ()
-					+ ", base y " + baseY + ", " + baseBlocks + " base blocks, " + airUnderBase + " over air, " + lecterns + " lectern(s), " + chests + " chest(s)" + chestBlock;
 		}
+		if (floorY == Integer.MAX_VALUE) {
+			return "box from " + box.minX() + "," + box.minY() + "," + box.minZ() + " to " + box.maxX() + "," + box.maxY() + "," + box.maxZ() + ", no masonry";
+		}
+		int solid = 0;
+		for (int x = box.minX(); x <= box.maxX(); x++) {
+			for (int z = box.minZ(); z <= box.maxZ(); z++) {
+				for (int y = box.minY(); y < floorY; y++) {
+					if (!end.getBlockState(new BlockPos(x, y, z)).isAir()) {
+						solid++;
+					}
+				}
+			}
+		}
+		// The template's own blocks below its floor (the piece sits with its origin at the box's bottom).
+		StructureTemplate template = end.getServer().getStructureTemplateManager()
+				.get(Aphelite.id(kind.equals("observatory") ? "observatory_ruin" : kind)).orElseThrow();
+		int templateFloor = floorY - box.minY();
+		int plinth = 0;
+		for (var info : template.filterBlocks(BlockPos.ZERO, new StructurePlaceSettings(), Blocks.END_STONE)) {
+			if (info.pos().getY() < templateFloor) {
+				plinth++;
+			}
+		}
+		return "box from " + box.minX() + "," + box.minY() + "," + box.minZ() + " to " + box.maxX() + "," + box.maxY() + "," + box.maxZ()
+				+ ", floor y " + floorY + ", " + Math.max(0, solid - plinth) + " blocks of ground under the floor (plinth " + plinth + "), "
+				+ lecterns + " lectern(s), " + chests + " chest(s)" + chestBlock;
 	}
 
 	/** Puts back every missing block, which should restore the observatory and hand out the chart. */
@@ -446,14 +460,9 @@ final class StructuresTest {
 		return s.getPlayerList().getPlayers().get(0);
 	}
 
-	private static int airUnderBase(String report) {
-		var m = java.util.regex.Pattern.compile("(\\d+) over air").matcher(report);
+	private static int groundBlocks(String report) {
+		var m = java.util.regex.Pattern.compile("(\\d+) blocks of ground").matcher(report);
 		return m.find() ? Integer.parseInt(m.group(1)) : -1;
-	}
-
-	private static int baseBlocks(String report) {
-		var m = java.util.regex.Pattern.compile("(\\d+) base blocks").matcher(report);
-		return m.find() ? Integer.parseInt(m.group(1)) : 0;
 	}
 
 	private void check(boolean condition, String what) {
