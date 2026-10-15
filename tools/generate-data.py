@@ -218,8 +218,10 @@ write(DATA / "worldgen" / "placed_feature" / "aphelite_ore.json", {
     "placement": [
         {"type": "minecraft:count", "count": 6},
         {"type": "minecraft:in_square"},
+        # Up to the top of the world: vanilla's islands stop near y 75, but modded Ends (Stellarity's,
+        # say) rise far higher, and an ore capped at 90 left their outer ring without any.
         {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform",
-                                                      "min_inclusive": {"absolute": 8}, "max_inclusive": {"absolute": 90}}},
+                                                      "min_inclusive": {"absolute": 8}, "max_inclusive": {"below_top": 8}}},
         {"type": ns("in_ring"), "ring": "outer"},
         {"type": "minecraft:biome"},
     ],
