@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 (2026-10-15)
 
 - Ruins no longer grow into End Cities. A ruin that would reach into a city standing nearby isn't built; on a vanilla End that keeps 241 of every 244 ruins, and the rest stay as common as they were.
 - Aphelite ore is easier to spot: each fleck has a teal glint in its middle and a deep violet shadow under it, so it reads as set into the end stone from a distance.
 - The aphelite ingot and ore carry the shared tags other mods look for (`c:ingots/aphelite` and `c:ores/aphelite`), so mods that work with any metal or ore pick aphelite up without knowing about this one.
+- BetterEnd is no longer tested alongside this mod: it doesn't sit well in most modpacks. Stellarity and Nullscape still are.
 
 ## 0.1.0 (2026-10-14)
 
