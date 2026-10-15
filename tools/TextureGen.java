@@ -87,15 +87,35 @@ public final class TextureGen {
 	private static void ore(Path stone, Path debris, Path outFile) throws IOException {
 		BufferedImage base = ImageIO.read(stone.toFile());
 		BufferedImage spots = ImageIO.read(debris.toFile());
-		BufferedImage result = new BufferedImage(base.getWidth(), base.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		for (int y = 0; y < base.getHeight(); y++) {
-			for (int x = 0; x < base.getWidth(); x++) {
+		int w = base.getWidth(), h = base.getHeight();
+		boolean[][] fleck = new boolean[h][w];
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				fleck[y][x] = luminance(spots.getRGB(x % spots.getWidth(), y % spots.getHeight())) > 0.42;
+			}
+		}
+		BufferedImage result = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
 				int argb = base.getRGB(x, y);
-				double spot = luminance(spots.getRGB(x % spots.getWidth(), y % spots.getHeight()));
-				if (spot > 0.42) {
-					// A fleck: deep violet, lighter where the debris was lightest.
-					double t = 0.15 + (spot - 0.42) * 1.2;
-					argb = 0xff000000 | ramp(Math.min(0.8, t));
+				if (fleck[y][x]) {
+					// A fleck, shaded by its shape: the ends of a streak deep violet, its middle the
+					// ramp's teal glint, a lone pixel in between. Vanilla's debris spots are all one
+					// brightness, so their brightness can't do it (that gave one flat violet).
+					int n = 0;
+					for (int dy = -1; dy <= 1; dy++) {
+						for (int dx = -1; dx <= 1; dx++) {
+							int nx = x + dx, ny = y + dy;
+							if ((dx != 0 || dy != 0) && nx >= 0 && ny >= 0 && nx < w && ny < h && fleck[ny][nx]) {
+								n++;
+							}
+						}
+					}
+					argb = 0xff000000 | ramp(n >= 2 ? 0.72 : n == 1 ? 0.18 : 0.45);
+				} else if (y > 0 && fleck[y - 1][x]) {
+					// The fleck's shadow: a deep violet pixel under it, so it reads as set into the stone
+					// and stays visible at a distance (chosen by Gabby, 2026-10-15).
+					argb = 0xff000000 | ramp(0.1);
 				}
 				result.setRGB(x, y, argb);
 			}

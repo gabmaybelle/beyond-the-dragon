@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Aphelite ore is easier to spot: each fleck has a teal glint in its middle and a deep violet shadow under it, so it reads as set into the end stone from a distance.
 - The aphelite ingot and ore carry the shared tags other mods look for (`c:ingots/aphelite` and `c:ores/aphelite`), so mods that work with any metal or ore pick aphelite up without knowing about this one.
 
 ## 0.1.0 (2026-10-14)
