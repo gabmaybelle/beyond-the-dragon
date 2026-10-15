@@ -106,7 +106,7 @@ LORE = {
         "The near ruins were picked over long before us. The charts mark the rich ones five thousand paces out, past the outer reaches, where the stone itself is worth digging.",
     ]),
     "observatory": ("The Keeper's Letter", "the keeper", [
-        "If you have found this, the storm has had the roof. The lectern's book says what is missing; put it all back and she will see again. The chart is yours then.",
+        "If you have found this, the storm has had the telescope. The lectern's book says what is missing; put it back and she will see again. The chart is yours then.",
         "Two things I never wrote down, in case the wrong hands found them. The first: the egg, set on a lit beacon, calls the dragon back. Each time, it comes back angrier.",
         "The second: past the outer reaches, five thousand paces from the island, the end stone holds a metal a step beyond netherite. Four shards and four popped chorus fruit to the ingot.",
     ]),
@@ -402,7 +402,7 @@ advancement("ruins", "root", "minecraft:end_stone_bricks", "Ruins",
             "Someone was here before you. Four kinds of ruin drift through the islands; their chests hold notes.",
             found(f"#{NS}:ruins"))
 advancement("keepers_eye", "ruins", "minecraft:lectern", "Keeper's Eye",
-            "An observatory's lectern lists what the storm took. Put it all back.", GRANTED, frame="goal")
+            "An observatory's lectern lists what the storm took from its telescope. Put it back.", GRANTED, frame="goal")
 advancement("keepers_chart", "keepers_eye", "minecraft:filled_map", "Keeper's Chart",
             "The restored lectern's map marks the nearest ruin of each kind. Sneak at it for another.", GRANTED)
 advancement("captains_log", "ruins", "minecraft:purpur_block", "Captain's Log",

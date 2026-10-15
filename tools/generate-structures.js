@@ -159,8 +159,10 @@ function book(title, intro, missing, intact) {
 
 // --- the observatory ---------------------------------------------------------------------------
 // Vanilla's fat tower (base, one middle, top) with a telescope of end rods on the roof, a lectern
-// inside the top floor and the chests holding our loot. The ruin has lost a quarter of the roof,
-// a bite of the middle floor's wall, and the telescope's eyepiece.
+// inside the top floor and the chests holding our loot. The tower stands whole; the storm took
+// the telescope (every end rod, and its pillar cracked to a slab that marks the spot), which is
+// all a restoration asks for: six blocks (Gabby, 2026-10-15: 94 blocks of roof and wall made it
+// a chore).
 function observatory() {
 	const b = new Build([21, 24, 21]);
 	stamp(b, 'end_city/fat_tower_base', 4, 0, 4);
@@ -188,20 +190,9 @@ function observatory() {
 }
 
 function observatoryMissing(o) {
-	const { build: b, roof } = o;
-	const missing = [];
-	// The north-east quarter of the roof.
-	for (const [x, y, z, e] of b.all()) {
-		if (y >= roof - 2 && y <= roof && x >= 11 && z <= 9 && e.state !== 'minecraft:air') missing.push([x, y, z]);
-	}
-	// A bite from the middle floor's east wall.
-	for (let y = 6 + PLINTH; y <= 10 + PLINTH; y++) for (let z = 7; z <= 12; z++) for (let x = 14; x <= 16; x++) {
-		const e = b.get(x, y, z);
-		if (e && e.state !== 'minecraft:air' && !e.state.includes('pillar')) missing.push([x, y, z]);
-	}
-	// The eyepiece.
-	for (const z of [10, 9, 8]) missing.push([10, roof + 4, z]);
-	return missing;
+	const { roof } = o;
+	// The telescope: its pillar, the two rods up and the three pointing north.
+	return [[10, roof + 1, 10], [10, roof + 2, 10], [10, roof + 3, 10], [10, roof + 4, 10], [10, roof + 4, 9], [10, roof + 4, 8]];
 }
 
 // --- the wrecked End ship -----------------------------------------------------------------------
@@ -427,11 +418,15 @@ function withPlinth(b, depth) {
 // Keep in step with PLINTH in generate-data.py (the structures' start height).
 const PLINTH = 10;
 
-function generate(name, intact, missing, title, intro, lectern) {
+function generate(name, intact, missing, title, intro, lectern, damaged = []) {
 	const theBook = book(title, intro, missing, intact);
 	for (const [, v] of intact.blocks) if (v.nbt && v.nbt.Book) v.nbt.Book = theBook;
 	out(`structure/${name}.nbt`, intact.toNbt());
-	out(`structure/${name}_ruin.nbt`, intact.ruin(missing).toNbt());
+	// The ruin: the missing blocks gone, and any damaged ones (still missing as far as the
+	// restoration is concerned) standing in as something broken, to show where they go.
+	const ruin = intact.ruin(missing);
+	for (const [x, y, z, state] of damaged) ruin.set(x, y, z, state);
+	out(`structure/${name}_ruin.nbt`, ruin.toNbt());
 	// What the restoration code checks: each missing block's template position and block id,
 	// plus where the lectern is (the respawn spot, and where the chart is read from).
 	const plan = {
@@ -454,8 +449,8 @@ obs.build = withPlinth(obs.build, PLINTH);
 obs.roof += PLINTH;
 obs.floor += PLINTH;
 generate('observatory', obs.build, observatoryMissing(obs), 'Keeper\'s Notes',
-	'The storm took the roof\'s corner, the east wall and the eyepiece. Put back what is listed here and she will see again.\n\nThe watch ends when the last piece is set.',
-	[10 - 2, obs.floor, 10 + 3]);
+	'The storm took the telescope from the roof. Break the cracked stump and set a purpur pillar in its place; stack three end rods on it, and two more on the north side of the top one. Then she will see again.\n\nThe watch ends when the last piece is set.',
+	[10 - 2, obs.floor, 10 + 3], [[10, obs.roof + 1, 10, 'minecraft:purpur_slab[type=bottom,waterlogged=false]']]);
 generateOne('wreck', withPlinth(wreck(), PLINTH));
 generateOne('graveyard', withPlinth(graveyard(), PLINTH));
 generateOne('sinking_city', withPlinth(sinkingCity(), PLINTH));
