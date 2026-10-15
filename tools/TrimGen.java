@@ -11,8 +11,8 @@ import java.util.zip.DeflaterOutputStream;
 import javax.imageio.ImageIO;
 
 /**
- * Draws the Dragon Scale armour trim: overlapping scales over the chest, shoulders, brow, boots
- * and legs, in the greys of vanilla's {@code trim_base} palette (which the game swaps for the
+ * Draws the Dragon Scale armour trim: a spine of vertebrae down the chest and back, a V of
+ * ridges on the brow, claw marks on the shoulders, a belt and the boots' rims, in the greys of vanilla's {@code trim_base} palette (which the game swaps for the
  * trim material's colours). The sheets are written as single-channel greyscale PNGs with grey 0
  * as the transparent key, the way vanilla's are: the palette swap keys on that, and an RGBA
  * file of the very same greys is drawn uncoloured. The layout is the standard 64x32 humanoid armour sheet: the helmet
@@ -33,29 +33,36 @@ public class TrimGen {
 		BufferedImage humanoid = new BufferedImage(64, 32, BufferedImage.TYPE_INT_ARGB);
 		BufferedImage leggings = new BufferedImage(64, 32, BufferedImage.TYPE_INT_ARGB);
 
-		// A trim is an accent, not a skin: the scales sit where a dragon's would show and the
-		// armour's own metal stays visible between them.
-		// Helmet: a band of scales across the brow, and a crest along the top.
-		scales(humanoid, 8, 9, 8, 2);    // brow
-		crest(humanoid, 8, 0, 8, 8);     // top face: a ridge front to back
-		// Chestplate: a breast panel down the middle, a spine down the back, caps on the shoulders.
-		scales(humanoid, 22, 21, 4, 10); // front, centre
-		scales(humanoid, 34, 21, 4, 10); // back, centre
-		scales(humanoid, 44, 20, 4, 4);  // shoulder, front
-		scales(humanoid, 40, 20, 4, 4);  // shoulder, outer side
-		scales(humanoid, 52, 20, 4, 4);  // shoulder, back
-		// Boots: a cuff of scales round the ankle.
-		scales(humanoid, 4, 28, 4, 2);   // front
-		scales(humanoid, 0, 28, 4, 2);   // outer side
-		scales(humanoid, 8, 28, 4, 2);   // inner side
-		scales(humanoid, 12, 28, 4, 2);  // back
-		// Leggings: scales down the front of the thighs and a belt of them round the waist.
-		scales(leggings, 4, 20, 4, 6);   // thigh front
-		scales(leggings, 0, 20, 4, 4);   // thigh outer side
-		scales(leggings, 20, 29, 8, 2);  // waist front
-		scales(leggings, 32, 29, 8, 2);  // waist back
-		scales(leggings, 16, 29, 4, 2);  // waist right
-		scales(leggings, 28, 29, 4, 2);  // waist left
+		// A trim is an accent, not a skin: line work, the way vanilla's are, and the armour's own
+		// metal stays the colour you see. The dragon is in the spine down the chest and back, a V
+		// of brow ridges on the helmet, claw marks on the shoulders, a belt and the boots' rims
+		// (Gabby's choice over filled panels of scales, 2026-10-14).
+		// Helmet: a V of ridges on the brow, meeting above the nose.
+		for (int y = 9; y <= 11; y++) {
+			pix(humanoid, 8 + (y - 9), y, 7);
+			pix(humanoid, 15 - (y - 9), y, 7);
+			pix(humanoid, 8 + (y - 9), y + 1, 4);
+			pix(humanoid, 15 - (y - 9), y + 1, 4);
+		}
+		pix(humanoid, 11, 12, 7);
+		pix(humanoid, 12, 12, 7);
+		// Chestplate: vertebrae down the middle of the front and the back, shaded either side, and
+		// three claw marks across each shoulder.
+		spine(humanoid, 23, 20, 12);     // front
+		spine(humanoid, 35, 20, 12);     // back
+		claws(humanoid, 44, 20);         // shoulder, front
+		claws(humanoid, 40, 20);         // shoulder, outer side
+		claws(humanoid, 52, 20);         // shoulder, back
+		// Boots: a scalloped rim round the top.
+		scallop(humanoid, 4, 28, 4);     // front
+		scallop(humanoid, 0, 28, 4);     // outer side
+		scallop(humanoid, 8, 28, 4);     // inner side
+		scallop(humanoid, 12, 28, 4);    // back
+		// Leggings: a scalloped belt round the waist.
+		scallop(leggings, 20, 20, 8);    // front
+		scallop(leggings, 32, 20, 8);    // back
+		scallop(leggings, 16, 20, 4);    // right
+		scallop(leggings, 28, 20, 4);    // left
 
 		writeGrey(humanoid, assets.resolve("dragon_scale.png"));
 		writeGrey(leggings, assets.resolve("dragon_scale_leggings.png"));
@@ -65,38 +72,38 @@ public class TrimGen {
 		System.out.println("dragon scale trim written");
 	}
 
-	/**
-	 * Scales three wide and two tall, every other row shifted by half a scale so they overlap:
-	 * a bright arc on top, a shaded underside. The region is filled completely.
-	 */
-	private static void scales(BufferedImage img, int x0, int y0, int w, int h) {
-		for (int row = 0; row * 2 < h; row++) {
-			int y = y0 + row * 2;
-			int shift = row % 2 == 0 ? 0 : 1;
-			for (int x = x0 - 3 + shift; x < x0 + w; x += 3) {
-				put(img, x, y, 6, x0, y0, w, h);
-				put(img, x + 1, y, 7, x0, y0, w, h);
-				put(img, x + 2, y, 6, x0, y0, w, h);
-				put(img, x, y + 1, 4, x0, y0, w, h);
-				put(img, x + 1, y + 1, 5, x0, y0, w, h);
-				put(img, x + 2, y + 1, 4, x0, y0, w, h);
-			}
+	/** A column of vertebrae two wide at x (bright and mid shades alternating down), a dark edge either side. */
+	private static void spine(BufferedImage img, int x, int y0, int h) {
+		for (int y = y0; y < y0 + h; y++) {
+			int shade = y % 2 == 0 ? 7 : 5;
+			pix(img, x, y, shade);
+			pix(img, x + 1, y, shade);
+			pix(img, x - 1, y, 3);
+			pix(img, x + 2, y, 3);
 		}
 	}
 
-	/** A ridge of pale spikes down the middle of a face, dark at its root. */
-	private static void crest(BufferedImage img, int x0, int y0, int w, int h) {
-		int mid = x0 + w / 2;
-		for (int y = y0 + 1; y < y0 + h - 1; y++) {
-			put(img, mid - 1, y, y % 2 == 0 ? 7 : 5, x0, y0, w, h);
-			put(img, mid, y, y % 2 == 0 ? 7 : 5, x0, y0, w, h);
-			put(img, mid - 2, y, 3, x0, y0, w, h);
-			put(img, mid + 1, y, 3, x0, y0, w, h);
+	/** Three claw marks raked diagonally from a corner, each bright with a shadow under it. */
+	private static void claws(BufferedImage img, int x0, int y0) {
+		for (int i = 0; i < 3; i++) {
+			pix(img, x0 + i, y0 + i, 7);
+			pix(img, x0 + i, y0 + i + 1, 4);
 		}
 	}
 
-	private static void put(BufferedImage img, int x, int y, int shade, int x0, int y0, int w, int h) {
-		if (x >= x0 && x < x0 + w && y >= y0 && y < y0 + h) {
+	/** A one-row scalloped rim: bright arcs with a mid pixel between, a shadow beneath. */
+	private static void scallop(BufferedImage img, int x0, int y, int w) {
+		for (int x = 0; x < w; x++) {
+			pix(img, x0 + x, y, x % 2 == 0 ? 7 : 5);
+			pix(img, x0 + x, y + 1, x % 2 == 0 ? 3 : 0);
+		}
+	}
+
+	private static void pix(BufferedImage img, int x, int y, int shade) {
+		if (shade == 0) {
+			return;
+		}
+		if (x >= 0 && x < img.getWidth() && y >= 0 && y < img.getHeight()) {
 			img.setRGB(x, y, 0xFF000000 | GREY[shade]);
 		}
 	}

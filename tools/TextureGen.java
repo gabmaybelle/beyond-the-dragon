@@ -8,20 +8,24 @@ import javax.imageio.ImageIO;
 
 /**
  * Draws the aphelite textures from vanilla's netherite ones: the shapes and shading stay, the
- * colours move to an End palette (void violet through lavender to an end-stone glint). Run
+ * colours move to an End palette (void violet through a cold steel blue to a teal glint). Run
  * with `java tools/TextureGen.java <vanilla textures dir> <mod assets dir>`; the vanilla dir
  * holds `assets/minecraft/textures/...` as unpacked from the client jar. The result is a
  * starting point for Gabby to approve or repaint, never final art on its own.
  */
 public final class TextureGen {
-	/** The aphelite ramp, darkest to lightest: void, deep violet, violet, lavender, pale glint. */
+	/**
+	 * The aphelite ramp, darkest to lightest: void, deep violet, then the light turns cold through
+	 * a steel blue to teal and an icy glint. Violet in the shadows keeps it of the End; the teal
+	 * light keeps it apart from netherite, amethyst and purpur (chosen by Gabby, 2026-10-14).
+	 */
 	private static final int[][] RAMP = {
-			{0x1a, 0x10, 0x2c},
-			{0x3d, 0x25, 0x63},
-			{0x6e, 0x48, 0xa6},
-			{0xa8, 0x8a, 0xd6},
-			{0xd9, 0xcc, 0xf0},
-			{0xf1, 0xf4, 0xd6},
+			{0x1a, 0x12, 0x30},
+			{0x44, 0x2a, 0x78},
+			{0x5e, 0x6a, 0xb8},
+			{0x72, 0xbf, 0xd4},
+			{0xb6, 0xf0, 0xee},
+			{0xf4, 0xff, 0xf6},
 	};
 
 	public static void main(String[] args) throws IOException {
