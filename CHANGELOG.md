@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Ruins no longer grow into each other. Now and then a wreck or a graveyard stood inside a sinking city or an observatory; each kind of ruin now keeps out of the others' way.
 - Restoring an observatory is quicker: the tower now stands whole and only its telescope is broken. Break the cracked stump on the roof, set a purpur pillar in its place and five end rods on it, and the observatory sees again. The lectern's book says exactly how. In observatories that already stand in a world, only the telescope counts now too.
 
 ## 0.1.1 (2026-10-15)

@@ -295,6 +295,9 @@ final class StructuresTest {
 		int ruins = 0;
 		int overlaps = 0;
 		StringBuilder where = new StringBuilder();
+		List<StructureStart> placed = new java.util.ArrayList<>();
+		List<String> placedKinds = new java.util.ArrayList<>();
+		int ruinOverlaps = 0;
 		int closest = Integer.MAX_VALUE;
 		int reach = 0;
 		for (StructureStart city : cities) {
@@ -308,6 +311,15 @@ final class StructuresTest {
 					.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind))))) {
 				ruins++;
 				BoundingBox box = ruin.getBoundingBox();
+				// Ruins of different kinds don't overlap each other either.
+				for (int i = 0; i < placed.size(); i++) {
+					if (placed.get(i).getBoundingBox().intersects(box)) {
+						ruinOverlaps++;
+						where.append(' ').append(kind).append(" in a ").append(placedKinds.get(i)).append(" at ").append(box.getCenter().toShortString());
+					}
+				}
+				placed.add(ruin);
+				placedKinds.add(kind);
 				for (StructureStart city : cities) {
 					closest = Math.min(closest, gap(box, city.getBoundingBox()));
 					if (!box.intersects(city.getBoundingBox())) {
@@ -326,10 +338,11 @@ final class StructuresTest {
 				}
 			}
 		}
-		String report = cities.size() + " End Cities, " + ruins + " ruins, " + overlaps + " overlap(s)" + where
+		String report = cities.size() + " End Cities, " + ruins + " ruins, " + overlaps + " overlap(s), " + ruinOverlaps + " ruin(s) in another ruin" + where
 				+ "; closest boxes " + closest + " blocks apart; cities reach " + reach + " chunks from their start";
 		BeyondTheDragon.LOGGER.info("[test] End City overlap within 4000 blocks: {}", report);
 		check(overlaps == 0 && !cities.isEmpty(), "no ruin overlaps an End City within 4000 blocks (" + report + ")");
+		check(ruinOverlaps == 0, "no ruin overlaps another ruin within 4000 blocks (" + report + ")");
 	}
 
 	/** Every start of a structure within 4,000 blocks of the centre, built from the seed a slice of columns at a time. */

@@ -19,5 +19,10 @@
 		69
 	],
 	"min_distance": 1000,
-	"avoid_end_cities": true
+	"keep_out_of": [
+		"minecraft:end_cities",
+		"beyond_the_dragon:observatories",
+		"beyond_the_dragon:wrecks",
+		"beyond_the_dragon:graveyards"
+	]
 }
