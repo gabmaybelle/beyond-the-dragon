@@ -1,7 +1,7 @@
 # Beyond the Dragon
 
-A Fabric and NeoForge mod for Minecraft 26.1.2 (this is the `26.1` branch; `main` is for 26.3).
-You killed the dragon; that was the tutorial.
+A Fabric and NeoForge mod for Minecraft 26.1.2 (this is the `26.1` branch; `main` is for 26.3
+and `1.21.1` for 1.21.1). You killed the dragon; that was the tutorial.
 
 Beyond the Dragon is for players who have done it all. It leaves the game you know alone and
 adds reasons to pack your elytra and keep flying: ruins at the edge of the End, a dragon that
@@ -53,6 +53,10 @@ don't load on 26.1.2, and Stellarity's start hangs there now and then (its 5.5.5
 through the whole test when it starts). Recipes use the crafting and smithing tables, so JEI, REI
 and EMI show them. Nothing scans the world while you play: the rings and titles are one check
 per player per second, and structure lookups come from the seed.
+
+Other mods can find aphelite without knowing about this one: the ingot and the ore carry the
+shared tags mods look for (`c:ingots/aphelite`, `c:ores/aphelite`). With Apotheosis installed
+(tested on NeoForge), aphelite swords and armour take its affixes like any other gear.
 
 Servers: flying fast into new territory is the heaviest thing any player can do to a server,
 with or without mods. Pre-generating the End with Chunky keeps things smooth.
