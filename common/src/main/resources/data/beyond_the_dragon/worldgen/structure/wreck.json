@@ -13,5 +13,8 @@
 	"min_surface_y": 50,
 	"max_slope": 10,
 	"min_distance": 1000,
-	"avoid_end_cities": true
+	"keep_out_of": [
+		"minecraft:end_cities",
+		"beyond_the_dragon:observatories"
+	]
 }
