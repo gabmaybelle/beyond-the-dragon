@@ -19,11 +19,6 @@ TOOLS = ["sword", "pickaxe", "axe", "shovel", "hoe"]
 # configured features live in worldgen/feature with a flat config and plain block ids, trims are
 # coloured from the texture's palette metadata. "26.1": loot takes "functions"/"conditions",
 # features live in worldgen/configured_feature under "config" with {"Name": id} states, and a trim
-<<<<<<< HEAD
-# pattern must be listed in an armor_trims atlas. Everything else below is written once, in the
-# 26.3 shape, and converted here; keep this the only place the versions differ.
-FORMAT = "26.1"
-=======
 # pattern must be listed in an armor_trims atlas. "1.21.1": as 26.1, and besides: recipe
 # ingredients are {"item"}/{"tag"} objects, a trim recipe names no pattern (the pattern names its
 # template item), trimmed item models are "overrides" on a trim_type predicate rather than item
@@ -31,12 +26,7 @@ FORMAT = "26.1"
 # equipment asset, trim sheets live under trims/models/armor, and there is no resin trim.
 # Everything else below is written once, in the 26.3 shape, and converted here; keep this the
 # only place the versions differ.
-<<<<<<< Updated upstream
 FORMAT = "26.1"
->>>>>>> feb3911 (The data generator knows all three versions' formats, and the trim atlas goes where the game reads it)
-=======
-FORMAT = "1.21.1"
->>>>>>> Stashed changes
 
 TRIM_MATERIALS = ["amethyst", "copper", "diamond", "emerald", "gold", "iron", "lapis", "netherite", "quartz", "redstone"]
 if FORMAT != "1.21.1":

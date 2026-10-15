@@ -6,6 +6,7 @@
 			"permutations": {
 				"amethyst": "minecraft:trims/color_palettes/amethyst",
 				"copper": "minecraft:trims/color_palettes/copper",
+				"copper_darker": "minecraft:trims/color_palettes/copper_darker",
 				"diamond": "minecraft:trims/color_palettes/diamond",
 				"diamond_darker": "minecraft:trims/color_palettes/diamond_darker",
 				"emerald": "minecraft:trims/color_palettes/emerald",
@@ -17,11 +18,12 @@
 				"netherite": "minecraft:trims/color_palettes/netherite",
 				"netherite_darker": "minecraft:trims/color_palettes/netherite_darker",
 				"quartz": "minecraft:trims/color_palettes/quartz",
-				"redstone": "minecraft:trims/color_palettes/redstone"
+				"redstone": "minecraft:trims/color_palettes/redstone",
+				"resin": "minecraft:trims/color_palettes/resin"
 			},
 			"textures": [
-				"beyond_the_dragon:trims/models/armor/dragon_scale",
-				"beyond_the_dragon:trims/models/armor/dragon_scale_leggings"
+				"beyond_the_dragon:trims/entity/humanoid/dragon_scale",
+				"beyond_the_dragon:trims/entity/humanoid_leggings/dragon_scale"
 			]
 		}
 	]
