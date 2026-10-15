@@ -6,6 +6,8 @@ playing after the Ender Dragon. Ruins drift through the outer End, the dragon ge
 time it's respawned, and aphelite (a metal a step past netherite) only exists far from the centre.
 The design doc with every decision is Gabby's Claude doc "Beyond the Dragon — design doc"; this
 file holds what a session needs to work here.
+`PROGRESS.md` says what's done, what's broken and what's next, with a row per session: read
+it first, and add this session's row before ending.
 
 ## Layout
 
@@ -156,6 +158,8 @@ or test names. Check the diff for these before every push.
   test opens a real game window for a minute or two.
 - A new or changed check should fail with the feature switched off: run it that way once, then
   put the code back. A check that compares against the setting it tests proves nothing.
+- A data change (worldgen, loot, a template) gets the same proof: run the part of the test that
+  sees it, on every terrain in the branch's matrix, and quote the numbers in the progress row.
 - On Linux without a screen, run game tests under `xvfb-run -a`. 26.3 also needs
   `SDL_VIDEO_FORCE_EGL=1` with `libegl1 libegl-mesa0` installed, or the game hangs at startup.
 
