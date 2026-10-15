@@ -3,6 +3,8 @@
 A Fabric and NeoForge mod for Minecraft 26.3 (26.1.2 is on the `26.1` branch and 1.21.1 on the
 `1.21.1` branch). You killed the dragon; that was the tutorial.
 
+Downloads (a Fabric and a NeoForge jar for each Minecraft version) are on the [Releases page](https://github.com/gabmaybelle/beyond-the-dragon/releases).
+
 Beyond the Dragon is for players who have done it all. It leaves the game you know alone and
 adds reasons to pack your elytra and keep flying: ruins at the edge of the End, a dragon that
 comes back harder every time, and a metal that only exists very far from home. No magic, no
