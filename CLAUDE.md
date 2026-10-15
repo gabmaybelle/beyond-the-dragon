@@ -124,6 +124,34 @@ registrations in its registry event, so its `Platform` queues them and the resul
 - The egg must be **sneak-placed** on the beacon, like any block on a container; a plain
   right-click opens the beacon's menu. The egg is see-through, so it doesn't dim the beam.
 
+## Gabby's mods: who does what (the same in every repo)
+
+One job per mod, decided 2026-10-15, so nothing is done twice and each repo tells the same story:
+
+- **Cozy Core** (cozy-core): the builder rules, each an ordinary game rule: builds stay built (mob
+  explosions, endermen, fire), no phantoms, keep your hotbar on death, the Hearth Lantern, cheap
+  wood in the stonecutter, re-dyeing and builder trades. Fabric and NeoForge jars, plus a plain
+  data pack of the recipes.
+- **Espresso Flavoured Core** (espresso-flavoured): the café: coffee you grow and brew, mugs,
+  baristas, Bean Coins, the café charms, and Drowsy (coffee's reason to exist). Longer days stay a
+  Core setting for now. The survival rules Cozy Core now covers left Core in 0.4.0 (its PLAN-0.4.0.md).
+- **Spawn Gazebo** (spawn-gazebo): the gazebo at the world spawn and its starter chest.
+- **Nightfall Clock** (nightfall-clock): the clock above the hotbar and the dusk warning.
+- **Pocket List** (pocket-list): the gathering checklist.
+- **Not Now, Shield** (not-now-shield): the shield drawn lower in first person; on 26.x also
+  tools that change blocks while a shield is in the off-hand.
+- **Beyond the Dragon** (beyond-the-dragon): the end-game after the Ender Dragon: ruins at the
+  edge of the End, a dragon that comes back harder, and the aphelite metal.
+- **Forgemark** (forgemark): tempering the tools, weapons and armour you already have, from any
+  mod, for a small capped quality bonus.
+- **Espresso Flavoured** (espresso-flavoured-pack): the modpack that puts them together. Since
+  pack 0.5.0 (2026-10-15) it carries all five: Cozy Core, Espresso Flavoured Core (back as the café
+  once it stopped doing Cozy Core's jobs), Spawn Gazebo, Nightfall Clock and Pocket List.
+- **Cozy Core Pack** (cozy-core-pack): the builder-friendly modpack around Cozy Core, with Spawn
+  Gazebo, Nightfall Clock, Pocket List and Not Now, Shield.
+
+A new feature goes in the mod whose job it is. If none fits, ask Gabby before adding it anywhere.
+
 ## Working on Gabby's mods (the same in every repo)
 
 Gabby makes these mods with help from Claude. Several Claude sessions work on them: one on her
