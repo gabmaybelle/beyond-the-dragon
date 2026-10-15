@@ -8,9 +8,6 @@ adds reasons to pack your elytra and keep flying: ruins at the edge of the End, 
 comes back harder every time, and a metal that only exists very far from home. No magic, no
 machines, nothing that fights your other mods.
 
-**It's in development.** Everything below works and is tested in game, but the first release
-isn't out yet.
-
 ## What's in it
 
 - **The Far End.** The End gets more rewarding the farther you fly from the centre. A title
