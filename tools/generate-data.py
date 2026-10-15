@@ -29,6 +29,17 @@ TOOLS = ["sword", "pickaxe", "axe", "shovel", "hoe"]
 FORMAT = "26.1"
 
 
+# Ruins keep out of End Cities that will really stand nearby, and out of each other: each kind
+# keeps out of the kinds before it in this order (one direction only, so two ruins never wait on
+# each other). EndJigsawStructure asks each listed set whether its structure really starts near.
+RUIN_ORDER = ["observatory", "wreck", "graveyard", "sinking_city"]
+
+
+def keep_out_of(kind):
+    sets = {"observatory": "observatories", "wreck": "wrecks", "graveyard": "graveyards", "sinking_city": "sinking_citys"}
+    return ["minecraft:end_cities"] + [f"{NS}:{sets[k]}" for k in RUIN_ORDER[:RUIN_ORDER.index(kind)]]
+
+
 TRIM_MATERIALS = ["amethyst", "copper", "diamond", "emerald", "gold", "iron", "lapis", "netherite", "quartz", "redstone"]
 if FORMAT != "1.21.1":
     TRIM_MATERIALS.append("resin")
@@ -471,7 +482,7 @@ write(DATA / "worldgen" / "structure" / "observatory.json", {
     "min_surface_y": 50,
     "max_slope": MAX_SLOPE,
     "min_distance": 1000,
-    "avoid_end_cities": True,
+    "keep_out_of": keep_out_of("observatory"),
 })
 write(DATA / "worldgen" / "structure_set" / "observatories.json", {
     "placement": {
@@ -532,7 +543,7 @@ def structure(name, pool_name, template, size, spacing, separation, salt, extra_
         "max_slope": max_slope,
         **({"footing": footing} if footing else {}),
         "min_distance": 1000,
-        "avoid_end_cities": True,
+        "keep_out_of": keep_out_of(name),
     })
     write(DATA / "worldgen" / "structure_set" / f"{name}s.json", {
         "placement": {
