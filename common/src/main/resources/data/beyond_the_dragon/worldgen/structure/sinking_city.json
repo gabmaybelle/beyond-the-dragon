@@ -18,5 +18,6 @@
 		27,
 		69
 	],
-	"min_distance": 1000
+	"min_distance": 1000,
+	"avoid_end_cities": true
 }

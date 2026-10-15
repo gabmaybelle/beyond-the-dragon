@@ -12,5 +12,6 @@
 	"max_distance_from_center": 48,
 	"min_surface_y": 50,
 	"max_slope": 12,
-	"min_distance": 1000
+	"min_distance": 1000,
+	"avoid_end_cities": true
 }

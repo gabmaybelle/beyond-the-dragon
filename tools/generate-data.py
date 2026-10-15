@@ -28,6 +28,7 @@ TOOLS = ["sword", "pickaxe", "axe", "shovel", "hoe"]
 # only place the versions differ.
 FORMAT = "26.1"
 
+
 TRIM_MATERIALS = ["amethyst", "copper", "diamond", "emerald", "gold", "iron", "lapis", "netherite", "quartz", "redstone"]
 if FORMAT != "1.21.1":
     TRIM_MATERIALS.append("resin")
@@ -470,6 +471,7 @@ write(DATA / "worldgen" / "structure" / "observatory.json", {
     "min_surface_y": 50,
     "max_slope": MAX_SLOPE,
     "min_distance": 1000,
+    "avoid_end_cities": True,
 })
 write(DATA / "worldgen" / "structure_set" / "observatories.json", {
     "placement": {
@@ -530,6 +532,7 @@ def structure(name, pool_name, template, size, spacing, separation, salt, extra_
         "max_slope": max_slope,
         **({"footing": footing} if footing else {}),
         "min_distance": 1000,
+        "avoid_end_cities": True,
     })
     write(DATA / "worldgen" / "structure_set" / f"{name}s.json", {
         "placement": {
