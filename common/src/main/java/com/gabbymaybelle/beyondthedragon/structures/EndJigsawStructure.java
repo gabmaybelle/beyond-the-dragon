@@ -7,13 +7,18 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.heightproviders.HeightProvider;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructureSets;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pools.DimensionPadding;
@@ -38,7 +43,9 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
  * over the void). {@code min_surface_y} is the lowest surface height that counts as an island
  * (vanilla End land is y 55 to 75 or so), {@code max_slope} is how far the highest and lowest
  * samples may differ (the templates' end stone plinth covers that much of a drop), and
- * {@code min_distance} keeps the structure that many blocks from the End's centre. The biomes are the {@code #minecraft:is_end} tag, so
+ * {@code min_distance} keeps the structure that many blocks from the End's centre, and
+ * {@code avoid_end_cities} refuses a start whose footprint would reach into an End City that will
+ * really stand there (see {@link #intoEndCity}). The biomes are the {@code #minecraft:is_end} tag, so
  * modded End biomes count too; the surface and distance checks do the rest, and they matter
  * there most: {@code beard_box} terrain adaptation does nothing on an End whose density
  * functions it can't outweigh (Stellarity's, for one).
@@ -53,7 +60,8 @@ public final class EndJigsawStructure extends Structure {
 			Codec.intRange(0, 320).optionalFieldOf("min_surface_y", 50).forGetter(s -> s.minSurfaceY),
 			Codec.intRange(0, 64).optionalFieldOf("max_slope", 6).forGetter(s -> s.maxSlope),
 			Codec.INT.listOf(4, 4).optionalFieldOf("footing", List.of()).forGetter(s -> s.footing),
-			Codec.intRange(0, 100000).optionalFieldOf("min_distance", 0).forGetter(s -> s.minDistance)
+			Codec.intRange(0, 100000).optionalFieldOf("min_distance", 0).forGetter(s -> s.minDistance),
+			Codec.BOOL.optionalFieldOf("avoid_end_cities", false).forGetter(s -> s.avoidEndCities)
 	).apply(instance, EndJigsawStructure::new));
 	public static final StructureType<EndJigsawStructure> TYPE = () -> CODEC;
 
@@ -65,9 +73,10 @@ public final class EndJigsawStructure extends Structure {
 	private final int maxSlope;
 	private final List<Integer> footing;
 	private final int minDistance;
+	private final boolean avoidEndCities;
 
 	public EndJigsawStructure(StructureSettings settings, Holder<StructureTemplatePool> startPool, int size, HeightProvider startHeight,
-			int maxDistanceFromCenter, int minSurfaceY, int maxSlope, List<Integer> footing, int minDistance) {
+			int maxDistanceFromCenter, int minSurfaceY, int maxSlope, List<Integer> footing, int minDistance, boolean avoidEndCities) {
 		super(settings);
 		this.startPool = startPool;
 		this.size = size;
@@ -77,6 +86,7 @@ public final class EndJigsawStructure extends Structure {
 		this.maxSlope = maxSlope;
 		this.footing = footing;
 		this.minDistance = minDistance;
+		this.avoidEndCities = avoidEndCities;
 	}
 
 	/**
@@ -151,6 +161,9 @@ public final class EndJigsawStructure extends Structure {
 		if (surface.isEmpty() || surface.get().lowest() < minSurfaceY || surface.get().highest() - surface.get().lowest() > maxSlope) {
 			return Optional.empty();
 		}
+		if (avoidEndCities && intoEndCity(context, surface.get().box())) {
+			return Optional.empty();
+		}
 		// The template's bottom goes at the footing centre's first free block plus the start height
 		// (negative: the plinth sinks in). A constant height never reads its random; a copy is
 		// passed all the same so the context's own random reaches the placement untouched.
@@ -159,6 +172,53 @@ public final class EndJigsawStructure extends Structure {
 		return JigsawPlacement.addPieces(context, startPool, Optional.empty(), size, new BlockPos(x, y, z), false,
 				Optional.empty(), maxDistanceFromCenter,
 				PoolAliasLookup.EMPTY, DimensionPadding.ZERO, LiquidSettings.IGNORE_WATERLOGGING);
+	}
+
+	/** How far an End City's pieces reach from its start chunk, at most, with room to spare (eight measured). */
+	private static final int CITY_REACH_CHUNKS = 10;
+	/** Blocks kept clear between a ruin's footprint and a city's pieces. */
+	private static final int CITY_MARGIN = 4;
+
+	/**
+	 * Whether this ruin's footprint would reach into an End City that will really stand. The
+	 * footprint is the start template's box: the generator turns every jigsaw block in our
+	 * templates to air, so a ruin is its start piece and nothing more. Each End City candidate
+	 * chunk in reach (one per grid cell of the End City set) is asked whether the city starts
+	 * there, with the city's own terrain check; only then are its pieces laid out, from the seed,
+	 * and compared. A wider exclusion zone in the structure set would keep clear of every chunk
+	 * where a city might start, real or not: in the game test that cost up to a fifth of the
+	 * ruins on Stellarity's dense End to prevent one overlap.
+	 */
+	private boolean intoEndCity(GenerationContext context, BoundingBox start) {
+		Optional<Holder.Reference<StructureSet>> set = context.registryAccess().lookupOrThrow(Registries.STRUCTURE_SET).get(BuiltinStructureSets.END_CITIES);
+		if (set.isEmpty() || !(set.get().value().placement() instanceof RandomSpreadStructurePlacement spread)) {
+			return false;
+		}
+		BoundingBox footprint = BoundingBox.fromCorners(
+				new BlockPos(start.minX() - CITY_MARGIN, -2048, start.minZ() - CITY_MARGIN),
+				new BlockPos(start.maxX() + CITY_MARGIN, 2048, start.maxZ() + CITY_MARGIN));
+		ChunkPos here = context.chunkPos();
+		int reach = CITY_REACH_CHUNKS + (Math.max(start.getXSpan(), start.getZSpan()) + CITY_MARGIN) / 16 + 1;
+		int spacing = spread.spacing();
+		for (int gx = Math.floorDiv(here.x - reach, spacing); gx <= Math.floorDiv(here.x + reach, spacing); gx++) {
+			for (int gz = Math.floorDiv(here.z - reach, spacing); gz <= Math.floorDiv(here.z + reach, spacing); gz++) {
+				ChunkPos city = spread.getPotentialStructureChunk(context.seed(), gx * spacing, gz * spacing);
+				if (Math.max(Math.abs(city.x - here.x), Math.abs(city.z - here.z)) > reach) {
+					continue;
+				}
+				for (StructureSet.StructureSelectionEntry entry : set.get().value().structures()) {
+					Structure structure = entry.structure().value();
+					GenerationContext there = new GenerationContext(context.registryAccess(), context.chunkGenerator(), context.biomeSource(),
+							context.randomState(), context.structureTemplateManager(), context.seed(), city,
+							context.heightAccessor(), structure.biomes()::contains);
+					Optional<GenerationStub> stub = structure.findValidGenerationPoint(there);
+					if (stub.isPresent() && stub.get().getPiecesBuilder().build().pieces().stream().anyMatch(piece -> piece.getBoundingBox().intersects(footprint))) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override

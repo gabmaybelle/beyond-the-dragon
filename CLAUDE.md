@@ -107,7 +107,12 @@ registrations in its registry event, so its `Platform` queues them and the resul
   (`max_slope`), and sets the height itself from the footing's centre: vanilla's projection
   reads the *whole box's* centre, which put a graveyard on the void floor. The game test's
   placement-yield check prints, per ruin and per End mod, how many candidate chunks were
-  rejected for void and for slope; tune from those numbers. Every template also stands on a plinth of
+  rejected for void and for slope; tune from those numbers. Ruins also keep out of End Cities
+  (`avoid_end_cities`): the End City set's candidates near a ruin are asked whether the city
+  really starts there, and its pieces, laid out from the seed, are compared with the ruin's
+  box. A wider exclusion zone in the structure sets can't do it: it keeps clear of every chunk
+  where a city *might* start, and cost up to a fifth of the ruins for the margin a city's sprawl
+  needs. The game test's End City overlap check measures it per terrain. Every template also stands on a plinth of
   end stone (`PLINTH` in both generator scripts) and starts that deep below the surface, so the
   plinth is buried on flat ground and is the foundation on a slope. Terrain adaptation is off:
   `beard_box` laid a flat slab the size of the whole box under the city and square terraces round
