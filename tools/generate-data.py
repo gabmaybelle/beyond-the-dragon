@@ -216,10 +216,12 @@ else:
 write(DATA / "worldgen" / "placed_feature" / "aphelite_ore.json", {
     "feature": ns("aphelite_ore"),
     "placement": [
-        {"type": "minecraft:count", "count": 6},
-        {"type": "minecraft:in_square"},
         # Up to the top of the world: vanilla's islands stop near y 75, but modded Ends (Stellarity's,
-        # say) rise far higher, and an ore capped at 90 left their outer ring without any.
+        # say) rise far higher, and an ore capped at 90 left their outer ring without any. The
+        # attempts scale with the range (six over y 8 to 90 before, eighteen over 8 to 247 now), so
+        # the density in any band of island, vanilla's included, is what it was.
+        {"type": "minecraft:count", "count": 18},
+        {"type": "minecraft:in_square"},
         {"type": "minecraft:height_range", "height": {"type": "minecraft:uniform",
                                                       "min_inclusive": {"absolute": 8}, "max_inclusive": {"below_top": 8}}},
         {"type": ns("in_ring"), "ring": "outer"},
