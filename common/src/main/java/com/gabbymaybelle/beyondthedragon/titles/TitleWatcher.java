@@ -147,15 +147,15 @@ public final class TitleWatcher {
 		player.connection.send(new ClientboundSetSubtitleTextPacket(
 				ring == null ? Component.empty() : Component.translatable(ring.titleKey())));
 		player.connection.send(new ClientboundSetTitleTextPacket(name(biome)));
-		BeyondTheDragon.LOGGER.debug("Title for {}: {}{}", player.getScoreboardName(), biome.identifier(),
+		BeyondTheDragon.LOGGER.debug("Title for {}: {}{}", player.getScoreboardName(), biome.location(),
 				ring == null ? "" : " (" + ring + ")");
 	}
 
 	/** The biome's name: the mod's own for the End's biomes when that's on, else the vanilla one. */
 	public static Component name(ResourceKey<Biome> biome) {
 		if (Config.endBiomeNames && END_BIOMES.contains(biome)) {
-			return Component.translatable("biome.beyond_the_dragon." + biome.identifier().getPath());
+			return Component.translatable("biome.beyond_the_dragon." + biome.location().getPath());
 		}
-		return Component.translatable("biome." + biome.identifier().getNamespace() + "." + biome.identifier().getPath());
+		return Component.translatable("biome." + biome.location().getNamespace() + "." + biome.location().getPath());
 	}
 }

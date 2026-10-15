@@ -12,9 +12,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:purpur_block",
 					"weight": 8,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 6,
@@ -27,9 +27,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:end_rod",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 3,
@@ -42,9 +42,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:magenta_stained_glass",
 					"weight": 5,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 4,
@@ -57,9 +57,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:diamond",
 					"weight": 4,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 1,
@@ -72,9 +72,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:emerald",
 					"weight": 4,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -87,9 +87,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:shulker_shell",
 					"weight": 3,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 1,
@@ -102,9 +102,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:ender_pearl",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -117,9 +117,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:chorus_fruit",
 					"weight": 8,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 4,
@@ -132,9 +132,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:experience_bottle",
 					"weight": 6,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 3,
@@ -152,9 +152,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:golden_apple",
 					"weight": 3,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 1,
@@ -167,9 +167,9 @@
 					"type": "minecraft:item",
 					"name": "minecraft:book",
 					"weight": 3,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:enchant_with_levels",
+							"function": "minecraft:enchant_with_levels",
 							"levels": {
 								"type": "minecraft:uniform",
 								"min": 20,
@@ -187,18 +187,20 @@
 		},
 		{
 			"rolls": 1,
-			"condition": {
-				"type": "beyond_the_dragon:in_ring",
-				"ring": "outer"
-			},
+			"conditions": [
+				{
+					"condition": "beyond_the_dragon:in_ring",
+					"ring": "outer"
+				}
+			],
 			"entries": [
 				{
 					"type": "minecraft:item",
 					"name": "beyond_the_dragon:aphelite_shard",
 					"weight": 4,
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": {
 								"type": "minecraft:uniform",
 								"min": 2,
@@ -224,15 +226,15 @@
 				{
 					"type": "minecraft:item",
 					"name": "minecraft:written_book",
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_book_cover",
+							"function": "minecraft:set_book_cover",
 							"title": "A Resident's Note",
 							"author": "a resident",
 							"generation": 0
 						},
 						{
-							"type": "minecraft:set_written_book_pages",
+							"function": "minecraft:set_written_book_pages",
 							"pages": [
 								"We are leaving before the rest goes. If you are reading this, go to the keeper's tower instead; the one with the glass eye.",
 								"Mend it, and its chart will show you every ruin and city near. More than that: the lectern is where the dead come back. The End has no other such place."

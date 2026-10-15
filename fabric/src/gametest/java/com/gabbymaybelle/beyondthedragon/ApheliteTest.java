@@ -6,23 +6,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
-import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
+import com.gabbymaybelle.beyondthedragon.harness.ClientGameTestContext;
+import com.gabbymaybelle.beyondthedragon.harness.TestServerContext;
 import net.minecraft.client.CameraType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Shulker;
@@ -34,7 +32,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
-import net.minecraft.world.item.equipment.trim.ArmorTrim;
+import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -96,10 +94,10 @@ final class ApheliteTest {
 				ServerPlayer player = player(s);
 				ServerLevel overworld = s.overworld();
 				ArmorTrim trim = new ArmorTrim(
-						s.registryAccess().lookupOrThrow(Registries.TRIM_MATERIAL)
-								.getOrThrow(ResourceKey.create(Registries.TRIM_MATERIAL, Identifier.withDefaultNamespace(material))),
-						s.registryAccess().lookupOrThrow(Registries.TRIM_PATTERN)
-								.getOrThrow(ResourceKey.create(Registries.TRIM_PATTERN, Aphelite.id("dragon_scale"))));
+						s.registryAccess().registryOrThrow(Registries.TRIM_MATERIAL)
+								.getHolderOrThrow(ResourceKey.create(Registries.TRIM_MATERIAL, ResourceLocation.withDefaultNamespace(material))),
+						s.registryAccess().registryOrThrow(Registries.TRIM_PATTERN)
+								.getHolderOrThrow(ResourceKey.create(Registries.TRIM_PATTERN, Aphelite.id("dragon_scale"))));
 				List<Supplier<Item>> set = List.of(Aphelite.HELMET, Aphelite.CHESTPLATE, Aphelite.LEGGINGS, Aphelite.BOOTS);
 				EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 				for (int i = 0; i < 4; i++) {
@@ -107,12 +105,12 @@ final class ApheliteTest {
 					stack.set(DataComponents.TRIM, trim);
 					player.setItemSlot(slots[i], stack);
 				}
-				player.setPermanentlyInvulnerable(true);
+				player.setInvulnerable(true);
 				player.setGameMode(GameType.CREATIVE);
 				player.getAbilities().flying = true;
 				player.onUpdateAbilities();
 				// High up first: the ground's height can't be read until the chunk is loaded.
-				player.teleportTo(overworld, 0.5, 200, 0.5, java.util.Set.of(), 0, 0, false);
+				player.teleportTo(overworld, 0.5, 200, 0.5, java.util.Set.of(), 0, 0);
 			});
 			ctx.waitTicks(60);
 			server.runOnServer(s -> {
@@ -121,7 +119,7 @@ final class ApheliteTest {
 				BlockPos ground = overworld.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(0, 0, 0));
 				player.getAbilities().flying = false;
 				player.onUpdateAbilities();
-				player.teleportTo(overworld, 0.5, ground.getY(), 0.5, java.util.Set.of(), 0, 0, false);
+				player.teleportTo(overworld, 0.5, ground.getY(), 0.5, java.util.Set.of(), 0, 0);
 			});
 			// Coming back from the End the client fades in from black; give it time. A narrow field
 			// of view brings the figure close enough to see the scales.
@@ -130,18 +128,14 @@ final class ApheliteTest {
 			ctx.runOnClient(mc -> {
 				mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
 				mc.options.fov().set(45);
-				if (!mc.gui.hud.isHidden()) {
-					mc.gui.hud.toggle();
-				}
+				mc.options.hideGui = true;
 			});
 			ctx.waitTicks(60);
-			BeyondTheDragonClientTest.screenshot(ctx, TestScreenshotOptions.of("beyond_the_dragon_trim_" + material).withSize(1280, 720));
+			BeyondTheDragonClientTest.screenshot(ctx, "beyond_the_dragon_trim_" + material);
 			ctx.runOnClient(mc -> {
 				mc.options.setCameraType(CameraType.FIRST_PERSON);
 				mc.options.fov().set(fov);
-				if (mc.gui.hud.isHidden()) {
-					mc.gui.hud.toggle();
-				}
+				mc.options.hideGui = false;
 			});
 		}
 		server.runOnServer(s -> {
@@ -163,14 +157,14 @@ final class ApheliteTest {
 	private void recipes(TestServerContext server) {
 		for (String recipe : List.of("aphelite_ingot", "aphelite_helmet_smithing", "aphelite_pickaxe_smithing",
 				"aphelite_upgrade_smithing_template", "dragon_scale_armor_trim_smithing_template_smithing_trim")) {
-			boolean present = server.computeOnServer(s -> s.getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, Aphelite.id(recipe))).isPresent());
+			boolean present = server.computeOnServer(s -> s.getRecipeManager().byKey(Aphelite.id(recipe)).isPresent());
 			check(present, "recipe " + recipe + " loads");
 		}
 		ItemStack result = server.computeOnServer(s -> {
 			SmithingRecipeInput input = new SmithingRecipeInput(new ItemStack(Aphelite.UPGRADE_TEMPLATE.get()),
 					new ItemStack(Items.NETHERITE_HELMET), new ItemStack(Aphelite.INGOT.get()));
 			Optional<RecipeHolder<SmithingRecipe>> holder = s.getRecipeManager().getRecipeFor(RecipeType.SMITHING, input, s.overworld());
-			return holder.map(h -> h.value().assemble(input)).orElse(ItemStack.EMPTY);
+			return holder.map(h -> h.value().assemble(input, s.registryAccess())).orElse(ItemStack.EMPTY);
 		});
 		check(result.getItem() == Aphelite.HELMET.get(), "template + netherite helmet + ingot smiths an aphelite helmet (got " + result + ")");
 	}
@@ -189,10 +183,10 @@ final class ApheliteTest {
 			ServerLevel end = s.getLevel(Level.END);
 			ServerPlayer player = player(s);
 			// Stand beside the ore so its chunk ticks and the drops are visible to entity queries.
-			player.setPermanentlyInvulnerable(true);
+			player.setInvulnerable(true);
 			player.setGameMode(GameType.SURVIVAL);
 			end.setBlockAndUpdate(base.offset(-2, -1, -2), Blocks.OBSIDIAN.defaultBlockState());
-			player.teleportTo(end, base.getX() - 1.5, base.getY(), base.getZ() - 1.5, java.util.Set.of(), 0, 0, false);
+			player.teleportTo(end, base.getX() - 1.5, base.getY(), base.getZ() - 1.5, java.util.Set.of(), 0, 0);
 		});
 		// Drops in a chunk that isn't ticking entities yet are invisible to entity queries, and on
 		// a slow server (a modded End generating around the player) the chunk takes a while.
@@ -226,7 +220,7 @@ final class ApheliteTest {
 			}
 			// The player stands beside the ore and may have picked a drop up as its pickup delay ended.
 			ServerPlayer player = player(s);
-			for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
+			for (ItemStack stack : player.getInventory().items) {
 				if (stack.getItem() == Aphelite.SHARD.get()) {
 					shards += stack.getCount();
 				}
@@ -305,18 +299,18 @@ final class ApheliteTest {
 		float[] landing = server.computeOnServer(s -> {
 			ServerLevel end = s.getLevel(Level.END);
 			ServerPlayer player = player(s);
-			player.setPermanentlyInvulnerable(false);
+			player.setInvulnerable(false);
 			player.setHealth(20.0F);
 			wear(player, 4);
-			boolean fallHurt = player.hurtServer(end, end.damageSources().fall(), 6.0F);
-			boolean crashHurt = player.hurtServer(end, end.damageSources().flyIntoWall(), 6.0F);
+			boolean fallHurt = player.hurt(end.damageSources().fall(), 6.0F);
+			boolean crashHurt = player.hurt(end.damageSources().flyIntoWall(), 6.0F);
 			float afterSet = player.getHealth();
 			wear(player, 2);
-			player.setInvulnerableTime(0);
-			boolean twoPiecesHurt = player.hurtServer(end, end.damageSources().fall(), 6.0F);
+			player.invulnerableTime = 0;
+			boolean twoPiecesHurt = player.hurt(end.damageSources().fall(), 6.0F);
 			float afterTwo = player.getHealth();
 			player.setHealth(20.0F);
-			player.setPermanentlyInvulnerable(true);
+			player.setInvulnerable(true);
 			wear(player, 0);
 			return new float[] {fallHurt ? 1 : 0, crashHurt ? 1 : 0, afterSet, twoPiecesHurt ? 1 : 0, afterTwo};
 		});
@@ -332,7 +326,7 @@ final class ApheliteTest {
 			ServerPlayer player = player(s);
 			player.removeAllEffects();
 			wear(player, pieces);
-			Shulker shulker = EntityTypes.SHULKER.create(end, EntitySpawnReason.COMMAND);
+			Shulker shulker = EntityType.SHULKER.create(end);
 			player.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 200), shulker);
 			MobEffectInstance effect = player.getEffect(MobEffects.LEVITATION);
 			int duration = effect == null ? 0 : effect.getDuration();

@@ -3,9 +3,12 @@
 	"id": "beyond_the_dragon_gametest",
 	"version": "1.0.0",
 	"name": "Beyond the Dragon game tests",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
-		"fabric-client-gametest": [
+		"client": [
+			"com.gabbymaybelle.beyondthedragon.harness.GameTestRunner"
+		],
+		"beyond_the_dragon:gametest": [
 			"com.gabbymaybelle.beyondthedragon.BeyondTheDragonClientTest"
 		]
 	},

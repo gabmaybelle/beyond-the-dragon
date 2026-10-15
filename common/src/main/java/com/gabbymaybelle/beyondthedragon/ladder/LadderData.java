@@ -1,25 +1,19 @@
 package com.gabbymaybelle.beyondthedragon.ladder;
 
 import com.gabbymaybelle.beyondthedragon.BeyondTheDragon;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.Identifier;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.level.saveddata.SavedDataType;
 
 /**
  * The Dragon Ladder's state, saved with the End: whether the egg has been set on a beacon, the
  * tier the next (or current) dragon fights at, and which tiers have paid out their rewards.
  */
 public final class LadderData extends SavedData {
-	private static final Codec<LadderData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			Codec.BOOL.fieldOf("unlocked").forGetter(data -> data.unlocked),
-			Codec.INT.fieldOf("tier").forGetter(data -> data.tier),
-			Codec.INT.fieldOf("rewarded").forGetter(data -> data.rewarded)
-	).apply(instance, LadderData::new));
-	public static final SavedDataType<LadderData> TYPE = new SavedDataType<>(
-			Identifier.fromNamespaceAndPath(BeyondTheDragon.MOD_ID, "dragon_ladder"), LadderData::new, CODEC, null);
+	// 1.21.1 saves through NBT (26.x through a codec); the keys match, so a world moves between them.
+	public static final SavedData.Factory<LadderData> TYPE = new SavedData.Factory<>(LadderData::new, LadderData::load, null);
+	private static final String NAME = BeyondTheDragon.MOD_ID + "_dragon_ladder";
 
 	private boolean unlocked;
 	private int tier;
@@ -35,9 +29,21 @@ public final class LadderData extends SavedData {
 		this.rewarded = rewarded;
 	}
 
+	private static LadderData load(CompoundTag tag, HolderLookup.Provider registries) {
+		return new LadderData(tag.getBoolean("unlocked"), tag.getInt("tier"), tag.getInt("rewarded"));
+	}
+
+	@Override
+	public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+		tag.putBoolean("unlocked", unlocked);
+		tag.putInt("tier", tier);
+		tag.putInt("rewarded", rewarded);
+		return tag;
+	}
+
 	/** The ladder's state for the End; the End is where the dragon fight lives. */
 	public static LadderData get(ServerLevel end) {
-		return end.getDataStorage().computeIfAbsent(TYPE);
+		return end.getDataStorage().computeIfAbsent(TYPE, NAME);
 	}
 
 	public boolean unlocked() {

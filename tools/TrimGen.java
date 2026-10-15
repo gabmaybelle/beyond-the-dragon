@@ -28,7 +28,8 @@ public class TrimGen {
 	private static final int[] GREY = {0x000000, 0x202020, 0x404040, 0x606060, 0x808080, 0xa0a0a0, 0xc0c0c0, 0xe0e0e0};
 
 	public static void main(String[] args) throws IOException {
-		Path assets = Path.of(args[0]).resolve("textures/trims/entity");
+		// 1.21.1 reads trim sheets from trims/models/armor/<pattern> and <pattern>_leggings.
+		Path assets = Path.of(args[0]).resolve("textures/trims/models/armor");
 		BufferedImage humanoid = new BufferedImage(64, 32, BufferedImage.TYPE_INT_ARGB);
 		BufferedImage leggings = new BufferedImage(64, 32, BufferedImage.TYPE_INT_ARGB);
 
@@ -56,8 +57,8 @@ public class TrimGen {
 		scales(leggings, 16, 29, 4, 2);  // waist right
 		scales(leggings, 28, 29, 4, 2);  // waist left
 
-		writeGrey(humanoid, assets.resolve("humanoid/dragon_scale.png"));
-		writeGrey(leggings, assets.resolve("humanoid_leggings/dragon_scale.png"));
+		writeGrey(humanoid, assets.resolve("dragon_scale.png"));
+		writeGrey(leggings, assets.resolve("dragon_scale_leggings.png"));
 		if (args.length > 1) {
 			preview(humanoid, leggings, Path.of(args[1]));
 		}

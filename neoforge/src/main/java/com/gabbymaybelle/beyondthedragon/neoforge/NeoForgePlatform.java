@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ItemLike;
@@ -22,7 +22,7 @@ import net.neoforged.neoforge.registries.RegisterEvent;
  * registers is queued here and handed over when {@link #onRegister} fires for that registry.
  */
 public class NeoForgePlatform implements Platform {
-	private record Pending<T>(ResourceKey<? extends Registry<T>> registry, Identifier id, Supplier<T> factory) {
+	private record Pending<T>(ResourceKey<? extends Registry<T>> registry, ResourceLocation id, Supplier<T> factory) {
 		void offer(RegisterEvent event) {
 			if (event.getRegistryKey().equals(registry)) {
 				event.register(registry, id, factory);
@@ -53,7 +53,7 @@ public class NeoForgePlatform implements Platform {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> Supplier<T> register(ResourceKey<? extends Registry<T>> registry, Identifier id, Supplier<T> factory) {
+	public <T> Supplier<T> register(ResourceKey<? extends Registry<T>> registry, ResourceLocation id, Supplier<T> factory) {
 		pending.add(new Pending<>(registry, id, factory));
 		ResourceKey<T> key = ResourceKey.create(registry, id);
 		return new Supplier<>() {
@@ -62,8 +62,8 @@ public class NeoForgePlatform implements Platform {
 			@Override
 			public T get() {
 				if (value == null) {
-					Registry<T> target = (Registry<T>) BuiltInRegistries.REGISTRY.getValue(registry.identifier());
-					value = target.getValue(key);
+					Registry<T> target = (Registry<T>) BuiltInRegistries.REGISTRY.get(registry.location());
+					value = target.get(key);
 					if (value == null) {
 						throw new IllegalStateException(id + " isn't registered yet");
 					}

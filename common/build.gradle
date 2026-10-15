@@ -2,13 +2,15 @@
 // import can't sneak in: only Minecraft, Mixin and the JDK are on the classpath. Nothing here
 // ships as a jar; `fabric` and `neoforge` compile these sources into theirs.
 plugins {
-	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'fabric-loom' version "${loom_version}"
 }
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	// 1.21.1 ships obfuscated (26.x ships Mojang names); the code is written in Mojang names and Loom remaps.
+	mappings loom.officialMojangMappings()
 	// Only for the Mixin annotations and the launch-side classes they need. No Fabric API here.
-	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Plain unit tests for the pure logic (rings, title timing): `./gradlew :common:test`.
 	testImplementation platform('org.junit:junit-bom:5.11.4')

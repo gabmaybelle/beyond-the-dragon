@@ -22,7 +22,6 @@ import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
-import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -108,7 +107,7 @@ public final class EndJigsawStructure extends Structure {
 		int x = context.chunkPos().getMinBlockX();
 		int z = context.chunkPos().getMinBlockZ();
 		WorldgenRandom peek = new WorldgenRandom(new LegacyRandomSource(0L));
-		peek.setLargeFeatureSeed(context.seed(), context.chunkPos().x(), context.chunkPos().z());
+		peek.setLargeFeatureSeed(context.seed(), context.chunkPos().x, context.chunkPos().z);
 		Rotation rotation = Rotation.getRandom(peek);
 		StructurePoolElement element = startPool.value().getRandomTemplate(peek);
 		if (element == EmptyPoolElement.INSTANCE) {
@@ -158,7 +157,7 @@ public final class EndJigsawStructure extends Structure {
 		int y = surface.get().free() + startHeight.sample(new WorldgenRandom(new LegacyRandomSource(0L)),
 				new net.minecraft.world.level.levelgen.WorldGenerationContext(context.chunkGenerator(), context.heightAccessor()));
 		return JigsawPlacement.addPieces(context, startPool, Optional.empty(), size, new BlockPos(x, y, z), false,
-				Optional.empty(), new JigsawStructure.MaxDistance(maxDistanceFromCenter),
+				Optional.empty(), maxDistanceFromCenter,
 				PoolAliasLookup.EMPTY, DimensionPadding.ZERO, LiquidSettings.IGNORE_WATERLOGGING);
 	}
 

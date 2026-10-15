@@ -3,6 +3,7 @@ package com.gabbymaybelle.beyondthedragon.structures;
 import com.gabbymaybelle.beyondthedragon.Advancements;
 import com.gabbymaybelle.beyondthedragon.BeyondTheDragon;
 import com.gabbymaybelle.beyondthedragon.aphelite.Aphelite;
+import com.gabbymaybelle.beyondthedragon.mixin.SinglePoolElementAccessor;
 import com.gabbymaybelle.beyondthedragon.titles.Titles;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -20,7 +21,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,7 +39,7 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
@@ -54,7 +55,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class Observatories {
 	public static final ResourceKey<Structure> OBSERVATORY = ResourceKey.create(Registries.STRUCTURE, Aphelite.id("observatory"));
-	private static final Identifier RUIN_TEMPLATE = Aphelite.id("observatory_ruin");
+	private static final ResourceLocation RUIN_TEMPLATE = Aphelite.id("observatory_ruin");
 	private static final int CHART_SEARCH_CHUNKS = 100;
 
 	/** A block the ruin is missing: where in the template, and what should be there. */
@@ -82,7 +83,7 @@ public final class Observatories {
 				List<Missing> missing = new ArrayList<>();
 				for (var element : json.getAsJsonArray("missing")) {
 					JsonObject entry = element.getAsJsonObject();
-					missing.add(new Missing(pos(entry.getAsJsonArray("pos")), BuiltInRegistries.BLOCK.getValue(Identifier.parse(entry.get("block").getAsString()))));
+					missing.add(new Missing(pos(entry.getAsJsonArray("pos")), BuiltInRegistries.BLOCK.get(ResourceLocation.parse(entry.get("block").getAsString()))));
 				}
 				plan = new Plan(List.copyOf(missing), pos(json.getAsJsonArray("lectern")));
 			} catch (Exception e) {
@@ -156,7 +157,7 @@ public final class Observatories {
 	public static PoolElementStructurePiece ruinPiece(StructureStart start) {
 		for (StructurePiece piece : start.getPieces()) {
 			if (piece instanceof PoolElementStructurePiece pool && pool.getElement() instanceof SinglePoolElement single
-					&& RUIN_TEMPLATE.equals(single.getTemplateLocation())) {
+					&& RUIN_TEMPLATE.equals(((SinglePoolElementAccessor) single).beyondTheDragon$template().left().orElse(null))) {
 				return pool;
 			}
 		}
@@ -175,7 +176,7 @@ public final class Observatories {
 	}
 
 	public static Structure structure(ServerLevel level) {
-		return level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getOrThrow(OBSERVATORY).value();
+		return level.registryAccess().registryOrThrow(Registries.STRUCTURE).getOrThrow(OBSERVATORY);
 	}
 
 	/** Sneaking at a restored observatory's lectern: the keeper's chart. True when handled. */
@@ -198,18 +199,20 @@ public final class Observatories {
 	 */
 	public static ItemStack chart(ServerLevel level, BlockPos centre) {
 		ItemStack map = MapItem.create(level, centre.getX(), centre.getZ(), (byte) 3, true, true);
-		var structures = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+		var structures = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
 		for (String name : List.of("observatory", "wreck", "graveyard", "sinking_city")) {
-			mark(level, map, centre, structures.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(name))), name, true);
+			mark(level, map, centre, structures.getHolderOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(name))), name, true);
 		}
-		mark(level, map, centre, structures.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Identifier.withDefaultNamespace("end_city"))), "end_city", false);
+		mark(level, map, centre, structures.getHolderOrThrow(ResourceKey.create(Registries.STRUCTURE, ResourceLocation.withDefaultNamespace("end_city"))), "end_city", false);
 		MapItem.renderBiomePreviewMap(level, map);
 		map.set(DataComponents.CUSTOM_NAME, Component.translatable("item.beyond_the_dragon.keepers_chart"));
 		return map;
 	}
 
 	private static void mark(ServerLevel level, ItemStack map, BlockPos centre, Holder<Structure> structure, String name, boolean ours) {
-		BlockPos found = level.findNearestMapStructure(HolderSet.direct(structure), centre, CHART_SEARCH_CHUNKS, false);
+		// 1.21.1's level has only the tag form of the locator; the generator's takes a holder set and answers with the structure too.
+		var nearest = level.getChunkSource().getGenerator().findNearestMapStructure(level, HolderSet.direct(structure), centre, CHART_SEARCH_CHUNKS, false);
+		BlockPos found = nearest == null ? null : nearest.getFirst();
 		if (found != null) {
 			MapItemSavedData.addTargetDecoration(map, found, BeyondTheDragon.MOD_ID + ":" + name, ours ? MapDecorationTypes.TARGET_X : MapDecorationTypes.RED_X);
 		}
@@ -223,11 +226,11 @@ public final class Observatories {
 	}
 
 	/** A player died in the End: the nearest restored observatory is where they come back, if any. */
-	public static Optional<TeleportTransition> respawn(ServerPlayer dead, TeleportTransition.PostTeleportTransition post) {
+	public static Optional<DimensionTransition> respawn(ServerPlayer dead, DimensionTransition.PostDimensionTransition post) {
 		if (dead.level().dimension() != Level.END) {
 			return Optional.empty();
 		}
-		ServerLevel end = dead.level();
+		ServerLevel end = dead.serverLevel();
 		ObservatoryData.Restored nearest = null;
 		double best = Double.MAX_VALUE;
 		for (ObservatoryData.Restored observatory : ObservatoryData.get(end).restored()) {
@@ -241,6 +244,6 @@ public final class Observatories {
 			return Optional.empty();
 		}
 		BeyondTheDragon.LOGGER.info("{} died in the End; respawning at the observatory at {}", dead.getScoreboardName(), nearest.lectern());
-		return Optional.of(new TeleportTransition(end, Vec3.atBottomCenterOf(nearest.lectern().above()), Vec3.ZERO, dead.getYRot(), 0.0F, post));
+		return Optional.of(new DimensionTransition(end, Vec3.atBottomCenterOf(nearest.lectern().above()), Vec3.ZERO, dead.getYRot(), 0.0F, post));
 	}
 }

@@ -1,7 +1,0 @@
-{
-	"parent": "minecraft:item/generated",
-	"textures": {
-		"layer0": "beyond_the_dragon:item/aphelite_chestplate",
-		"layer1": "minecraft:trims/items/chestplate_trim_resin"
-	}
-}

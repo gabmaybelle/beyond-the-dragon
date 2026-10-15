@@ -1,7 +1,7 @@
 {
 	"required": true,
 	"package": "com.gabbymaybelle.beyondthedragon.mixin",
-	"compatibilityLevel": "JAVA_25",
+	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"BeaconBlockEntityAccessor",
 		"BlockItemMixin",
@@ -9,7 +9,8 @@
 		"EnderDragonMixin",
 		"LecternBlockMixin",
 		"LivingEntityMixin",
-		"ServerPlayerMixin"
+		"ServerPlayerMixin",
+		"SinglePoolElementAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

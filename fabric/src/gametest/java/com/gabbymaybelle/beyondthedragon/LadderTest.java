@@ -5,8 +5,8 @@ import com.gabbymaybelle.beyondthedragon.ladder.DragonLadder;
 import com.gabbymaybelle.beyondthedragon.ladder.LadderData;
 import java.util.List;
 import java.util.function.Consumer;
-import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
+import com.gabbymaybelle.beyondthedragon.harness.ClientGameTestContext;
+import com.gabbymaybelle.beyondthedragon.harness.TestServerContext;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,8 +14,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
@@ -29,7 +28,7 @@ import net.minecraft.world.level.Level;
 import com.gabbymaybelle.beyondthedragon.mixin.BeaconBlockEntityAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
-import net.minecraft.world.level.dimension.end.EnderDragonFight;
+import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -67,7 +66,7 @@ final class LadderTest {
 			player.setGameMode(GameType.CREATIVE);
 			player.getAbilities().flying = true;
 			player.onUpdateAbilities();
-			player.teleportTo(s.overworld(), 0.5, 200, 0.5, java.util.Set.of(), 0, 0, false);
+			player.teleportTo(s.overworld(), 0.5, 200, 0.5, java.util.Set.of(), 0, 0);
 		});
 		waitOnServer(ctx, server, s -> s.overworld().isLoaded(new BlockPos(3, 64, 3)), 600);
 		ctx.waitTicks(20);
@@ -78,7 +77,7 @@ final class LadderTest {
 			BlockPos surface = overworld.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(3, 0, 3));
 			player.getAbilities().flying = false;
 			player.onUpdateAbilities();
-			player.teleportTo(overworld, surface.getX() + 3.5, surface.getY(), surface.getZ() + 0.5, java.util.Set.of(), 0, 0, false);
+			player.teleportTo(overworld, surface.getX() + 3.5, surface.getY(), surface.getZ() + 0.5, java.util.Set.of(), 0, 0);
 			overworld.setBlockAndUpdate(surface, Blocks.BEACON.defaultBlockState());
 			return surface;
 		});
@@ -123,12 +122,12 @@ final class LadderTest {
 		server.runOnServer(s -> {
 			ServerLevel end = end(s);
 			ServerPlayer player = player(s);
-			player.setPermanentlyInvulnerable(true);
+			player.setInvulnerable(true);
 			player.setGameMode(GameType.SURVIVAL);
 			// Beside the arena's centre column, never on it: the podium and portal are placed by the
 			// heightmap at (0, 0), and a block there would move them.
 			end.setBlockAndUpdate(new BlockPos(12, 99, 12), Blocks.OBSIDIAN.defaultBlockState());
-			player.teleportTo(end, 12.5, 100, 12.5, java.util.Set.of(), 0, 0, false);
+			player.teleportTo(end, 12.5, 100, 12.5, java.util.Set.of(), 0, 0);
 		});
 		// The End unloaded while we were away; the dragon is back once its chunks are.
 		waitOnServer(ctx, server, s -> !end(s).getDragons().isEmpty(), 1200);
@@ -214,7 +213,7 @@ final class LadderTest {
 		server.runOnServer(s -> {
 			ServerLevel end = end(s);
 			for (EnderDragon dragon : end.getDragons()) {
-				dragon.kill(end);
+				dragon.kill();
 			}
 		});
 	}
@@ -234,7 +233,7 @@ final class LadderTest {
 	private static int rewardsAtPortal(TestServerContext server, BlockPos origin) {
 		return server.computeOnServer(s -> {
 			ServerLevel end = end(s);
-			BlockPos podium = end.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EnderDragonFight.getPodiumLocation(origin));
+			BlockPos podium = end.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(origin));
 			int count = 0;
 			for (ItemEntity item : end.getEntitiesOfClass(ItemEntity.class, new AABB(podium).inflate(8))) {
 				if (item.getItem().is(Items.DRAGON_BREATH)) {
@@ -251,14 +250,14 @@ final class LadderTest {
 			ServerLevel end = end(s);
 			// The exit portal's level is where its end portal blocks are; the fight keeps that
 			// position privately, so read it off the blocks. The crystals go on the bedrock ring.
-			BlockPos podium = EnderDragonFight.getPodiumLocation(origin);
+			BlockPos podium = EndPodiumFeature.getLocation(origin);
 			long sx = 0;
 			long sy = 0;
 			long sz = 0;
 			int n = 0;
 			for (int x = podium.getX() - 64; x <= podium.getX() + 64; x++) {
 				for (int z = podium.getZ() - 64; z <= podium.getZ() + 64; z++) {
-					for (int y = Math.max(end.getMinY(), podium.getY() - 40); y < Math.min(end.getMaxY(), podium.getY() + 80); y++) {
+					for (int y = Math.max(end.getMinBuildHeight(), podium.getY() - 40); y < Math.min(end.getMaxBuildHeight(), podium.getY() + 80); y++) {
 						if (end.getBlockState(new BlockPos(x, y, z)).is(Blocks.END_PORTAL)) {
 							sx += x;
 							sy += y;
@@ -290,7 +289,7 @@ final class LadderTest {
 					}
 					BeyondTheDragon.LOGGER.info("[test] BetterEnd crystal at {} on {}", pos, end.getBlockState(pos.below()).getBlock());
 				}
-				EndCrystal crystal = EntityTypes.END_CRYSTAL.create(end, EntitySpawnReason.COMMAND);
+				EndCrystal crystal = EntityType.END_CRYSTAL.create(end);
 				crystal.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
 				end.addFreshEntity(crystal);
 			}

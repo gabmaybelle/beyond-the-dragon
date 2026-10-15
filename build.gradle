@@ -19,14 +19,14 @@ subprojects {
 	}
 
 	tasks.withType(JavaCompile).configureEach {
-		it.options.release = 25
+		it.options.release = 21
 		it.options.encoding = 'UTF-8'
 	}
 
 	java {
 		withSourcesJar()
-		sourceCompatibility = JavaVersion.VERSION_25
-		targetCompatibility = JavaVersion.VERSION_25
+		sourceCompatibility = JavaVersion.VERSION_21
+		targetCompatibility = JavaVersion.VERSION_21
 	}
 
 	// Captured outside the closure: the configuration cache can't serialise `rootProject` itself.

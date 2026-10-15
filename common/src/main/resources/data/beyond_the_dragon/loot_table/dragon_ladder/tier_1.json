@@ -16,9 +16,9 @@
 				{
 					"type": "minecraft:item",
 					"name": "minecraft:dragon_breath",
-					"modifier": [
+					"functions": [
 						{
-							"type": "minecraft:set_count",
+							"function": "minecraft:set_count",
 							"count": 4
 						}
 					]

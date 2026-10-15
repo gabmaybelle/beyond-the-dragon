@@ -6,11 +6,11 @@ import com.gabbymaybelle.beyondthedragon.structures.Observatories;
 import com.gabbymaybelle.beyondthedragon.structures.ObservatoryData;
 import java.util.List;
 import java.util.function.Consumer;
-import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
-import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
+import com.gabbymaybelle.beyondthedragon.harness.ClientGameTestContext;
+import com.gabbymaybelle.beyondthedragon.harness.TestServerContext;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -33,7 +33,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 
@@ -91,7 +90,7 @@ final class StructuresTest {
 		double cx = (Integer.parseInt(m.group(1)) + Integer.parseInt(m.group(4))) / 2.0;
 		double cy = (Integer.parseInt(m.group(2)) + Integer.parseInt(m.group(5))) / 2.0;
 		double cz = (Integer.parseInt(m.group(3)) + Integer.parseInt(m.group(6))) / 2.0;
-		server.runOnServer(s -> player(s).teleportTo(s.getLevel(Level.END), cx, cy, cz, java.util.Set.of(), 0, 0, false));
+		server.runOnServer(s -> player(s).teleportTo(s.getLevel(Level.END), cx, cy, cz, java.util.Set.of(), 0, 0));
 		ctx.waitTicks(45);
 		// With the player there and the chunks ticking, which blocks are the chests now? (Lootr
 		// swaps loot chests for its own once a player is near; vanilla keeps minecraft:chest.)
@@ -173,7 +172,7 @@ final class StructuresTest {
 			float pitch = (float) Math.toDegrees(-Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
 			ServerPlayer player = player(s);
 			player.setGameMode(GameType.SPECTATOR);
-			player.teleportTo(end, ex, ey, ez, java.util.Set.of(), yaw, pitch, false);
+			player.teleportTo(end, ex, ey, ez, java.util.Set.of(), yaw, pitch);
 		});
 		// The chunks have to reach the client and render (a modded End's generation can be slow);
 		// the picture is taken without the HUD (titles, chat, toasts) and with the gamma up, since
@@ -181,24 +180,20 @@ final class StructuresTest {
 		int chunkX = (int) cx >> 4;
 		int chunkZ = (int) cz >> 4;
 		try {
-			ctx.waitFor(mc -> mc.level != null && mc.level.getChunkSource().hasChunk(chunkX, chunkZ), 2400);
+			ctx.waitFor(mc -> mc.level != null && mc.level.hasChunk(chunkX, chunkZ), 2400);
 		} catch (AssertionError slow) {
 			BeyondTheDragon.LOGGER.warn("[test] the {}'s chunk never reached the client; its picture may be empty", kind);
 		}
 		ctx.waitTicks(45);
 		double gamma = ctx.computeOnClient(mc -> mc.options.gamma().get());
 		ctx.runOnClient(mc -> {
-			if (!mc.gui.hud.isHidden()) {
-				mc.gui.hud.toggle();
-			}
+			mc.options.hideGui = true;
 			mc.options.gamma().set(1.0);
 		});
 		ctx.waitTicks(5);
-		BeyondTheDragonClientTest.screenshot(ctx, TestScreenshotOptions.of("beyond_the_dragon_" + kind).withSize(1280, 720));
+		BeyondTheDragonClientTest.screenshot(ctx, "beyond_the_dragon_" + kind);
 		ctx.runOnClient(mc -> {
-			if (mc.gui.hud.isHidden()) {
-				mc.gui.hud.toggle();
-			}
+			mc.options.hideGui = false;
 			mc.options.gamma().set(gamma);
 		});
 	}
@@ -214,12 +209,10 @@ final class StructuresTest {
 			ServerLevel end = s.getLevel(Level.END);
 			var state = end.getChunkSource().getGeneratorState();
 			var generator = end.getChunkSource().getGenerator();
-			// The same climate sampler the game's own structure check builds.
-			var climate = state.randomState().createClimateSampler(SamplerContext.builder().enableCaches().build());
 			StringBuilder out = new StringBuilder();
 			for (String kind : KINDS) {
-				Holder<Structure> holder = end.registryAccess().lookupOrThrow(Registries.STRUCTURE)
-						.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind)));
+				Holder<Structure> holder = end.registryAccess().registryOrThrow(Registries.STRUCTURE)
+						.getHolderOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind)));
 				EndJigsawStructure structure = (EndJigsawStructure) holder.value();
 				int candidates = 0;
 				int starts = 0;
@@ -232,8 +225,8 @@ final class StructuresTest {
 								continue;
 							}
 							candidates++;
-							var context = new Structure.GenerationContext(end.registryAccess(), generator, generator.getBiomeSource(), climate, state.randomState(),
-									s.getStructureTemplateManager(), end.getSeed(), new ChunkPos(cx, cz), end, holder.value().biomes()::contains);
+							var context = new Structure.GenerationContext(end.registryAccess(), generator, generator.getBiomeSource(), state.randomState(),
+									s.getStructureManager(), end.getSeed(), new ChunkPos(cx, cz), end, holder.value().biomes()::contains);
 							if (holder.value().findValidGenerationPoint(context).isPresent()) {
 								starts++;
 							} else {
@@ -264,16 +257,17 @@ final class StructuresTest {
 
 	/** Where the nearest ruin of a kind stands and what is under it; the observatory's lectern and chests are counted too. */
 	private static String footing(ServerLevel end, String kind) {
-		Holder<Structure> structure = end.registryAccess().lookupOrThrow(Registries.STRUCTURE)
-				.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind)));
-		BlockPos start = end.findNearestMapStructure(HolderSet.direct(structure), new BlockPos(0, 64, 0), 120, false);
-		if (start == null) {
+		Holder<Structure> structure = end.registryAccess().registryOrThrow(Registries.STRUCTURE)
+				.getHolderOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind)));
+		var nearest = end.getChunkSource().getGenerator().findNearestMapStructure(end, HolderSet.direct(structure), new BlockPos(0, 64, 0), 120, false);
+		if (nearest == null) {
 			return "none within 120 chunks";
 		}
+		BlockPos start = nearest.getFirst();
 		// Loading the start's chunk creates the pieces; the start's bounding box then says where the
 		// (randomly rotated) template actually stands, and loading every chunk under it places it.
 		end.getChunk(start.getX() >> 4, start.getZ() >> 4);
-		var starts = end.structureManager().startsForStructure(start.getX() >> 4, start.getZ() >> 4, structure.value());
+		var starts = end.structureManager().startsForStructure(SectionPos.of(start.getX() >> 4, 0, start.getZ() >> 4), structure.value());
 		if (starts.isEmpty() || !starts.get(0).isValid()) {
 			return "no structure start at " + start;
 		}
@@ -339,7 +333,7 @@ final class StructuresTest {
 			// Stand by the lectern so the restored title and the chart reach a real player.
 			BlockPos lectern = Observatories.worldPos(piece, Observatories.plannedLectern());
 			player.setGameMode(GameType.CREATIVE);
-			player.teleportTo(end, lectern.getX() + 1.5, lectern.getY(), lectern.getZ() + 1.5, java.util.Set.of(), 0, 0, false);
+			player.teleportTo(end, lectern.getX() + 1.5, lectern.getY(), lectern.getZ() + 1.5, java.util.Set.of(), 0, 0);
 			player.getInventory().clearContent();
 			// Put back all but one by hand, then the last one through the mod's own hook.
 			for (int i = 0; i < missing.size() - 1; i++) {
@@ -354,7 +348,7 @@ final class StructuresTest {
 			boolean restored = ObservatoryData.get(end).isRestored(Observatories.startKey(start));
 			int charts = 0;
 			int markers = 0;
-			for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
+			for (ItemStack stack : player.getInventory().items) {
 				if (stack.getItem() == Items.FILLED_MAP) {
 					charts++;
 					// Target markers ride on the item until the map is carried and updates.
@@ -391,22 +385,22 @@ final class StructuresTest {
 			ServerLevel end = s.getLevel(Level.END);
 			ServerPlayer player = player(s);
 			player.setGameMode(GameType.CREATIVE);
-			player.teleportTo(end, lectern.getX() + 40.5, lectern.getY() + 10, lectern.getZ() + 40.5, java.util.Set.of(), 0, 0, false);
+			player.teleportTo(end, lectern.getX() + 40.5, lectern.getY() + 10, lectern.getZ() + 40.5, java.util.Set.of(), 0, 0);
 		});
 		ctx.waitTicks(40);
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
-			player.setPermanentlyInvulnerable(false);
+			player.setInvulnerable(false);
 			player.setGameMode(GameType.SURVIVAL);
-			player.kill(s.getLevel(Level.END));
+			player.kill();
 		});
 		ctx.waitForScreen(DeathScreen.class);
 		ctx.clickScreenButton("deathScreen.respawn");
 		ctx.waitTicks(60);
 		String where = server.computeOnServer(s -> {
 			ServerPlayer player = player(s);
-			player.setPermanentlyInvulnerable(true);
-			return player.level().dimension().identifier() + " " + player.blockPosition() + " (lectern " + lectern + ")";
+			player.setInvulnerable(true);
+			return player.level().dimension().location() + " " + player.blockPosition() + " (lectern " + lectern + ")";
 		});
 		double distance = server.computeOnServer(s -> player(s).blockPosition().distSqr(lectern.above()));
 		check(where.contains("the_end") && distance <= 9, "a death in the End respawns at the restored observatory's lectern (" + where + ")");
@@ -415,31 +409,31 @@ final class StructuresTest {
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.setGameMode(GameType.CREATIVE);
-			player.teleportTo(s.overworld(), 0.5, 200, 0.5, java.util.Set.of(), 0, 0, false);
+			player.teleportTo(s.overworld(), 0.5, 200, 0.5, java.util.Set.of(), 0, 0);
 		});
 		ctx.waitTicks(40);
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
-			player.setPermanentlyInvulnerable(false);
+			player.setInvulnerable(false);
 			player.setGameMode(GameType.SURVIVAL);
-			player.kill(s.overworld());
+			player.kill();
 		});
 		ctx.waitForScreen(DeathScreen.class);
 		ctx.clickScreenButton("deathScreen.respawn");
 		ctx.waitTicks(60);
 		String home = server.computeOnServer(s -> {
 			ServerPlayer player = player(s);
-			player.setPermanentlyInvulnerable(true);
-			return player.level().dimension().identifier() + " " + player.blockPosition();
+			player.setInvulnerable(true);
+			return player.level().dimension().location() + " " + player.blockPosition();
 		});
 		check(home.contains("overworld"), "a death in the Overworld respawns at home, not at an observatory (" + home + ")");
 	}
 
 	private static StructureStart nearestObservatory(ServerLevel end) {
 		Structure structure = Observatories.structure(end);
-		BlockPos start = end.findNearestMapStructure(HolderSet.direct(end.registryAccess().lookupOrThrow(Registries.STRUCTURE)
-				.getOrThrow(Observatories.OBSERVATORY)), new BlockPos(0, 64, 0), 120, false);
-		return end.structureManager().startsForStructure(start.getX() >> 4, start.getZ() >> 4, structure).get(0);
+		BlockPos start = end.getChunkSource().getGenerator().findNearestMapStructure(end, HolderSet.direct(end.registryAccess().registryOrThrow(Registries.STRUCTURE)
+				.getHolderOrThrow(Observatories.OBSERVATORY)), new BlockPos(0, 64, 0), 120, false).getFirst();
+		return end.structureManager().startsForStructure(SectionPos.of(start.getX() >> 4, 0, start.getZ() >> 4), structure).get(0);
 	}
 
 	private static ServerPlayer player(MinecraftServer s) {

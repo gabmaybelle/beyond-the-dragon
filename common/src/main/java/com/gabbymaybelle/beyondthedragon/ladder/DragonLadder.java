@@ -14,10 +14,9 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.particles.PowerParticleOption;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,8 +34,8 @@ import net.minecraft.world.entity.projectile.ShulkerBullet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
-import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -176,9 +175,9 @@ public final class DragonLadder {
 		}
 		data.markRewarded(tier);
 		ResourceKey<LootTable> key = ResourceKey.create(Registries.LOOT_TABLE,
-				Identifier.fromNamespaceAndPath(BeyondTheDragon.MOD_ID, "dragon_ladder/tier_" + tier));
+				ResourceLocation.fromNamespaceAndPath(BeyondTheDragon.MOD_ID, "dragon_ladder/tier_" + tier));
 		LootTable table = end.getServer().reloadableRegistries().getLootTable(key);
-		BlockPos podium = end.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EnderDragonFight.getPodiumLocation(origin));
+		BlockPos podium = end.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(origin));
 		Vec3 drop = Vec3.atBottomCenterOf(podium.above());
 		LootParams params = new LootParams.Builder(end)
 				.withParameter(LootContextParams.ORIGIN, drop)
@@ -251,15 +250,15 @@ public final class DragonLadder {
 		abilities.nextBreath = BREATH_INTERVAL;
 		ServerPlayer target = targets.get(level.getRandom().nextInt(targets.size()));
 		BlockPos ground = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, target.blockPosition());
-		if (ground.getY() <= level.getMinY() + 1) {
+		if (ground.getY() <= level.getMinBuildHeight() + 1) {
 			return;
 		}
 		AreaEffectCloud cloud = new AreaEffectCloud(level, ground.getX() + 0.5, ground.getY(), ground.getZ() + 0.5);
 		cloud.setOwner(dragon);
 		cloud.setRadius(BREATH_RADIUS);
 		cloud.setDuration(BREATH_DURATION);
-		cloud.setCustomParticle(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F));
-		cloud.addEffect(new MobEffectInstance(MobEffects.INSTANT_DAMAGE));
+		cloud.setParticle(ParticleTypes.DRAGON_BREATH);
+		cloud.addEffect(new MobEffectInstance(MobEffects.HARM));
 		level.addFreshEntity(cloud);
 		abilities.pullingClouds.add(cloud);
 		level.playSound(null, ground, SoundEvents.ENDER_DRAGON_SHOOT, SoundSource.HOSTILE, 2.0F, 0.5F);
@@ -279,7 +278,7 @@ public final class DragonLadder {
 				Vec3 pull = new Vec3(toCloud.x / distance * BREATH_PULL, 0, toCloud.z / distance * BREATH_PULL);
 				player.addDeltaMovement(pull);
 				// A player's motion only reaches their client when the server says so.
-				player.needsSync = true;
+				player.hurtMarked = true;
 			}
 		}
 	}

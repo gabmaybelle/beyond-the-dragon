@@ -17,7 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class BlockItemMixin {
 	@Inject(method = "place", at = @At("RETURN"))
 	private void beyondTheDragon$eggPlaced(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir) {
-		if (cir.getReturnValue() != InteractionResult.SUCCESS) {
+		// 1.21.1's place answers CONSUME on the server (sidedSuccess), SUCCESS on the client.
+		if (!cir.getReturnValue().consumesAction()) {
 			return;
 		}
 		if (!(context.getLevel() instanceof ServerLevel level)) {

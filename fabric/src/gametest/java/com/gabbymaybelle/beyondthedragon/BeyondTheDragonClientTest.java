@@ -11,13 +11,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
-import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
-import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
+import com.gabbymaybelle.beyondthedragon.harness.ClientGameTest;
+import com.gabbymaybelle.beyondthedragon.harness.ClientGameTestContext;
+import com.gabbymaybelle.beyondthedragon.harness.TestServerContext;
+import com.gabbymaybelle.beyondthedragon.harness.TestSingleplayerContext;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -32,7 +31,10 @@ import net.minecraft.world.level.biome.Biomes;
  * in fabric/build/run/clientGameTest/screenshots. Each feature adds its own checks here as it
  * lands, and each check is proven by running it once with the feature switched off.
  */
-public class BeyondTheDragonClientTest implements FabricClientGameTest {
+public class BeyondTheDragonClientTest implements ClientGameTest {
+	/** Client ticks a wait on the server's clock may be behind by, when the server stalls on chunk generation. */
+	static final int STALL_SLACK = 1200;
+
 	private final List<String> failures = new ArrayList<>();
 
 	@Override
@@ -41,7 +43,7 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 		// The test world is flat (one biome, quick to make), but flat worlds switch structures off
 		// by default and the End still needs them.
 		try (TestSingleplayerContext world = ctx.worldBuilder().adjustSettings(ui -> ui.setGenerateStructures(true)).create()) {
-			world.getConnection().waitForChunksRender();
+			world.waitForChunksRender();
 			boolean loaded = world.getServer().computeOnServer(server -> FabricLoader.getInstance().isModLoaded(BeyondTheDragon.MOD_ID));
 			check(loaded, "the mod is loaded in a new world");
 			// BTD_TEST_ONLY=structures or =aphelite (an environment variable, passed through by Gradle)
@@ -101,20 +103,23 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 		ResourceKey<Biome> start = server.computeOnServer(s -> biomeAt(player(s)));
 		ctx.waitTicks(dwell + 40);
 		check(TitleWatcher.shownBiome(id).equals(Optional.of(start)),
-				"the biome you start in (" + start.identifier() + ") gets its title after " + Config.biomeTitleDwellSeconds + " seconds");
+				"the biome you start in (" + start.location() + ") gets its title after " + Config.biomeTitleDwellSeconds + " seconds");
 
 		// Into the End, above the main island, as a spectator so nothing falls.
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.setGameMode(GameType.SPECTATOR);
-			player.teleportTo(s.getLevel(Level.END), 0.5, 90, 0.5, Set.of(), 0, 0, false);
+			player.teleportTo(s.getLevel(Level.END), 0.5, 90, 0.5, Set.of(), 0, 0);
 		});
 		ctx.waitTicks(dwell + 40);
 		check(TitleWatcher.shownBiome(id).equals(Optional.of(start)),
 				"arriving in the End inside the " + Config.biomeTitleCooldownSeconds + " second cooldown shows nothing yet");
 		// The title fires on the watcher's next second once the cooldown has passed; wait for it,
-		// then a moment more so the screenshot catches it faded in.
-		ctx.waitFor(mc -> TitleWatcher.shownBiome(id).equals(Optional.of(Biomes.THE_END)), cooldown + 40);
+		// then a moment more so the screenshot catches it faded in. The wait is in client ticks
+		// and the watcher counts server ticks: the End's first tick with a player in it scans for
+		// the dragon fight, loading chunks on the server thread, and on a heavy modded End that
+		// can take twenty seconds, during which the watcher's clock stands still. Hence the slack.
+		ctx.waitFor(mc -> TitleWatcher.shownBiome(id).equals(Optional.of(Biomes.THE_END)), cooldown + 40 + STALL_SLACK);
 		ctx.waitTicks(15);
 		screenshot(ctx, "beyond_the_dragon_end_title");
 		check(TitleWatcher.shownBiome(id).equals(Optional.of(Biomes.THE_END)),
@@ -125,7 +130,7 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 
 		// Out past the middle ring's start, in the same biome or another: the ring change shows.
 		server.runOnServer(s -> player(s).teleportTo(Config.ringMiddle + 100.5, 90, 0.5));
-		ctx.waitFor(mc -> TitleWatcher.shownRing(id).map(ring -> ring.name().equals("MIDDLE")).orElse(false), cooldown + dwell + 40);
+		ctx.waitFor(mc -> TitleWatcher.shownRing(id).map(ring -> ring.name().equals("MIDDLE")).orElse(false), cooldown + dwell + 40 + STALL_SLACK);
 		ctx.waitTicks(15);
 		screenshot(ctx, "beyond_the_dragon_ring_title");
 		check(TitleWatcher.shownRing(id).map(ring -> ring.name().equals("MIDDLE")).orElse(false),
@@ -141,15 +146,6 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 	 */
 	static Path screenshot(ClientGameTestContext ctx, String name) {
 		return screenshot(ctx, name, ctx.takeScreenshot(name));
-	}
-
-	static Path screenshot(ClientGameTestContext ctx, TestScreenshotOptions options) {
-		Path shot = ctx.takeScreenshot(options);
-		return screenshot(ctx, stripPng(shot.getFileName().toString()), shot);
-	}
-
-	private static String stripPng(String fileName) {
-		return fileName.endsWith(".png") ? fileName.substring(0, fileName.length() - 4) : fileName;
 	}
 
 	private static Path screenshot(ClientGameTestContext ctx, String name, Path shot) {
@@ -169,7 +165,7 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 	/** Whether the test player has finished one of the mod's advancements. */
 	static boolean advancementDone(TestServerContext server, String path) {
 		return server.computeOnServer(s -> {
-			var holder = s.getAdvancements().get(Identifier.fromNamespaceAndPath(BeyondTheDragon.MOD_ID, path));
+			var holder = s.getAdvancements().get(ResourceLocation.fromNamespaceAndPath(BeyondTheDragon.MOD_ID, path));
 			return holder != null && player(s).getAdvancements().getOrStartProgress(holder).isDone();
 		});
 	}
@@ -179,7 +175,7 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 	}
 
 	private static ResourceKey<Biome> biomeAt(ServerPlayer player) {
-		ServerLevel level = player.level();
+		ServerLevel level = player.serverLevel();
 		return level.getBiome(player.blockPosition()).unwrapKey().orElseThrow();
 	}
 

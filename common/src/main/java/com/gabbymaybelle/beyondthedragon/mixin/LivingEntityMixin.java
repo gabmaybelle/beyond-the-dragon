@@ -1,7 +1,6 @@
 package com.gabbymaybelle.beyondthedragon.mixin;
 
 import com.gabbymaybelle.beyondthedragon.aphelite.AphelitePerks;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -20,8 +19,8 @@ public abstract class LivingEntityMixin {
 		return AphelitePerks.adjustIncoming((LivingEntity) (Object) this, effect, source);
 	}
 
-	@Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
-	private void beyondTheDragon$safeLanding(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+	@Inject(method = "hurt", at = @At("HEAD"), cancellable = true)
+	private void beyondTheDragon$safeLanding(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		if (AphelitePerks.cancelsLanding((LivingEntity) (Object) this, source)) {
 			cir.setReturnValue(false);
 		}

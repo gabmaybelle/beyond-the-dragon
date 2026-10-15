@@ -1,7 +1,7 @@
 package com.gabbymaybelle.beyondthedragon;
 
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -19,7 +19,7 @@ public final class Advancements {
 		if (server == null) {
 			return;
 		}
-		AdvancementHolder holder = server.getAdvancements().get(Identifier.fromNamespaceAndPath(BeyondTheDragon.MOD_ID, path));
+		AdvancementHolder holder = server.getAdvancements().get(ResourceLocation.fromNamespaceAndPath(BeyondTheDragon.MOD_ID, path));
 		if (holder != null) {
 			player.getAdvancements().award(holder, "granted");
 		}

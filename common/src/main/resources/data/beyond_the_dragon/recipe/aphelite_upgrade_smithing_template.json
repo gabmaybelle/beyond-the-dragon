@@ -1,9 +1,15 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"key": {
-		"#": "minecraft:diamond",
-		"C": "minecraft:end_stone",
-		"S": "beyond_the_dragon:aphelite_upgrade_smithing_template"
+		"#": {
+			"item": "minecraft:diamond"
+		},
+		"C": {
+			"item": "minecraft:end_stone"
+		},
+		"S": {
+			"item": "beyond_the_dragon:aphelite_upgrade_smithing_template"
+		}
 	},
 	"pattern": [
 		"#S#",

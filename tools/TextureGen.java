@@ -45,9 +45,10 @@ public final class TextureGen {
 		recolour(vanilla.resolve("item/sentry_armor_trim_smithing_template.png"), out.resolve("item/dragon_scale_armor_trim_smithing_template.png"));
 		made.add("item/dragon_scale_armor_trim_smithing_template");
 		// Worn armour layers.
-		recolour(vanilla.resolve("entity/equipment/humanoid/netherite.png"), out.resolve("entity/equipment/humanoid/aphelite.png"));
-		recolour(vanilla.resolve("entity/equipment/humanoid_leggings/netherite.png"), out.resolve("entity/equipment/humanoid_leggings/aphelite.png"));
-		made.add("entity/equipment/humanoid(_leggings)/aphelite");
+		// 1.21.1 keeps armour sheets as the material's layer_1 (body) and layer_2 (leggings) textures.
+		recolour(vanilla.resolve("models/armor/netherite_layer_1.png"), out.resolve("models/armor/aphelite_layer_1.png"));
+		recolour(vanilla.resolve("models/armor/netherite_layer_2.png"), out.resolve("models/armor/aphelite_layer_2.png"));
+		made.add("models/armor/aphelite_layer_1 and _2");
 		// The ore: end stone with aphelite flecks where ancient debris has its bright spots.
 		ore(vanilla.resolve("block/end_stone.png"), vanilla.resolve("block/ancient_debris_side.png"), out.resolve("block/aphelite_ore.png"));
 		made.add("block/aphelite_ore");

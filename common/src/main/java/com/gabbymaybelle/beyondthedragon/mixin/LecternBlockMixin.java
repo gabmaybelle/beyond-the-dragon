@@ -20,7 +20,7 @@ public abstract class LecternBlockMixin {
 	@Inject(method = "useWithoutItem", at = @At("HEAD"), cancellable = true)
 	private void beyondTheDragon$keepersChart(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
 		if (level instanceof ServerLevel serverLevel && Observatories.onLecternUsed(serverLevel, pos, player)) {
-			cir.setReturnValue(InteractionResult.SUCCESS_SERVER);
+			cir.setReturnValue(InteractionResult.CONSUME);
 		}
 	}
 }

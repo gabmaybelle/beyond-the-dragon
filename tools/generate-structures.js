@@ -15,8 +15,8 @@ const NS = 'beyond_the_dragon';
 const ROOT = path.join(__dirname, '..', 'common', 'src', 'main', 'resources', 'data', NS);
 const args = process.argv.slice(2);
 const opt = (n, d) => { const i = args.indexOf('--' + n); return i >= 0 ? args[i + 1] : d; };
-const JAR = opt('jar', path.join(os.homedir(), '.gradle', 'caches', 'fabric-loom', 'minecraftMaven', 'net', 'minecraft',
-	'minecraft-merged-deobf', '26.3', 'minecraft-merged-deobf-26.3.jar'));
+// Loom's merged 1.21.1 jar (obfuscated, but the data files are what's read).
+const JAR = opt('jar', path.join(os.homedir(), '.gradle', 'caches', 'fabric-loom', '1.21.1', 'minecraft-merged.jar'));
 const jar = openZip(JAR);
 const out = (rel, buf) => {
 	const f = path.join(ROOT, ...rel.split('/'));

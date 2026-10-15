@@ -3,5 +3,6 @@
 	"decal": false,
 	"description": {
 		"translate": "trim_pattern.beyond_the_dragon.dragon_scale"
-	}
+	},
+	"template_item": "beyond_the_dragon:dragon_scale_armor_trim_smithing_template"
 }

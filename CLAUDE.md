@@ -1,7 +1,7 @@
 # Beyond the Dragon
 
-A Fabric and NeoForge mod for Minecraft 26.3 (mod ID `beyond_the_dragon`): a reason to keep
-playing after the Ender Dragon. Ruins drift through the outer End, the dragon gets harder every
+A Fabric and NeoForge mod for Minecraft 1.21.1 on this branch (`1.21.1`; `main` is 26.3 and
+`26.1` is 26.1.2; mod ID `beyond_the_dragon`): a reason to keep playing after the Ender Dragon. Ruins drift through the outer End, the dragon gets harder every
 time it's respawned, and aphelite (a metal a step past netherite) only exists far from the centre.
 The design doc with every decision is Gabby's Claude doc "Beyond the Dragon — design doc"; this
 file holds what a session needs to work here.
@@ -19,14 +19,19 @@ One codebase, two jars:
 - `fabric/` and `neoforge/`: the entrypoints and a `Platform` each. Their `build.gradle` compiles
   `common`'s sources straight into their jar.
 - `fabric/src/gametest/`: the client game test (`BeyondTheDragonClientTest`, which runs
-  `ApheliteTest` and `LadderTest`).
+  `ApheliteTest`, `StructuresTest` and `LadderTest`) and, in `harness/`, the little of Fabric's
+  client game test API it uses, written here because that API doesn't exist for 1.21.1: a
+  `ClientModInitializer` that starts the test on its own thread at the title screen, waits
+  measured in client ticks, work handed to the client and server threads, the create-world
+  screen driven for a flat world, screenshots. A failure crashes the game so the Gradle task
+  fails; a pass closes it.
 - `tools/`: `TextureGen.java` draws the aphelite textures from vanilla's netherite ones (run it
   with `java tools/TextureGen.java <unpacked vanilla textures> common/src/main/resources/assets/beyond_the_dragon`);
   `generate-data.py` writes every aphelite and structure data and asset JSON (recipes, tags,
   loot, worldgen, item models with all trim overlays); `TrimGen.java` draws the Dragon Scale
   trim sheets (`java tools/TrimGen.java common/src/main/resources/assets/beyond_the_dragon`); `generate-structures.js` builds the
   structure templates by remixing vanilla's End City and fossil pieces, read straight from the
-  game jar (`--jar`, default: Loom's 26.3 merged jar under `~/.gradle`), through `structure.js`
+  game jar (`--jar`, default: Loom's 1.21.1 merged jar under `~/.gradle`), through `structure.js`
   + `nbt.js`; the observatory comes as an intact template (what restoration compares against)
   and a `_ruin` (what generates), with the lectern book written from the difference.
   `render-structure.js <template.nbt> --out <png> --jar <jar>` draws a template isometrically
@@ -54,19 +59,23 @@ registrations in its registry event, so its `Platform` queues them and the resul
 
 - `./gradlew build`: jars in `fabric/build/libs/` and `neoforge/build/libs/`.
 - `./gradlew :fabric:runClientGameTest`: the settings file and the in-game checks, in a real game
-  window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestBetterEnd`,
-  `-PtestStellarity` or `-PtestNullscape` to play it with that mod installed (fetched from
-  Modrinth's maven, never bundled); CI runs all four. `-PtestJei` / `-PtestRei` load the game
+  window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestStellarity` or
+  `-PtestNullscape` to play it with that mod installed (fetched from Modrinth's maven, never
+  bundled); CI runs it on its own and with Stellarity. Nullscape is out of CI on this branch:
+  its 1.21.1 terrain (1.2.14) gives four graveyard starts within 4,000 blocks against the
+  test's five (void at 165 of 184 candidate chunks); the rest of the test passes with it, and
+  the nearest graveyard generates and stands on land. BetterEnd is left out on this branch: its last 1.21.1 builds
+  (BetterEnd 21.0.11 with BCLib and WorldWeaver 21.0.13 and WunderLib 21.0.8) don't fit each
+  other, so none of them loads; Gabby has had trouble with BetterEnd in packs generally. `-PtestJei` / `-PtestRei` load the game
   with that recipe viewer (and what it needs) for a load check; the recipes are plain JSON, so
   the viewers list them on their own. `BTD_TEST_ONLY=structures` (or
   `=aphelite`) in the environment plays only that part of the test, in a couple of minutes, for
   tuning. `BTD_SCREENSHOTS=<folder>` keeps the test's
   screenshots (titles, each ruin from the air, the egg on the beacon, each dragon tier) there;
   the run directory they land in is thrown away otherwise. With a mod that reworks the dragon fight
-  installed, the test expects our tier attacks to stay off. BetterEnd keeps the fight but
-  replaces the respawn check (crystals four blocks from the End's origin, on bedrock, any
-  height); the ladder test places them there when it is loaded.
-- NeoForge load check: `node ~/mods-dev/tools/neoforge-server-test.js <scratch folder> --mod neoforge/build/libs/<jar>`
+  installed, the test expects our tier attacks to stay off. (On 26.3, BetterEnd keeps the fight
+  but replaces the respawn check; the ladder test still carries that case.)
+- NeoForge load check: `node ~/mods-dev/tools/neoforge-server-test.js <scratch folder> --minecraft 1.21.1 --mod neoforge/build/libs/<jar>`
   starts a NeoForge server with the jar and fails on any data or mod error.
 - Fresh test worlds and background game driving: `~/mods-dev/tools/README.md`
   (`new-test-world.js`, `mcf.js`).
@@ -75,8 +84,14 @@ registrations in its registry event, so its `Platform` queues them and the resul
 
 - **The common sources are compiled twice**, once per loader. A class that compiles on Fabric but
   not NeoForge (or the reverse) is a common class that leaked a loader import.
-- **Mixins** need no refmap on either loader: Minecraft 26.x ships with Mojang names at runtime, so
-  the one `beyond_the_dragon.mixins.json` serves both jars as it is.
+- **Names and mappings.** 1.21.1 ships obfuscated, unlike 26.x, so the Loom projects declare
+  `loom.officialMojangMappings()`, the loader and Fabric API are `modImplementation`
+  dependencies (that is what puts Mixin on the classpath), and the plugin id is the classic
+  `fabric-loom`: Loom 1.18's `net.fabricmc.fabric-loom` id is for unobfuscated games only and
+  refuses mappings. Loom remaps the Fabric jar to intermediary, the mixins' targets and method
+  names included (no refmap: Loom 1.18 remaps them statically); NeoForge runs on Mojang names,
+  so the one `beyond_the_dragon.mixins.json` serves both jars as it is.
+  The code is compiled for Java 21 (`release = 21`), which is what 1.21.1 players run.
 - **The ladder's loot tables are placeholders** (dragon's breath) until the aphelite items exist;
   `data/beyond_the_dragon/loot_table/dragon_ladder/tier_N.json`.
 - **Dragon fight code is the fragile part.** Vanilla's dragon phases are hard-coded and differ
@@ -102,7 +117,7 @@ registrations in its registry event, so its `Platform` queues them and the resul
   `"condition": ...`, not the old `functions`/`function`/`conditions`, and unknown keys are
   ignored without a warning. Copy the shape from a vanilla file in the merged jar
   (`data/minecraft/...`) before writing a new kind of data file.
-- Decompiled 26.3 sources (for reading vanilla, not for copying): ModDevGradle leaves them in
+- Decompiled 1.21.1 sources (for reading vanilla, not for copying): ModDevGradle leaves them in
   `~/.gradle/caches/neoformruntime/intermediate_results/mergeWithSources_*_output.jar`.
 - **Jigsaw pieces have no mirror**: `PoolElementStructurePiece.getMirror()` is null; treat it as
   `Mirror.NONE` before any `StructureTemplate.transform`. A target decoration added with
@@ -143,8 +158,8 @@ or test names. Check the diff for these before every push.
   test opens a real game window for a minute or two.
 - A new or changed check should fail with the feature switched off: run it that way once, then
   put the code back. A check that compares against the setting it tests proves nothing.
-- On Linux without a screen, run game tests under `xvfb-run -a`. 26.3 also needs
-  `SDL_VIDEO_FORCE_EGL=1` with `libegl1 libegl-mesa0` installed, or the game hangs at startup.
+- On Linux without a screen, run game tests under `xvfb-run -a` (1.21.1's GLFW window is fine
+  with Xvfb as it is; 26.3's SDL one needs EGL).
 
 **Writing.**
 - README and CHANGELOG are for players: plain, friendly, no jargon. New player-facing changes
@@ -155,13 +170,23 @@ or test names. Check the diff for these before every push.
 **Minecraft.** Fabric and NeoForge (Mojang names; Loom 1.18.4, ModDevGradle 2.0, Java 25).
 Version branches: `main` is the newest Minecraft (26.3), `26.1` is 26.1.2, and older versions get
 a branch each. Behaviour changes land on `main` and are cherry-picked to the version branches,
-where only the version differences are edited; CI runs on every branch. The data formats differ
-between versions (loot `modifier`/`condition` here against `functions`/`conditions` on 26.1,
-`worldgen/feature` against `worldgen/configured_feature`, the trim palette metadata against an
-`armor_trims` atlas): `generate-data.py` writes everything in the 26.3 shape and converts under
-its `FORMAT` constant, the one line that differs between the branches' generators. Structure
-templates differ too: `structure.js` writes palette entries as `id`/`properties` here and
-`Name`/`Properties` on 26.1, and stamps each version's `DATA_VERSION`; a template with either
-wrong loads with its box but places no blocks, silently. Each branch's test matrix is its own:
-BetterEnd and Stellarity run here but not on 26.1 (their 26.1 builds don't load or hang). Vanilla names changed a lot in 26.x: check the merged jar rather than older docs
-(for example `iron_chain`, `pink_petals[flower_amount=N]`, timelines instead of `time query daytime`).
+where only the version differences are edited; CI runs on every branch. This branch is `1.21.1`,
+the furthest from `main`: the code differs in many names and shapes (`ResourceLocation` for
+`Identifier`, `Tier` and a registered `ArmorMaterial` with the item classes of that version for
+the gear, NBT saved data with a `SavedData.Factory`, `DimensionTransition` for the respawn,
+`EndDragonFight`, the loot condition and placement modifier types that hold their codecs, the
+generator's structure locator, `hurt` rather than `hurtServer`). The data formats differ too
+(loot `functions`/`conditions` here against `modifier`/`condition` on 26.3,
+`worldgen/configured_feature` against `worldgen/feature`, recipe ingredients as `{"item"}` and
+`{"tag"}` objects, a trim recipe without a pattern and a trim pattern with its `template_item`,
+trimmed item models as `overrides` on a `trim_type` predicate rather than item definitions, the
+armour's `layer_1`/`layer_2` sheets rather than an equipment asset, trim sheets under
+`trims/models/armor` listed in an `armor_trims` atlas, no resin trim): `generate-data.py` writes
+everything in the 26.3 shape and converts under its `FORMAT` constant, which is the only line
+that differs between the branches' generators. Structure templates differ as well:
+`structure.js` writes palette entries as `Name`/`Properties` here (`id`/`properties` on 26.3)
+and stamps this version's `DATA_VERSION` (3955); a template with either of those wrong loads
+with its box but places no blocks, silently. Regenerate the templates on this branch from this
+version's jar (`generate-structures.js` defaults to it). Vanilla names changed a lot in 26.x:
+check the merged jar rather than older docs (for example `iron_chain`,
+`pink_petals[flower_amount=N]`, timelines instead of `time query daytime`).

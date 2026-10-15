@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -22,8 +23,8 @@ public record InRingCondition(Rings ring) implements LootItemCondition {
 	).apply(instance, name -> new InRingCondition(Rings.valueOf(name.toUpperCase(Locale.ROOT)))));
 
 	@Override
-	public MapCodec<? extends LootItemCondition> codec() {
-		return CODEC;
+	public LootItemConditionType getType() {
+		return Structures.IN_RING;
 	}
 
 	@Override
@@ -31,7 +32,7 @@ public record InRingCondition(Rings ring) implements LootItemCondition {
 		if (context.getLevel().dimension() != Level.END) {
 			return false;
 		}
-		Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
+		Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
 		return origin != null && Rings.at(origin.x, origin.z).ordinal() >= ring.ordinal();
 	}
 }

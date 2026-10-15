@@ -1,0 +1,33 @@
+package com.gabbymaybelle.beyondthedragon.harness;
+
+/** An open singleplayer world; closing it leaves for the title screen and waits for the server to stop. */
+public final class TestSingleplayerContext implements AutoCloseable {
+	private final ClientGameTestContext ctx;
+	private final TestServerContext server;
+
+	TestSingleplayerContext(ClientGameTestContext ctx, TestServerContext server) {
+		this.ctx = ctx;
+		this.server = server;
+	}
+
+	public TestServerContext getServer() {
+		return server;
+	}
+
+	/** Waits until the chunk the player stands in has been built for rendering. */
+	public void waitForChunksRender() {
+		ctx.waitFor(mc -> mc.player != null && mc.levelRenderer.isSectionCompiled(mc.player.blockPosition()), 2400);
+		ctx.waitTicks(20);
+	}
+
+	@Override
+	public void close() {
+		ctx.runOnClient(mc -> {
+			if (mc.level != null) {
+				mc.level.disconnect();
+			}
+			mc.disconnect();
+		});
+		ctx.waitFor(mc -> mc.getSingleplayerServer() == null && mc.level == null, 1200);
+	}
+}
