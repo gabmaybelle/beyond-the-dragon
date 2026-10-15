@@ -44,6 +44,14 @@ class Build {
 		if (yy >= this.size[1] - 1) throw new Error(`no floor for a shulker near ${x},${y},${z}`);
 		this.shulkers.push([x, yy, z]);
 	}
+	/** A loot chest on the floor at or above y (like a shulker, it finds the floor), facing the way given. */
+	chest(x, y, z, loot, facing = 'north') {
+		const solid = (xx, yy, zz) => { const e = this.get(xx, yy, zz); return e && e.state !== 'minecraft:air'; };
+		let yy = y;
+		while (yy < this.size[1] - 1 && (solid(x, yy, z) || !solid(x, yy - 1, z))) yy++;
+		if (yy >= this.size[1] - 1) throw new Error(`no floor for a chest near ${x},${y},${z}`);
+		this.set(x, yy, z, `minecraft:chest[facing=${facing},type=single,waterlogged=false]`, { LootTable: loot });
+	}
 	set(x, y, z, state, nbtData) {
 		if (x < 0 || y < 0 || z < 0 || x >= this.size[0] || y >= this.size[1] || z >= this.size[2]) throw new Error(`out of the template: ${x},${y},${z}`);
 		this.blocks.set(`${x},${y},${z}`, { state, nbt: nbtData });
@@ -174,6 +182,8 @@ function observatory() {
 	b.set(cx - 2, floor, cz + 3, 'minecraft:lectern[facing=north,has_book=true,powered=false]', { Book: { id: 'minecraft:written_book', count: 1 }, Page: 0 });
 	b.shulker(cx + 3, floor, cz - 3);
 	b.shulker(cx - 3, 5, cz);
+	// A third chest on the middle floor, so the climb up pays before the top.
+	b.chest(cx + 3, 5, cz + 2, `${NS}:chests/observatory`, 'west');
 	return { build: b, roof, floor };
 }
 
@@ -233,6 +243,10 @@ function wreck() {
 		if (e && e.state !== 'minecraft:air' && rand() < 0.8) b.del(x, y, z);
 	}
 	b.shulker(mastX - 1, deck + 1, mastZ - 2);
+	// Two chests on the main deck (seven up in the ship template) astern of the mast, clear of
+	// the fallen mast and the wound; the hold's two are below.
+	b.chest(mastX - 3, 7, mastZ + 3, `${NS}:chests/wreck`, 'east');
+	b.chest(mastX + 3, 7, mastZ + 4, `${NS}:chests/wreck`, 'west');
 	b.phantom(mastX, deck + 10, mastZ);
 	b.phantom(mastX - 4, deck + 12, mastZ + 6);
 	b.phantom(mastX + 4, deck + 11, mastZ - 6);
@@ -284,9 +298,10 @@ function graveyard() {
 		if (Math.hypot(x - cx, (z - 23) * 0.55) <= 6 && !b.get(x, 0, z)) b.set(x, 0, z, 'minecraft:end_stone_bricks');
 	}
 	// The vault at the heart holds the Aphelite Upgrade template, one per player; its key drops
-	// from the phantoms wheeling overhead (see phantomLoot below). A plain chest sits by the spine.
+	// from the phantoms wheeling overhead (see phantomLoot below). Two plain chests sit by the spine.
 	b.set(cx + 3, 1, 20, 'minecraft:vault[facing=west,ominous=false,vault_state=inactive]', { config: { loot_table: `${NS}:chests/graveyard_vault` } });
 	b.set(cx - 3, 1, 26, 'minecraft:chest[facing=east,type=single,waterlogged=false]', { LootTable: `${NS}:chests/graveyard` });
+	b.set(cx + 4, 1, 30, 'minecraft:chest[facing=west,type=single,waterlogged=false]', { LootTable: `${NS}:chests/graveyard` });
 	// Four phantoms, each carrying a key: a vault rewards each player once, so a party needs a
 	// key apiece (trial keys from the Overworld's trial chambers open it too).
 	b.phantom(cx, 14, 20, `${NS}:entities/graveyard_phantom`);
@@ -342,10 +357,10 @@ function sinkingCity() {
 	const fx = a.tx - 5, fy = a.bridgeY - 12, fz = aEnd - 13;
 	stamp(b, 'end_city/fat_tower_base', fx, fy, fz);
 	stamp(b, 'end_city/fat_tower_middle', fx, fy + 4, fz);
-	stamp(b, 'end_city/fat_tower_top', fx - 2, fy + 12, fz - 2);
+	stamp(b, 'end_city/fat_tower_top', fx - 2, fy + 12, fz - 2, `${NS}:chests/sinking_city`);
 	const bEnd = bridge(fx + 4, fy + 8, fz - 4, 2);
 	// The north cluster: a shorter house that the slip has half taken.
-	house(fx + 1, fy - 2, bEnd - 10, 1);
+	house(fx + 1, fy - 2, bEnd - 10, 1, `${NS}:chests/sinking_city`);
 	b.shulker(a.tx + 4, 7, a.tz + 4);
 	b.shulker(a.tx - 3, 15, a.tz);
 	b.shulker(fx + 6, fy + 13, fz + 6);

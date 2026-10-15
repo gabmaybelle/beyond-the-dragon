@@ -70,6 +70,7 @@ LORE = {
         "Day 40. Ran her onto the island in the dark. Hull split along the east side; the mast went with the first gust. The crew took the boats and did not come back.",
         "Far out, towards where the sky goes thin, there is a tower with a glass eye on its roof. Lights in it, some nights. The keeper's lectern, the old charts call it.",
         "South of here, shoals of bone. The dragon's kin fell there once, the charts say, and something still circles above them, carrying what it took from the dead.",
+        "The near ruins were picked over long before us. The charts mark the rich ones five thousand paces out, past the outer reaches, where the stone itself is worth digging.",
     ]),
     "observatory": ("The Keeper's Letter", "the keeper", [
         "If you have found this, the storm has had the roof. The lectern's book says what is missing; put it all back and she will see again. The chart is yours then.",
@@ -79,10 +80,12 @@ LORE = {
     "graveyard": ("Scratched on Bone", "unknown", [
         "the vault under the ribs takes a trial key. the phantoms that circle here carry them. one prize to each of us, it said, and it kept its word.",
         "out past the skull there is a city that slipped. half of it hangs over nothing. we did not stay.",
+        "nothing here was worth the keys. the real haul is far out, past the outer reaches, where the stone goes dark with metal.",
     ]),
     "sinking_city": ("A Resident's Note", "a resident", [
         "We are leaving before the rest goes. If you are reading this, go to the keeper's tower instead; the one with the glass eye.",
         "Mend it, and its chart will show you every ruin and city near. More than that: the lectern is where the dead come back. The End has no other such place.",
+        "We took what little was here. If you want more than pearls and purpur, fly: five thousand paces out the ruins keep a metal a step past netherite.",
     ]),
 }
 
