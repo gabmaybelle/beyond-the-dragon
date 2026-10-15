@@ -77,8 +77,9 @@ registrations in its registry event, so its `Platform` queues them and the resul
   not NeoForge (or the reverse) is a common class that leaked a loader import.
 - **Mixins** need no refmap on either loader: Minecraft 26.x ships with Mojang names at runtime, so
   the one `beyond_the_dragon.mixins.json` serves both jars as it is.
-- **The ladder's loot tables are placeholders** (dragon's breath) until the aphelite items exist;
-  `data/beyond_the_dragon/loot_table/dragon_ladder/tier_N.json`.
+- **The ladder's loot tables** are `data/beyond_the_dragon/loot_table/dragon_ladder/tier_N.json`,
+  written by `generate-data.py`: the trim template at tier 1, an upgrade template at tiers 2 and 3,
+  dragon's breath with each.
 - **Dragon fight code is the fragile part.** Vanilla's dragon phases are hard-coded and differ
   between 1.21.1 and 26.x. Keep every new attack behind its own setting and reuse vanilla phases
   and entities (charge phase, shulker bullets, lingering clouds) rather than inventing new ones.
