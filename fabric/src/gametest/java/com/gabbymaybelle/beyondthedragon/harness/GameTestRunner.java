@@ -5,6 +5,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,12 @@ public final class GameTestRunner implements ClientModInitializer {
 			if (screen != lastScreen) {
 				LOGGER.info("[test] screen: {}", screen == null ? "none" : screen.getSimpleName());
 				lastScreen = screen;
+			}
+			// A fresh run directory (CI, say) opens on the accessibility onboarding screen the first
+			// time; closing it records that and goes on to the title screen.
+			if (!started && mc.getOverlay() == null && mc.screen instanceof AccessibilityOnboardingScreen onboarding) {
+				onboarding.onClose();
+				return;
 			}
 			if (!started && mc.getOverlay() == null && mc.screen instanceof TitleScreen) {
 				started = true;
