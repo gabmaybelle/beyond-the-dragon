@@ -77,10 +77,7 @@ registrations in its registry event, so its `Platform` queues them and the resul
   the run directory they land in is thrown away otherwise. With a mod that reworks the dragon fight
   installed, the test expects our tier attacks to stay off. (On 26.3, BetterEnd keeps the fight
   but replaces the respawn check; the ladder test still carries that case.)
-- NeoForge load check: `node ~/mods-dev/tools/neoforge-server-test.js <scratch folder> --minecraft 1.21.1 --mod neoforge/build/libs/<jar>`
-  starts a NeoForge server with the jar and fails on any data or mod error.
-- Fresh test worlds and background game driving: `~/mods-dev/tools/README.md`
-  (`new-test-world.js`, `mcf.js`).
+- NeoForge load check: start a NeoForge server with `neoforge/build/libs/<jar>` and fail on any data or mod error.
 
 ## Gotchas
 
