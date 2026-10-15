@@ -127,6 +127,14 @@ computer and others in the cloud. These rules keep their work fitting together.
 - Start from the latest `main` (`git pull`), and say in the branch's last commit or a short note
   what is finished and what isn't.
 
+**Commits are made one at a time, by hand.** Never commit or push from a chained script. Run
+the test, read its result (and the screenshot, for anything visual), then commit that one
+branch, then push it. A cherry-pick that conflicts stops the work until it is resolved by hand.
+A worldgen or balance change is tested on every terrain in the branch's matrix before it goes
+to any other branch. (Learned 2026-10-14, when scripted chains committed a conflicted
+cherry-pick, put one branch's files on another, and sent an untested ore change to all three.)
+For a Gradle game test use the toolkit's watcher (`~/.claude/CLAUDE.md`), not a wait loop.
+
 **Commits.**
 - Author and committer are always `gabmaybelle <211247938+gabmaybelle@users.noreply.github.com>`:
   `git -c user.name=gabmaybelle -c user.email=211247938+gabmaybelle@users.noreply.github.com commit ...`.
