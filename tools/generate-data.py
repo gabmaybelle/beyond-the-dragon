@@ -31,8 +31,12 @@ FORMAT = "26.1"
 # equipment asset, trim sheets live under trims/models/armor, and there is no resin trim.
 # Everything else below is written once, in the 26.3 shape, and converted here; keep this the
 # only place the versions differ.
+<<<<<<< Updated upstream
 FORMAT = "26.1"
 >>>>>>> feb3911 (The data generator knows all three versions' formats, and the trim atlas goes where the game reads it)
+=======
+FORMAT = "1.21.1"
+>>>>>>> Stashed changes
 
 TRIM_MATERIALS = ["amethyst", "copper", "diamond", "emerald", "gold", "iron", "lapis", "netherite", "quartz", "redstone"]
 if FORMAT != "1.21.1":
@@ -310,7 +314,8 @@ for piece in ARMOR:
         write(ASSETS / "models" / "item" / f"{overlay}.json",
               generated(ns(f"item/{item}"), f"minecraft:trims/items/{piece}_trim_{material}"))
         cases.append({"when": f"minecraft:{material}", "model": model_ref(overlay)})
-        overrides.append({"model": ns(f"item/{overlay}"), "predicate": {"trim_type": TRIM_TYPE[material]}})
+        if not definitions:
+            overrides.append({"model": ns(f"item/{overlay}"), "predicate": {"trim_type": TRIM_TYPE[material]}})
     base = generated(ns(f"item/{item}"))
     if definitions:
         write(ASSETS / "items" / f"{item}.json", {"model": {
