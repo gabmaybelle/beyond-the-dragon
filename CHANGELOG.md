@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Restoring an observatory is quicker: the tower now stands whole and only its telescope is broken. Break the cracked stump on the roof, set a purpur pillar in its place and five end rods on it, and the observatory sees again. The lectern's book says exactly how. In observatories that already stand in a world, only the telescope counts now too.
+
 ## 0.1.1 (2026-10-15)
 
 - Ruins no longer grow into End Cities. A ruin that would reach into a city standing nearby isn't built; on a vanilla End that keeps 241 of every 244 ruins, and the rest stay as common as they were.
