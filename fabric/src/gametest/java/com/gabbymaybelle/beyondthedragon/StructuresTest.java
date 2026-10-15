@@ -32,7 +32,10 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -75,6 +78,7 @@ final class StructuresTest {
 			found(ctx, server, kind, report);
 		}
 		placementYield(server);
+		endCityOverlap(server);
 		lore(server);
 		restoration(ctx, server);
 	}
@@ -260,6 +264,87 @@ final class StructuresTest {
 			int starts = m.find() ? Integer.parseInt(m.group(1)) : -1;
 			check(starts >= 5, "at least five " + kind + " starts within 4000 blocks of the centre (" + report + ")");
 		}
+	}
+
+	/**
+	 * No ruin overlaps a vanilla End City. Every End City and every ruin within 4,000 blocks of the
+	 * centre is built from the seed alone, the way chunk generation would build it (no chunks
+	 * loaded), and their pieces' boxes are compared. The structure sets keep a ruin two chunks from
+	 * a city's start chunk, but a city sprawls further than that, so this is measured, not assumed.
+	 */
+	private void endCityOverlap(TestServerContext server) {
+		String report = server.computeOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			var structures = end.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+			List<StructureStart> cities = starts(s, end, structures.getOrThrow(BuiltinStructures.END_CITY));
+			int ruins = 0;
+			int overlaps = 0;
+			StringBuilder where = new StringBuilder();
+			int closest = Integer.MAX_VALUE;
+			int reach = 0;
+			for (StructureStart city : cities) {
+				BoundingBox box = city.getBoundingBox();
+				ChunkPos at = city.getChunkPos();
+				reach = Math.max(reach, Math.max(Math.max(at.x() - (box.minX() >> 4), (box.maxX() >> 4) - at.x()),
+						Math.max(at.z() - (box.minZ() >> 4), (box.maxZ() >> 4) - at.z())));
+			}
+			for (String kind : KINDS) {
+				for (StructureStart ruin : starts(s, end, structures.getOrThrow(ResourceKey.create(Registries.STRUCTURE, Aphelite.id(kind))))) {
+					ruins++;
+					BoundingBox box = ruin.getBoundingBox();
+					for (StructureStart city : cities) {
+						closest = Math.min(closest, gap(box, city.getBoundingBox()));
+						if (!box.intersects(city.getBoundingBox())) {
+							continue;
+						}
+						boolean touching = false;
+						for (StructurePiece a : ruin.getPieces()) {
+							for (StructurePiece b : city.getPieces()) {
+								touching |= a.getBoundingBox().intersects(b.getBoundingBox());
+							}
+						}
+						if (touching) {
+							overlaps++;
+							where.append(' ').append(kind).append(" at ").append(box.getCenter().toShortString());
+						}
+					}
+				}
+			}
+			return cities.size() + " End Cities, " + ruins + " ruins, " + overlaps + " overlap(s)" + where
+					+ "; closest boxes " + closest + " blocks apart; cities reach " + reach + " chunks from their start";
+		});
+		BeyondTheDragon.LOGGER.info("[test] End City overlap within 4000 blocks: {}", report);
+		check(report.contains(" 0 overlap(s)") && !report.startsWith("0 End Cities"), "no ruin overlaps an End City within 4000 blocks (" + report + ")");
+	}
+
+	/** Every start of a structure within 4,000 blocks of the centre, built from the seed alone. */
+	private static List<StructureStart> starts(MinecraftServer s, ServerLevel end, Holder<Structure> holder) {
+		var state = end.getChunkSource().getGeneratorState();
+		var generator = end.getChunkSource().getGenerator();
+		var climate = state.randomState().createClimateSampler(SamplerContext.builder().enableCaches().build());
+		List<StructureStart> out = new java.util.ArrayList<>();
+		for (StructurePlacement placement : state.getPlacementsForStructure(holder)) {
+			for (int cx = -250; cx <= 250; cx++) {
+				for (int cz = -250; cz <= 250; cz++) {
+					if (!placement.isStructureChunk(state, cx, cz)) {
+						continue;
+					}
+					StructureStart start = holder.value().generate(holder, Level.END, end.registryAccess(), generator, generator.getBiomeSource(), climate,
+							state.randomState(), s.getStructureTemplateManager(), end.getSeed(), new ChunkPos(cx, cz), 0, end, holder.value().biomes()::contains);
+					if (start.isValid()) {
+						out.add(start);
+					}
+				}
+			}
+		}
+		return out;
+	}
+
+	/** The horizontal gap between two boxes, in blocks (0 when they touch or overlap). */
+	private static int gap(BoundingBox a, BoundingBox b) {
+		int dx = Math.max(0, Math.max(a.minX() - b.maxX(), b.minX() - a.maxX()));
+		int dz = Math.max(0, Math.max(a.minZ() - b.maxZ(), b.minZ() - a.maxZ()));
+		return Math.max(dx, dz);
 	}
 
 	/** Where the nearest ruin of a kind stands and what is under it; the observatory's lectern and chests are counted too. */
