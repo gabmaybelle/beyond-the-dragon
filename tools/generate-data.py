@@ -349,6 +349,23 @@ if definitions:
 else:
     write(ASSETS / "models" / "item" / "aphelite_ore.json", {"parent": ns("block/aphelite_ore")})
 
+# --- the Void Jelly ---------------------------------------------------------------------------
+# The chorus flower on a stick, crafted like a carrot on a stick, is what steers a jelly.
+write(DATA / "recipe" / "chorus_flower_on_a_stick.json", {
+    "type": "minecraft:crafting_shaped",
+    "key": {"#": "minecraft:fishing_rod", "X": "minecraft:chorus_flower"},
+    "pattern": ["# ", " X"],
+    "result": {"id": ns("chorus_flower_on_a_stick")},
+})
+write(ASSETS / "models" / "item" / "chorus_flower_on_a_stick.json",
+      {"parent": "minecraft:item/handheld_rod", "textures": {"layer0": ns("item/chorus_flower_on_a_stick")}})
+if definitions:
+    write(ASSETS / "items" / "chorus_flower_on_a_stick.json", {"model": model_ref("chorus_flower_on_a_stick")})
+# The jelly is a happy ghast underneath: it takes the harness, never takes fall damage, and its
+# riders get off under water, like the happy ghast's.
+for tag in ("can_equip_harness", "fall_damage_immune", "dismounts_underwater"):
+    write(MC_DATA / "tags" / "entity_type" / f"{tag}.json", {"values": [ns("void_jelly")]})
+
 print("data and assets written")
 
 # --- the advancements tab: the in-game guide. Each entry's description hints at the next step.

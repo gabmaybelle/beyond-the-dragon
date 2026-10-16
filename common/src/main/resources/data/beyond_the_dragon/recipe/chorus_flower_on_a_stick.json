@@ -1,0 +1,14 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"key": {
+		"#": "minecraft:fishing_rod",
+		"X": "minecraft:chorus_flower"
+	},
+	"pattern": [
+		"# ",
+		" X"
+	],
+	"result": {
+		"id": "beyond_the_dragon:chorus_flower_on_a_stick"
+	}
+}

@@ -27,6 +27,8 @@
 	"item.beyond_the_dragon.aphelite_hoe": "Aphelite Hoe",
 	"item.beyond_the_dragon.aphelite_upgrade_smithing_template": "Smithing Template",
 	"item.beyond_the_dragon.dragon_scale_armor_trim_smithing_template": "Smithing Template",
+	"item.beyond_the_dragon.chorus_flower_on_a_stick": "Chorus Flower on a Stick",
+	"entity.beyond_the_dragon.void_jelly": "Void Jelly",
 	"item.beyond_the_dragon.smithing_template.aphelite_upgrade.applies_to": "Netherite Equipment",
 	"item.beyond_the_dragon.smithing_template.aphelite_upgrade.ingredients": "Aphelite Ingot",
 	"item.beyond_the_dragon.smithing_template.aphelite_upgrade.base_slot_description": "Add netherite armor, weapon, or tool",

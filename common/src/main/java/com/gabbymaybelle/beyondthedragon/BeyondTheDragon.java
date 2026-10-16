@@ -1,6 +1,7 @@
 package com.gabbymaybelle.beyondthedragon;
 
 import com.gabbymaybelle.beyondthedragon.aphelite.Aphelite;
+import com.gabbymaybelle.beyondthedragon.jelly.Jellies;
 import com.gabbymaybelle.beyondthedragon.platform.Services;
 import com.gabbymaybelle.beyondthedragon.structures.Structures;
 import com.gabbymaybelle.beyondthedragon.titles.TitleWatcher;
@@ -24,6 +25,7 @@ public final class BeyondTheDragon {
 		Config.load();
 		Aphelite.register();
 		Structures.register();
+		Jellies.register();
 		LOGGER.info("Beyond the Dragon: ready on {} (rings at {}, {} and {} blocks; biome titles {}; dragon ladder {})",
 				Services.PLATFORM.name(), Config.ringMiddle, Config.ringOuter, Config.ringEdge,
 				Config.biomeTitles ? "on" : "off", Config.dragonLadder ? "on" : "off");

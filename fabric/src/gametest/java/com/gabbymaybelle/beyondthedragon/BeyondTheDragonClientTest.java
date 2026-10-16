@@ -44,7 +44,7 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 			world.getConnection().waitForChunksRender();
 			boolean loaded = world.getServer().computeOnServer(server -> FabricLoader.getInstance().isModLoaded(BeyondTheDragon.MOD_ID));
 			check(loaded, "the mod is loaded in a new world");
-			// BTD_TEST_ONLY=structures or =aphelite (an environment variable, passed through by Gradle)
+			// BTD_TEST_ONLY=structures, =aphelite or =jelly (an environment variable, passed through by Gradle)
 			// plays just that part: a couple of minutes instead of five while tuning.
 			String only = System.getenv("BTD_TEST_ONLY");
 			boolean all = only == null || only.isBlank();
@@ -53,6 +53,9 @@ public class BeyondTheDragonClientTest implements FabricClientGameTest {
 			}
 			if (all || only.equals("aphelite")) {
 				new ApheliteTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
+			}
+			if (all || only.equals("jelly")) {
+				new JellyTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
 			}
 			if (all || only.equals("structures")) {
 				new StructuresTest(what -> check(true, what), what -> check(false, what)).run(ctx, world.getServer());
