@@ -131,9 +131,10 @@ public class VoidJellyRenderer extends AgeableMobRenderer<VoidJelly, HappyGhastR
 	/**
 	 * How brightly the shell glows on its own, as block light out of 15: the End is so dark that
 	 * a lighter teal barely showed, so the shell is lit as if a lamp were near (Gabby chose the
-	 * soft glow from screenshots, 2026-10-16). Brighter surroundings still light it more.
+	 * soft glow from screenshots, 2026-10-16, and 12 to match the preview she picked). Brighter
+	 * surroundings still light it more.
 	 */
-	static final int SHELL_GLOW = 10;
+	static final int SHELL_GLOW = 12;
 
 	/** The see-through jelly: the happy ghast's full body and tentacles, drawn last. */
 	private static final class Shell extends RenderLayer<HappyGhastRenderState, HappyGhastModel> {

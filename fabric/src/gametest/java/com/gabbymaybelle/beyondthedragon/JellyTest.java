@@ -76,6 +76,7 @@ final class JellyTest {
 		portraits(ctx, server);
 		spawning(ctx, server);
 		egg(ctx, server);
+		drift(ctx, server);
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.getInventory().clearContent();
@@ -376,6 +377,48 @@ final class JellyTest {
 		check(result[0].equals("yes"), "beside chorus an egg goes through its three stages and hatches a baby jelly that counts as hatched"
 				+ (result[0].equals("yes") ? "" : " (" + result[0] + ")"));
 		check(result[1].equals("yes"), "an egg with no chorus near stays an egg" + (result[1].equals("yes") ? "" : " (" + result[1] + ")"));
+	}
+
+	/**
+	 * Wild jellies wandering out among the End's islands stay up among them: eight are left to
+	 * drift for about two and a half game minutes (at five times speed), and the lowest any of them
+	 * gets is measured against {@link VoidJelly#END_MIN_Y}. (Vanilla's wandering sank them under the
+	 * islands, to heights of 2 to 15.)
+	 */
+	private void drift(ClientGameTestContext ctx, TestServerContext server) {
+		int x = Config.ringMiddle + 600;
+		server.runOnServer(s -> player(s).teleportTo(s.getLevel(Level.END), x + 0.5, 120, 0.5, Set.of(), 0, 0, false));
+		ctx.waitTicks(200);
+		UUID[] ids = server.computeOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			UUID[] made = new UUID[8];
+			for (int i = 0; i < made.length; i++) {
+				made[i] = summon(end, new Vec3(x - 30 + (i % 4) * 20, 70, -20 + (i / 4) * 40), false).getUUID();
+			}
+			return made;
+		});
+		double[] lowest = {Double.MAX_VALUE};
+		server.runCommand("tick rate 100");
+		for (int sample = 0; sample < 30; sample++) {
+			ctx.waitTicks(20);
+			server.runOnServer(s -> {
+				for (UUID id : ids) {
+					if (s.getLevel(Level.END).getEntity(id) instanceof VoidJelly jelly) {
+						lowest[0] = Math.min(lowest[0], jelly.getY());
+					}
+				}
+			});
+		}
+		server.runCommand("tick rate 20");
+		server.runOnServer(s -> {
+			for (UUID id : ids) {
+				if (s.getLevel(Level.END).getEntity(id) instanceof VoidJelly jelly) {
+					jelly.discard();
+				}
+			}
+		});
+		check(lowest[0] >= VoidJelly.END_MIN_Y - 6, "wild jellies drift up among the End's islands, not under them (lowest "
+				+ String.format("%.0f", lowest[0]) + ", kept to " + VoidJelly.END_MIN_Y + " and up)");
 	}
 
 	/** How many of the game's own spawn attempts are made on island ground at each distance. */

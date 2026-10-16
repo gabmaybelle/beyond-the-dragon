@@ -112,7 +112,36 @@ public class VoidJelly extends HappyGhast {
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(3, new FloatGoal(this));
-		this.goalSelector.addGoal(5, new Ghast.RandomFloatAroundGoal(this, 16));
+		this.goalSelector.addGoal(5, new FloatAmongIslandsGoal(this));
+	}
+
+	/** In the End a wandering jelly keeps between these heights, up among the islands. */
+	public static final int END_MIN_Y = 40;
+	public static final int END_MAX_Y = 110;
+
+	/**
+	 * The happy ghast's wandering, kept up among the End's islands. Vanilla's goal pulls its target
+	 * down whenever there is land below it, which kept a happy ghast near the ground but sank wild
+	 * jellies under the islands (heights 2 to 15 in a play test, 2026-10-16), where they were only
+	 * seen from below. In the End the target's height is kept between {@link #END_MIN_Y} and
+	 * {@link #END_MAX_Y}; elsewhere it wanders as a happy ghast does.
+	 */
+	static final class FloatAmongIslandsGoal extends Ghast.RandomFloatAroundGoal {
+		private final VoidJelly jelly;
+
+		FloatAmongIslandsGoal(VoidJelly jelly) {
+			super(jelly, 16);
+			this.jelly = jelly;
+		}
+
+		@Override
+		public void start() {
+			Vec3 target = Ghast.RandomFloatAroundGoal.getSuitableFlyToPosition(jelly, 16);
+			if (jelly.level().dimension() == Level.END) {
+				target = new Vec3(target.x(), Math.clamp(target.y(), END_MIN_Y, END_MAX_Y), target.z());
+			}
+			jelly.getMoveControl().setWantedPosition(target.x(), target.y(), target.z(), 1.0);
+		}
 	}
 
 	@Override
