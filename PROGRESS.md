@@ -6,30 +6,42 @@ which checks fail, code put back), what was learned, and what was deliberately n
 
 ## Where things stand
 
-- **Done:** v1 as the design doc defines it, on all three versions (`main` 26.3, `26.1` 26.1.2,
-  `1.21.1`): rings and titles, the four ruins with the notes and the advancements tab, observatory
-  restoration with the chart and the End respawn, the Dragon Ladder, aphelite with its perks and
-  trim. 109 game-test checks on its own; CI runs each branch's own matrix (26.3 with Stellarity
-  and Nullscape; 26.1.2 with Nullscape; 1.21.1 with Stellarity). BetterEnd is tested nowhere
-  (Gabby: poorly compatible in modpacks). GitHub pre-releases
-  `v0.1.0`, `v0.1.1` and `v0.1.2` carry six jars each (0.1.1 adds the shared tags, the brighter
-  ore and the End City fix; 0.1.2 keeps ruins out of each other and shrinks restoration to the
-  telescope). Textures and the trim approved by Gabby.
+- **Done:** v1 as the design doc defines it, plus the Void Jelly, on all three versions (`main`
+  26.3, `26.1` 26.1.2, `1.21.1`): rings and titles, the four ruins with the notes and the
+  advancements tab, observatory restoration with the chart and the End respawn, the Dragon Ladder,
+  aphelite with its perks and trim, the Void Jelly (wild ones past the Middle Reaches, the Jelly
+  Egg in sinking cities, riding with the Chorus Flower on a Stick; on 1.21.1 it takes a saddle),
+  and the Dragon Scale trim in graveyard chests. 136 game-test checks on its own on `main`; CI runs
+  each branch's own matrix (26.3 with Stellarity and Nullscape; 26.1.2 with Nullscape; 1.21.1 with
+  Stellarity). BetterEnd is tested nowhere (Gabby: poorly compatible in modpacks). GitHub
+  pre-releases `v0.1.0` to `v0.1.2` and `v0.2.0` carry six jars each; `v0.2.1+1.21.1` carries the
+  two 1.21.1 jars (Fabric Loader 0.15.11 or newer). Textures, the trim and the jelly's look
+  chosen by Gabby.
 - **Broken:** nothing known. Nullscape's 1.21.1 End is sparse enough that the placement-yield
   check comes up one graveyard short of five in 4,000 blocks (they generate; the kind is just
   rare there), so Nullscape is out of the 1.21.1 matrix. BetterEnd's last 1.21.1 jars don't load
   together, so it's out of that matrix too.
-- **Next:** Gabby's play test (her 26.3 instances have the v0.1.0 jars), then the Modrinth and
-  CurseForge uploads (she publishes on both herself; the upload sheets and the store icon are in
-  the local release folder and `store-art/`, never committed; 0.1.2 alone is enough for a first
-  upload). Then, from feedback: a fixed seed for the 1.21.1 test world, graveyard frequency on
-  sparse modded Ends, and v1.1 (Rumours, Xaero's and JourneyMap waypoints from restored
-  observatories).
+- **Next:** the Modrinth and CurseForge uploads of 0.2.0 (and 0.2.1 for 1.21.1; Gabby publishes on
+  both herself). The 1.21.1 test world plays in survival like 26.x's (being tested). Then the next
+  feature, chosen with Gabby: something at the Edge, repeat Dragon Ladder rewards, map waypoints
+  from restored observatories (Xaero's, JourneyMap), or an observatory network.
+
+## Done: the Void Jelly (planned with Gabby 2026-10-15, released in 0.2.0)
+
+The End's first creature from this mod, built as agreed: a see-through teal jelly on the happy ghast's body (the look and the
+egg's chosen by Gabby from previews), wild past the Middle Reaches, hatched from a Jelly Egg beside chorus, steered with a Chorus
+Flower on a Stick, faster in the End. It reached 1.21.1 too, with its own riding code and a saddle. The log rows below have the details.
 
 ## Log
 
 | Date | Session | What happened |
 | --- | --- | --- |
+| 2026-10-16 | Release 0.2.0 | At Gabby's word: `version` 0.2.0 (`+26.1`, `+1.21.1` on the version branches) and the changelog dated. The full CI matrix went green on each head before tagging `v0.2.0`, `v0.2.0+26.1` and `v0.2.0+1.21.1`; the six jars built from the tags are on the GitHub pre-release `v0.2.0` and match the tag builds. Not done: Modrinth and CurseForge (hers). |
+| 2026-10-16 | The trim in graveyards | The Dragon Scale trim template now turns up in about one dragon graveyard chest in eight, so explorers find it without the Dragon Ladder, and the note scratched on bone gains a fourth page saying how to earn your own (egg on a lit beacon, beat the dragon when it comes back). The same change on all three branches. CI green on each branch's matrix. |
+| 2026-10-16 | Void Jelly, part 3 | Wild jellies keep to the islands' heights in the End (between 40 and 110; they used to sink below the islands, where you only saw them from underneath), with a drift check in `JellyTest`, and the shell glows a little brighter (`SHELL_GLOW` 12, Gabby's pick from pictures). Full game test 136 checks. Then ported: 26.1.2 takes the jelly as it is, with a few API names; 1.21.1 has no happy ghast, so the jelly is its own flying animal there that takes a saddle and up to four riders, with the same speeds. CI green on all three. |
+| 2026-10-16 | Void Jelly, part 2 | Wild jellies spawn from the Middle Reaches out (2,000 blocks), by ring distance rather than biome, so vanilla, Stellarity and Nullscape all get them: a spawn chance of 1 in 14 gives two to four near a player (`BTD_JELLY_DENSITY=1` measures it), they can't be ridden and they drift off when no one is near. The Jelly Egg (a pale teal egg in a cup of chorus petals) is a rare find in sinking-city chests; set beside a chorus plant or flower it cracks a little each minute and hatches a baby that is yours, which grows faster on chorus fruit. Gabby's play test on 26.3: wild jellies, hatching, feeding, harness, riding and steering all worked. The changelog tells the whole jelly story. |
+| 2026-10-15 | Void Jelly, part 1 | The Void Jelly exists on `main` (Fabric and NeoForge): a happy ghast underneath (`VoidJelly`), drawn as a dark core with the face, eyes that glow like a phantom's, and a see-through teal shell with the happy ghast's body and tentacles over both (textures from `tools/JellyTextureGen.java`); the baby renders the same way. Only a hatched jelly takes a harness and riders; a rider steers it only while holding the new chorus flower on a stick (crafted like a carrot on a stick; it never wears out, since there is no boost), and without one it hovers. Ridden in the End it flies 1.6 times as fast as elsewhere. Nothing tempts it, and it has no loot table. No spawn egg yet (summon with `{hatched:1b}` for a rideable one). From Gabby's look at the first screenshots ("when riding, it looks like a ghast"): the happy ghast's harness wraps the top half of the body in cloth, so from the saddle a jelly read as a happy ghast. The jelly now wears its own harness sheets (one per colour, drawn by `JellyTextureGen` from vanilla's: the straps, the stitched hem with a band of the dyed cloth, and the goggles, with the rest of the cloth left off), and the test photographs a white-harnessed jelly from its rider's angle and measures how much of the picture is that pale grey: 0.10% with the jelly's sheets, 0.48% with vanilla's (the proof run; the check fails above 0.25%), plus a check that every harness colour has its sheet. New `JellyTest` (`BTD_TEST_ONLY=jelly`): 16 checks; steered 13.6 blocks in 80 ticks in the overworld, 0 without the stick, 21.7 in the End. Proof run with the stick check, the End speed and the wild-jelly rule switched off: 4 checks failed (wild harness, wild rider, no-stick steering, End speed), code put back. Full game test 124 checks; NeoForge load check clean. Learned: `isWearingBodyArmor` asks `canUseSlot(BODY)`, so the hatched flag must be synced to the client or the rider never gets control. Not done: wild spawning past the Middle Reaches, the egg and hatching, sinking-city loot, a spawn egg, the CHANGELOG line (waits until a player can get one), Gabby's approval of the in-game look. |
+| 2026-10-15 | Notes | **Next** tidied: the 1.21.1 test world's fixed seed is done (seed 1, on the `1.21.1` branch). Graveyard frequency on sparse modded Ends stays as it is (Gabby: rare there by design; v1.1's Rumours can point to them). No code change. |
 | 2026-10-15 | Release 0.1.2 | At Gabby's word: `version` 0.1.2 (`+26.1`, `+1.21.1` on the version branches) and the Unreleased changelog section dated, nothing else changed. `./gradlew build` passed on each branch; the game test was left to CI this time (no local game window), and the full matrix went green on each head (26.3 with Stellarity and Nullscape, 26.1.2 with Nullscape, 1.21.1 with Stellarity) before tagging `v0.1.2`, `v0.1.2+26.1` and `v0.1.2+1.21.1`. The six jars built from clean checkouts of the tags (each checked for its version and the `c` tags) and published as the GitHub pre-release `v0.1.2`; the release's jars match the tag builds byte for byte. The store description's observatory line now says only the telescope is broken. Not done: Gabby's hand play of the 0.1.2 jar, Modrinth and CurseForge (hers). |
 | 2026-10-15 | Test window | The placement-yield and End City overlap checks now scan 25 chunk columns per server call with a tick between, instead of all 501 in one call; the client is kept in step with the server, so the window had stopped drawing for minutes on a heavy modded End. Counts unchanged (26.3 Nullscape: 48, 24, 8 and 21 ruins, 80 End Cities, no overlaps), the window stayed responsive through the scans, and the game test passes with 109 checks on all three branches. Found: the 1.21.1 stand-in harness makes its world with a random seed (Fabric's test API fixes one), so 1.21.1's counts change from run to run; fixing the seed there would make its numbers comparable. |
 | 2026-10-15 | Smaller restoration | Gabby's call: an observatory's restoration is the telescope only. `generate-structures.js` builds the ruin as the whole tower minus the telescope, with a purpur slab as a cracked stump where its pillar stood (a `damaged` list in `generate()`), so the plan is six blocks (pillar and five end rods) instead of 94 of roof and wall; the lectern book spells out the shape, the keeper's letter and the Keeper's Eye advancement name the telescope. Observatories generated before keep their old damage, and with the new plan only their missing eyepiece rods count. Restoration test on every terrain in each branch's matrix (26.3 vanilla, Stellarity, Nullscape; 26.1.2 vanilla, Nullscape; 1.21.1 vanilla, Stellarity): 6 missing, not restored one short, restored on the last, chart with 5 markers; 109 checks on each branch. The version branches' templates were regenerated with their own `structure.js` (data versions 4790 and 3955), never taken from `main`. Learned: on Nullscape the End City overlap scan freezes the test window for a few minutes, and a window closed by hand then ends the run with exit 0xCFFFFFFF; the scan is fine, the window just isn't drawing. Not done: release (would be 0.1.2). |
