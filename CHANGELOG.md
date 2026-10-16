@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (2026-10-16)
+
+- The Fabric jar for 1.21.1 now loads with older Fabric Loaders. 0.2.0 asked for Fabric Loader 0.19.5 or newer, which most 1.21.1 launchers and packs don't have yet, so it refused to start; it now needs 0.15.11 or newer, the same as Fabric API for 1.21.1. Nothing else changed.
+
 ## 0.2.0 (2026-10-16)
 
 - The observatory's lectern now holds its book on 1.21.1. The book that says how to mend the telescope was written in a form only the newer versions read, so on 1.21.1 the lectern stood empty. Observatories that generate from now on have it; one already in a world keeps its empty lectern.
