@@ -56,7 +56,71 @@ public final class JellyTextureGen {
 			BufferedImage harness = ImageIO.read(harnesses.resolve(colour + "_harness.png").toFile());
 			write(harness(harness, white), out.resolve("entity/void_jelly/harness/" + colour + "_harness.png"));
 		}
-		System.out.println("wrote the void jelly's shell, core, eyes and harnesses, and the chorus flower on a stick");
+		write(petals(), out.resolve("block/jelly_egg_petals.png"));
+		for (int stage = 0; stage < 4; stage++) {
+			write(egg(stage), out.resolve("block/jelly_egg_stage" + stage + ".png"));
+		}
+		System.out.println("wrote the void jelly's shell, core, eyes and harnesses, the chorus flower on a stick and the jelly egg");
+	}
+
+	// The jelly egg ("Chorus pod", chosen from previews 2026-10-15): a pale teal egg in chorus
+	// petals. (A dragon-egg shape with turtle-egg cracks was tried on 2026-10-16; Gabby kept this.)
+	private static final int EGG = rgb(0x7f, 0xd8, 0xcf);
+	private static final int EGG_SHADE = rgb(0x5f, 0xbf, 0xb8);
+	private static final int EGG_DEEP = rgb(0x3a, 0x8f, 0x8a);
+	private static final int EGG_SHINE = rgb(0xd9, 0xff, 0xfa);
+	private static final int CRACK = rgb(0xc8, 0xff, 0xf6);
+	private static final int PETAL_LIGHT = rgb(0xb8, 0x96, 0xd0);
+	private static final int PETAL_MID = rgb(0x8f, 0x6f, 0xb3);
+	private static final int PETAL_DARK = rgb(0x6c, 0x4f, 0x8f);
+
+	/**
+	 * The petals: the model's flaps use the top four rows (light tips over purple), the cup's
+	 * base the rest, darker towards the rim and its sides the bottom two rows.
+	 */
+	private static BufferedImage petals() {
+		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+		Random random = new Random(20261017L);
+		for (int y = 0; y < 16; y++) {
+			for (int x = 0; x < 16; x++) {
+				int base = y == 0 ? PETAL_LIGHT : y < 3 ? PETAL_MID : y >= 14 ? PETAL_DARK : (x + y) % 3 == 0 ? PETAL_DARK : PETAL_MID;
+				img.setRGB(x, y, argb(255, jitter(base, random, 5)));
+			}
+		}
+		return img;
+	}
+
+	/** The egg's cracks, in the order they appear: stage n shows the first n groups, glowing. */
+	private static final int[][][] CRACKS = {
+			{{8, 5}, {8, 6}, {9, 7}, {9, 8}},
+			{{5, 9}, {6, 8}, {6, 7}, {11, 9}, {11, 10}, {10, 11}},
+			{{7, 2}, {7, 3}, {6, 4}, {9, 10}, {8, 11}, {5, 6}, {12, 6}, {11, 5}}};
+
+	/**
+	 * The egg's sheet: pale teal, shaded towards the bottom and the sides, a shine on its upper
+	 * left, and from stage 1 on glowing cracks that grow each stage until it hatches.
+	 */
+	private static BufferedImage egg(int stage) {
+		BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+		Random random = new Random(20261018L);
+		for (int y = 0; y < 16; y++) {
+			for (int x = 0; x < 16; x++) {
+				int base = y >= 11 ? EGG_SHADE : x <= 4 || x >= 11 ? EGG_SHADE : EGG;
+				if (y >= 13 || x <= 3 || x >= 12) {
+					base = EGG_DEEP;
+				}
+				img.setRGB(x, y, argb(255, jitter(base, random, 4)));
+			}
+		}
+		img.setRGB(5, 4, argb(255, EGG_SHINE));
+		img.setRGB(5, 5, argb(255, EGG_SHINE));
+		img.setRGB(6, 4, argb(255, EGG_SHINE));
+		for (int group = 0; group < stage; group++) {
+			for (int[] p : CRACKS[group]) {
+				img.setRGB(p[0], p[1], argb(255, CRACK));
+			}
+		}
+		return img;
 	}
 
 	/** The happy ghast's body (a 16-pixel cube at 0,0) and tentacles (0,0 to 8,10). */

@@ -1,6 +1,7 @@
 package com.gabbymaybelle.beyondthedragon;
 
 import com.gabbymaybelle.beyondthedragon.client.VoidJellyRenderer;
+import com.gabbymaybelle.beyondthedragon.jelly.JellyEggBlock;
 import com.gabbymaybelle.beyondthedragon.jelly.Jellies;
 import com.gabbymaybelle.beyondthedragon.jelly.VoidJelly;
 import java.util.Set;
@@ -28,6 +29,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -71,6 +75,7 @@ final class JellyTest {
 				+ String.format("%.1f", overworld) + ")");
 		portraits(ctx, server);
 		spawning(ctx, server);
+		egg(ctx, server);
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.getInventory().clearContent();
@@ -283,6 +288,94 @@ final class JellyTest {
 		} catch (java.io.IOException e) {
 			return 1.0;
 		}
+	}
+
+	/**
+	 * The jelly egg: it's a block with its item; the sinking city's chests can hold one; placed
+	 * beside a chorus flower it starts hatching (a tick is scheduled), steps through its three
+	 * stages and hatches into a baby jelly that counts as hatched; an egg with no chorus near
+	 * doesn't move. The four stages are photographed side by side.
+	 */
+	private void egg(ClientGameTestContext ctx, TestServerContext server) {
+		check(BuiltInRegistries.BLOCK.getOptional(Jellies.EGG_KEY).isPresent()
+				&& BuiltInRegistries.ITEM.getOptional(ResourceKey.create(Registries.ITEM, id("jelly_egg"))).isPresent(),
+				"the jelly egg is a block with its item");
+		boolean inCityLoot = server.computeOnServer(s -> s.getResourceManager().getResource(id("loot_table/chests/sinking_city.json"))
+				.map(r -> {
+					try (java.io.BufferedReader reader = r.openAsReader()) {
+						return reader.lines().anyMatch(line -> line.contains("beyond_the_dragon:jelly_egg"));
+					} catch (java.io.IOException e) {
+						return false;
+					}
+				}).orElse(false));
+		check(inCityLoot, "the sinking city's chests can hold a jelly egg");
+		BlockPos[] eggs = {new BlockPos(397, 120, 379), new BlockPos(399, 120, 379), new BlockPos(401, 120, 379), new BlockPos(403, 120, 379)};
+		BlockPos lonely = new BlockPos(420, 120, 379);
+		boolean[] scheduled = new boolean[2];
+		server.runOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			for (BlockPos p : BlockPos.betweenClosed(new BlockPos(395, 119, 377), new BlockPos(405, 119, 381))) {
+				end.setBlock(p, Blocks.END_STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+			end.setBlock(lonely.below(), Blocks.END_STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
+			for (int i = 0; i < eggs.length; i++) {
+				end.setBlock(eggs[i].north(), Blocks.CHORUS_FLOWER.defaultBlockState(), Block.UPDATE_CLIENTS);
+				end.setBlockAndUpdate(eggs[i], Jellies.EGG.get().defaultBlockState());
+				end.setBlock(eggs[i], Jellies.EGG.get().defaultBlockState().setValue(JellyEggBlock.STAGE, i), Block.UPDATE_CLIENTS);
+			}
+			end.setBlockAndUpdate(lonely, Jellies.EGG.get().defaultBlockState());
+			scheduled[0] = end.getBlockTicks().hasScheduledTick(eggs[0], Jellies.EGG.get());
+			scheduled[1] = end.getBlockTicks().hasScheduledTick(lonely, Jellies.EGG.get());
+			ServerPlayer player = player(s);
+			player.getAbilities().flying = true;
+			player.onUpdateAbilities();
+			player.teleportTo(end, 400.5, 121.6, 382.2, Set.of(), 180, 28, false);
+		});
+		check(scheduled[0], "an egg placed beside chorus starts hatching");
+		check(!scheduled[1], "an egg with no chorus near doesn't start");
+		ctx.waitTicks(100);
+		ctx.runOnClient(mc -> {
+			if (!mc.gui.hud.isHidden()) {
+				mc.gui.hud.toggle();
+			}
+		});
+		ctx.waitTicks(10);
+		BeyondTheDragonClientTest.screenshot(ctx, TestScreenshotOptions.of("beyond_the_dragon_jelly_egg_stages").withSize(1280, 720));
+		ctx.runOnClient(mc -> {
+			if (mc.gui.hud.isHidden()) {
+				mc.gui.hud.toggle();
+			}
+		});
+		// Each scheduled step, run by hand: three stages, then the hatching.
+		String[] result = server.computeOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			for (int step = 0; step <= JellyEggBlock.MAX_STAGE; step++) {
+				for (BlockPos p : new BlockPos[] {eggs[0], lonely}) {
+					BlockState state = end.getBlockState(p);
+					if (state.is(Jellies.EGG.get())) {
+						state.tick(end, p, end.getRandom());
+					}
+				}
+			}
+			java.util.List<VoidJelly> near = end.getEntitiesOfClass(VoidJelly.class, new AABB(eggs[0]).inflate(4));
+			java.util.List<VoidJelly> nearLonely = end.getEntitiesOfClass(VoidJelly.class, new AABB(lonely).inflate(4));
+			String hatched = near.size() == 1 && near.getFirst().isBaby() && near.getFirst().isHatched() && end.getBlockState(eggs[0]).isAir()
+					? "yes" : near.size() + " jellies, egg block " + end.getBlockState(eggs[0]);
+			BlockState lonelyState = end.getBlockState(lonely);
+			String waited = nearLonely.isEmpty() && lonelyState.is(Jellies.EGG.get()) && lonelyState.getValue(JellyEggBlock.STAGE) == 0
+					? "yes" : nearLonely.size() + " jellies, block " + lonelyState;
+			near.forEach(Entity::discard);
+			nearLonely.forEach(Entity::discard);
+			for (BlockPos p : BlockPos.betweenClosed(new BlockPos(395, 119, 377), new BlockPos(405, 121, 381))) {
+				end.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			}
+			end.setBlock(lonely, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			end.setBlock(lonely.below(), Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+			return new String[] {hatched, waited};
+		});
+		check(result[0].equals("yes"), "beside chorus an egg goes through its three stages and hatches a baby jelly that counts as hatched"
+				+ (result[0].equals("yes") ? "" : " (" + result[0] + ")"));
+		check(result[1].equals("yes"), "an egg with no chorus near stays an egg" + (result[1].equals("yes") ? "" : " (" + result[1] + ")"));
 	}
 
 	/** How many of the game's own spawn attempts are made on island ground at each distance. */

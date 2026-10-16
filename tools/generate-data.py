@@ -377,6 +377,42 @@ if definitions:
 # riders get off under water, like the happy ghast's.
 for tag in ("can_equip_harness", "fall_damage_immune", "dismounts_underwater"):
     write(MC_DATA / "tags" / "entity_type" / f"{tag}.json", {"values": [ns("void_jelly")]})
+# The jelly egg ("Chorus pod"): a pale teal egg sitting in a cup of chorus petals. One shape,
+# one model per hatching stage (the egg's sheet shows more glowing cracks each stage).
+write(ASSETS / "models" / "block" / "jelly_egg_template.json", {
+    "ambientocclusion": False,
+    "textures": {"particle": "#egg"},
+    "elements": [
+        # the cup of petals: a low base and four petals folding up round the egg
+        {"from": [2, 0, 2], "to": [14, 2, 14], "faces": {
+            "up": {"uv": [2, 2, 14, 14], "texture": "#petals"}, "down": {"uv": [2, 2, 14, 14], "texture": "#petals"},
+            "north": {"uv": [2, 14, 14, 16], "texture": "#petals"}, "south": {"uv": [2, 14, 14, 16], "texture": "#petals"},
+            "west": {"uv": [2, 14, 14, 16], "texture": "#petals"}, "east": {"uv": [2, 14, 14, 16], "texture": "#petals"}}},
+        *[{"from": f, "to": t, "faces": {d: {"uv": [0, 0, 12, 4], "texture": "#petals"} for d in ("north", "south", "east", "west", "up")}}
+          for f, t in (([3, 2, 2], [13, 5, 3]), ([3, 2, 13], [13, 5, 14]), ([2, 2, 3], [3, 5, 13]), ([13, 2, 3], [14, 5, 13]))],
+        # the egg, and its narrower crown
+        {"from": [4, 2, 4], "to": [12, 10, 12], "faces": {
+            "up": {"uv": [4, 0, 12, 8], "texture": "#egg"}, "down": {"uv": [4, 0, 12, 8], "texture": "#egg"},
+            **{d: {"uv": [4, 4, 12, 12], "texture": "#egg"} for d in ("north", "south", "east", "west")}}},
+        {"from": [5, 10, 5], "to": [11, 12, 11], "faces": {
+            "up": {"uv": [5, 0, 11, 6], "texture": "#egg"},
+            **{d: {"uv": [5, 2, 11, 4], "texture": "#egg"} for d in ("north", "south", "east", "west")}}},
+    ],
+})
+for stage in range(4):
+    write(ASSETS / "models" / "block" / f"jelly_egg_stage{stage}.json", {
+        "parent": ns("block/jelly_egg_template"),
+        "textures": {"egg": ns(f"block/jelly_egg_stage{stage}"), "petals": ns("block/jelly_egg_petals")},
+    })
+write(ASSETS / "blockstates" / "jelly_egg.json",
+      {"variants": {f"stage={s}": {"model": ns(f"block/jelly_egg_stage{s}")} for s in range(4)}})
+if definitions:
+    write(ASSETS / "items" / "jelly_egg.json", {"model": {"type": "minecraft:model", "model": ns("block/jelly_egg_stage0")}})
+write(DATA / "loot_table" / "blocks" / "jelly_egg.json", {
+    "type": "minecraft:block",
+    "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": ns("jelly_egg")}], "condition": {"type": "minecraft:survives_explosion"}}],
+    "random_sequence": ns("blocks/jelly_egg"),
+})
 
 print("data and assets written")
 
@@ -668,3 +704,10 @@ def amend(name, extra_common):
     write(f, d)
 amend("observatory", [enchanted_book(3)])
 amend("sinking_city", [enchanted_book(3), item("minecraft:music_disc_otherside", 1)])
+if FORMAT == "26.3":
+    # A jelly egg in one city chest in ten (a city has three), its own roll so it stays rare.
+    f = DATA / "loot_table" / "chests" / "sinking_city.json"
+    d = _json.loads(f.read_text(encoding="utf-8"))
+    d["pools"].append({"rolls": 1, "condition": {"type": "minecraft:random_chance", "chance": 0.1},
+                       "entries": [item(ns("jelly_egg"), 1)]})
+    write(f, d)

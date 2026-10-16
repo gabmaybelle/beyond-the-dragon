@@ -1,0 +1,18 @@
+{
+	"type": "minecraft:block",
+	"pools": [
+		{
+			"rolls": 1,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "beyond_the_dragon:jelly_egg"
+				}
+			],
+			"condition": {
+				"type": "minecraft:survives_explosion"
+			}
+		}
+	],
+	"random_sequence": "beyond_the_dragon:blocks/jelly_egg"
+}
