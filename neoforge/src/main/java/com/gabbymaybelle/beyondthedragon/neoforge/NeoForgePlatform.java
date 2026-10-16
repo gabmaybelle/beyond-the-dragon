@@ -9,12 +9,16 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
 /**
@@ -35,6 +39,8 @@ public class NeoForgePlatform implements Platform {
 
 	private final List<Pending<?>> pending = new ArrayList<>();
 	private final List<TabEntry> tabEntries = new ArrayList<>();
+	private final List<Runnable> attributes = new ArrayList<>();
+	private EntityAttributeCreationEvent attributeEvent;
 
 	@Override
 	public String name() {
@@ -81,6 +87,22 @@ public class NeoForgePlatform implements Platform {
 	@Override
 	public void addOreToEndBiomes(ResourceKey<PlacedFeature> feature) {
 		// Done by data/beyond_the_dragon/neoforge/biome_modifier/aphelite_ore.json.
+	}
+
+	@Override
+	public void addCreatureToEndBiomes(Supplier<? extends EntityType<?>> type) {
+		// Done by data/beyond_the_dragon/neoforge/biome_modifier/void_jelly_spawns.json.
+	}
+
+	@Override
+	public <T extends LivingEntity> void registerAttributes(Supplier<EntityType<T>> type, Supplier<AttributeSupplier.Builder> builder) {
+		attributes.add(() -> attributeEvent.put(type.get(), builder.get().build()));
+	}
+
+	void onAttributes(EntityAttributeCreationEvent event) {
+		attributeEvent = event;
+		attributes.forEach(Runnable::run);
+		attributeEvent = null;
 	}
 
 	void onRegister(RegisterEvent event) {

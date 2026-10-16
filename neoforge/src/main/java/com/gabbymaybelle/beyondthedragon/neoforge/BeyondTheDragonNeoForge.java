@@ -6,6 +6,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
@@ -18,6 +19,7 @@ public class BeyondTheDragonNeoForge {
 		BeyondTheDragon.init();
 		modBus.addListener(RegisterEvent.class, platform::onRegister);
 		modBus.addListener(BuildCreativeModeTabContentsEvent.class, platform::onCreativeTab);
+		modBus.addListener(EntityAttributeCreationEvent.class, platform::onAttributes);
 		NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class, event -> BeyondTheDragon.serverTick(event.getServer()));
 	}
 }

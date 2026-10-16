@@ -21,13 +21,21 @@ One codebase, two jars:
 - `fabric/` and `neoforge/`: the entrypoints and a `Platform` each. Their `build.gradle` compiles
   `common`'s sources straight into their jar.
 - `fabric/src/gametest/`: the client game test (`BeyondTheDragonClientTest`, which runs
-  `ApheliteTest`, `StructuresTest` and `LadderTest`) and, in `harness/`, the little of Fabric's
+  `ApheliteTest`, `JellyTest`, `StructuresTest` and `LadderTest`) and, in `harness/`, the little of Fabric's
   client game test API it uses, written here because that API doesn't exist for 1.21.1: a
   `ClientModInitializer` that starts the test on its own thread at the title screen, waits
   measured in client ticks, work handed to the client and server threads, the create-world
   screen driven for a flat world, screenshots. A failure crashes the game so the Gradle task
   fails; a pass closes it.
-- `tools/`: `TextureGen.java` draws the aphelite textures from vanilla's netherite ones (run it
+- `common/.../jelly/` and `common/.../client/`: the Void Jelly and its renderer, which only the
+  loaders' client entrypoints load (`BeyondTheDragonFabricClient`, and
+  `BeyondTheDragonNeoForgeClient`, a `@Mod` for `Dist.CLIENT`). 1.21.1 has no happy ghast, so
+  here `VoidJelly` is its own flying animal (saddle instead of harness, up to four riders,
+  steering written here) drawn on the ghast's model. Whether a jelly is hatched is synced
+  entity data.
+- `tools/`: `JellyTextureGen.java` draws the Void Jelly's shell, core and eye sheets and the
+  chorus flower on a stick (`java tools/JellyTextureGen.java <unpacked vanilla textures> common/src/main/resources/assets/beyond_the_dragon`);
+  `TextureGen.java` draws the aphelite textures from vanilla's netherite ones (run it
   with `java tools/TextureGen.java <unpacked vanilla textures> common/src/main/resources/assets/beyond_the_dragon`);
   `generate-data.py` writes every aphelite and structure data and asset JSON (recipes, tags,
   loot, worldgen, item models with all trim overlays); `TrimGen.java` draws the Dragon Scale
@@ -71,10 +79,12 @@ registrations in its registry event, so its `Platform` queues them and the resul
   other, so none of them loads; Gabby has had trouble with BetterEnd in packs generally. `-PtestJei` / `-PtestRei` load the game
   with that recipe viewer (and what it needs) for a load check; the recipes are plain JSON, so
   the viewers list them on their own. `BTD_TEST_ONLY=structures` (or
-  `=aphelite`) in the environment plays only that part of the test, in a couple of minutes, for
+  `=aphelite`, `=jelly`) in the environment plays only that part of the test, in a couple of minutes, for
   tuning. The test world's seed is 1, as Fabric's test API gives it on 26.x, so the seed scans
   count the same every run; `BTD_SEED=<seed>` tries another, and the log names the seed in use.
-  `BTD_SCREENSHOTS=<folder>` keeps the test's
+  `BTD_JELLY_DENSITY=1` adds a measurement to the jelly part: how many wild jellies are near a
+  player waiting 2,600 blocks out, each minute for ten minutes of natural spawning (at five times
+  speed). `BTD_SCREENSHOTS=<folder>` keeps the test's
   screenshots (titles, each ruin from the air, the egg on the beacon, each dragon tier) there;
   the run directory they land in is thrown away otherwise. With a mod that reworks the dragon fight
   installed, the test expects our tier attacks to stay off. (On 26.3, BetterEnd keeps the fight
