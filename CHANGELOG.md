@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (2026-10-16)
 
 - The observatory's lectern now holds its book on 1.21.1. The book that says how to mend the telescope was written in a form only the newer versions read, so on 1.21.1 the lectern stood empty. Observatories that generate from now on have it; one already in a world keeps its empty lectern.
 - The Dragon Scale trim is easier to come by: now and then a dragon graveyard's chest holds one (about one chest in eight), and the note scratched on bone there says how to earn your own, by setting the dragon egg on a lit beacon and beating the dragon when it comes back.
