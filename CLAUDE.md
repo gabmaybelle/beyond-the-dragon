@@ -72,7 +72,9 @@ registrations in its registry event, so its `Platform` queues them and the resul
   with that recipe viewer (and what it needs) for a load check; the recipes are plain JSON, so
   the viewers list them on their own. `BTD_TEST_ONLY=structures` (or
   `=aphelite`) in the environment plays only that part of the test, in a couple of minutes, for
-  tuning. `BTD_SCREENSHOTS=<folder>` keeps the test's
+  tuning. The test world's seed is 1, as Fabric's test API gives it on 26.x, so the seed scans
+  count the same every run; `BTD_SEED=<seed>` tries another, and the log names the seed in use.
+  `BTD_SCREENSHOTS=<folder>` keeps the test's
   screenshots (titles, each ruin from the air, the egg on the beacon, each dragon tier) there;
   the run directory they land in is thrown away otherwise. With a mod that reworks the dragon fight
   installed, the test expects our tier attacks to stay off. (On 26.3, BetterEnd keeps the fight
