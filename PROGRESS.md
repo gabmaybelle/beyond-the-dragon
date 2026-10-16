@@ -6,26 +6,33 @@ which checks fail, code put back), what was learned, and what was deliberately n
 
 ## Where things stand
 
-- **Done:** v1 as the design doc defines it, on all three versions (`main` 26.3, `26.1` 26.1.2,
-  `1.21.1`): rings and titles, the four ruins with the notes and the advancements tab, observatory
-  restoration with the chart and the End respawn, the Dragon Ladder, aphelite with its perks and
-  trim. 102 game-test checks on its own; CI runs each branch's own matrix (26.3 with BetterEnd,
-  Stellarity and Nullscape; 26.1.2 with Nullscape; 1.21.1 with Stellarity). GitHub pre-release
-  `v0.1.0` carries the six jars. Textures and the trim approved by Gabby.
+- **Done:** v1 as the design doc defines it, plus the Void Jelly, on all three versions (`main`
+  26.3, `26.1` 26.1.2, `1.21.1`): rings and titles, the four ruins with the notes and the
+  advancements tab, observatory restoration with the chart and the End respawn, the Dragon Ladder,
+  aphelite with its perks and trim, the Void Jelly (wild ones past the Middle Reaches, the Jelly
+  Egg in sinking cities, riding with the Chorus Flower on a Stick; on 1.21.1 it takes a saddle),
+  and the Dragon Scale trim in graveyard chests. 136 game-test checks on its own on `main`; CI runs
+  each branch's own matrix (26.3 with Stellarity and Nullscape; 26.1.2 with Nullscape; 1.21.1 with
+  Stellarity). BetterEnd is tested nowhere (Gabby: poorly compatible in modpacks). GitHub
+  pre-releases `v0.1.0` to `v0.1.2` and `v0.2.0` carry six jars each; `v0.2.1+1.21.1` carries the
+  two 1.21.1 jars (Fabric Loader 0.15.11 or newer). Textures, the trim and the jelly's look
+  chosen by Gabby.
 - **Broken:** nothing known. Nullscape's 1.21.1 End is sparse enough that the placement-yield
   check comes up one graveyard short of five in 4,000 blocks (they generate; the kind is just
   rare there), so Nullscape is out of the 1.21.1 matrix. BetterEnd's last 1.21.1 jars don't load
   together, so it's out of that matrix too.
-- **Next:** Gabby's play test and the Modrinth upload (she publishes there herself). Then, from
-  feedback: the End City overlap and elytra tick-time measurements the design doc lists,
-  graveyard frequency on sparse modded Ends, `c:ingots/aphelite` and `c:ores/aphelite` tags so
-  other mods find the metal without naming it (Forgemark names it by id today), and v1.1
-  (Rumours, Xaero's and JourneyMap waypoints from restored observatories).
+- **Next:** the Modrinth and CurseForge uploads of 0.2.0 (and 0.2.1 for 1.21.1; Gabby publishes on
+  both herself). The 1.21.1 test world plays in survival like 26.x's (being tested). Then the next
+  feature, chosen with Gabby: something at the Edge, repeat Dragon Ladder rewards, map waypoints
+  from restored observatories (Xaero's, JourneyMap), or an observatory network.
 
 ## Log
 
 | Date | Session | What happened |
 | --- | --- | --- |
+| 2026-10-16 | Release 0.2.0 | At Gabby's word: `version` 0.2.0 (`+26.1`, `+1.21.1` on the version branches) and the changelog dated. The full CI matrix went green on each head before tagging `v0.2.0`, `v0.2.0+26.1` and `v0.2.0+1.21.1`; the six jars built from the tags are on the GitHub pre-release `v0.2.0` and match the tag builds. Not done: Modrinth and CurseForge (hers). |
+| 2026-10-16 | The trim in graveyards | The Dragon Scale trim template now turns up in about one dragon graveyard chest in eight, so explorers find it without the Dragon Ladder, and the note scratched on bone gains a fourth page saying how to earn your own (egg on a lit beacon, beat the dragon when it comes back). The same change on all three branches. CI green on each branch's matrix. |
+| 2026-10-16 | The Void Jelly on 26.1.2 | Everything the jelly brought to 26.3 (the look, wild ones past the Middle Reaches, the Jelly Egg, riding with the Chorus Flower on a Stick) on 26.1.2, with a handful of API differences (culling box, model submission, the spawn file's counts, the test's harness lookup). CI green with Nullscape and on its own. The rows for 0.1.1, 0.1.2 and the jelly's design are on `main`. |
 | 2026-10-14 | Release prep and the 1.21.1 port | The `1.21.1` branch: the same mod built against 1.21.1 for both loaders (classic Loom plugin id with Mojang mappings, `Tier` and a registered armour material, NBT saved data, `DimensionTransition`, `EndDragonFight`, the data generator's `FORMAT` grown to cover 1.21.1's recipe, model, trim and texture layouts). Fabric's client game test API doesn't exist there, so `fabric/src/gametest/harness/` is a small stand-in; the tests are the same. Found and fixed on the way, on all branches: the "stands on land" check read the template's empty bottom row (now it counts island under the floor, minus the plinth); two of the sinking city's chests were empty (stamped without a loot table); the armour-trim atlas sat in our namespace, where the game ignores it, so the trim never rendered on 26.1 or 1.21.1. From Gabby's play: more chests per ruin (observatory 3, wreck 4, graveyard 2 plus the vault, city 3) and notes that point past the outer ring; aphelite recoloured (void violet to a teal glint) and the Dragon Scale trim redrawn as line work (spine, brow ridges, claw marks, belt, boot rims), both from previews. Ore now forms up to the top of the End for tall modded terrain, with attempts scaled so vanilla's density is unchanged. Apotheosis 9.1.0 on 26.1.2: loads clean beside us and treats aphelite as a melee weapon and chest armour (an epic reforge rolled five affixes). Forgemark 0.1.0: aphelite tempers like netherite (their side). Changelog dated, tags `v0.1.0`, `v0.1.0+26.1`, `v0.1.0+1.21.1`, GitHub pre-release with the six jars built from the tags, repo description and topics, name check clear on Modrinth and CurseForge. **Mistakes:** scripted chains committed a conflicted cherry-pick, put one branch's files on another, and sent the ore change to all branches before its Nullscape run showed it had cut density by two thirds; all superseded by tested commits, and the rule is in CLAUDE.md now. Proof runs: the footing check on the thin-island seed (0 base blocks before, 800 blocks of ground after); the ore density (7 to 20 veins in the samples where there had been 0). Not done: the Modrinth upload (Gabby's), `c:` tags. |
 | 2026-10-14 | 26.1 branch | The `26.1` branch for 26.1.2: a handful of names and shapes in code, loot `functions`/`conditions`, `configured_feature`, an armour-trim atlas, templates with `Name`/`Properties` and data version 4790, all under the generator's `FORMAT`. The graveyard tolerates a slope of twelve (it was the rarest ruin on rugged Ends). BetterEnd and Stellarity are out of this branch's matrix (their 26.1 builds don't load, or hang at startup now and then). |
 | 2026-10-14 | The guide | A "Beyond the Dragon" advancements tab (seventeen entries, each a hint at the next step, granted from the moments the mod already notices) and a short note in every ruin's chest. The test checks every grant and every note, and can load with Lootr (`-PtestLootr`). Housekeeping: the structure-found criterion written per version by the generator; the ore-drop check counts a shard already picked up. |
