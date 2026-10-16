@@ -26,10 +26,15 @@ machines, nothing that fights your other mods.
 - **Restore an observatory** and it sees again: its lectern gives the Keeper's Chart, a map
   marking the nearest ruin of each kind and the nearest End City, and from then on anyone who
   dies in the End comes back there. Beds explode in the End and anchors don't work, so this is
-  the End's first respawn point. The book on the lectern lists exactly what's missing.
+  the End's first respawn point. The book on the lectern says how to mend its telescope.
 - **The Dragon Ladder.** Sneak to set the dragon egg on a lit beacon and the dragon takes
   notice: every time you respawn it after that, it comes back one tier stronger, up to tier 3,
   with a new attack each tier. The first kill at each tier drops a reward at the exit portal.
+- **The Void Jelly.** A gentle creature of the far End, half slime and half ghast: a see-through
+  teal jelly that glows softly in the dark. Wild ones drift among the islands from the Middle
+  Reaches out. Find a Jelly Egg in a sinking city's chest, set it beside chorus and it hatches;
+  feed the baby chorus fruit to help it grow, then give it a harness and take up to three friends
+  along. Steer with a Chorus Flower on a Stick; it flies faster in the End than anywhere else.
 - **Aphelite.** A metal a step past netherite. Its ore forms in end stone past the outer ring;
   four shards and four popped chorus fruit make an ingot; an ingot and an Aphelite Upgrade
   template turn any netherite piece into aphelite at a smithing table. Its real worth is what
@@ -37,7 +42,8 @@ machines, nothing that fights your other mods.
   every fall and elytra crash in the End harmless, and an aphelite pickaxe sometimes pulls an
   extra shard from the ore. The upgrade template waits in a vault at every dragon graveyard
   (bring a trial key; the graveyard's phantoms carry them) and drops from the tier 2 and 3
-  dragons; the Dragon Scale armour trim drops from the tier 1 dragon.
+  dragons; the Dragon Scale armour trim drops from the tier 1 dragon, and now and then turns up in a
+  graveyard's chest.
 
 ## Settings
 
