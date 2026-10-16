@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- The Void Jelly, a gentle creature of the far End (Minecraft 26.3 and 26.1.2 for now). Half slime, half ghast: a see-through teal jelly that glows softly in the dark, with a little face inside. Wild ones drift among the islands from the Middle Reaches out (2,000 blocks from the centre), two to four at a time, and can't be ridden. To get your own, find a Jelly Egg (now and then in a sinking city's chests), set it down beside a chorus plant or flower, and in a few minutes it hatches. Feed the baby chorus fruit to help it grow; once grown it takes a harness and up to four riders. Steer it with a Chorus Flower on a Stick (a fishing rod and a chorus flower), and it flies faster in the End than anywhere else.
+
 ## 0.1.2 (2026-10-15)
 
 - Ruins no longer grow into each other. Now and then a wreck or a graveyard stood inside a sinking city or an observatory; each kind of ruin now keeps out of the others' way.

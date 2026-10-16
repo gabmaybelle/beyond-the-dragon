@@ -22,8 +22,16 @@ One codebase, two jars:
 - `fabric/` and `neoforge/`: the entrypoints and a `Platform` each. Their `build.gradle` compiles
   `common`'s sources straight into their jar.
 - `fabric/src/gametest/`: the client game test (`BeyondTheDragonClientTest`, which runs
-  `ApheliteTest` and `LadderTest`).
-- `tools/`: `TextureGen.java` draws the aphelite textures from vanilla's netherite ones (run it
+  `ApheliteTest`, `JellyTest`, `StructuresTest` and `LadderTest`).
+- `common/.../jelly/` and `common/.../client/`: the Void Jelly (`VoidJelly`, a happy ghast
+  subclass; `Jellies` registers it and the chorus flower on a stick) and its renderer, which
+  only the loaders' client entrypoints load (`BeyondTheDragonFabricClient`, and
+  `BeyondTheDragonNeoForgeClient`, a `@Mod` for `Dist.CLIENT`). Whether a jelly is hatched is
+  synced entity data: the client needs it, because a harness only counts as worn when
+  `canUseSlot(BODY)` says so.
+- `tools/`: `JellyTextureGen.java` draws the Void Jelly's shell, core and eye sheets and the
+  chorus flower on a stick (`java tools/JellyTextureGen.java <unpacked vanilla textures> common/src/main/resources/assets/beyond_the_dragon`);
+  `TextureGen.java` draws the aphelite textures from vanilla's netherite ones (run it
   with `java tools/TextureGen.java <unpacked vanilla textures> common/src/main/resources/assets/beyond_the_dragon`);
   `generate-data.py` writes every aphelite and structure data and asset JSON (recipes, tags,
   loot, worldgen, item models with all trim overlays); `TrimGen.java` draws the Dragon Scale
@@ -67,8 +75,9 @@ registrations in its registry event, so its `Platform` queues them and the resul
   about one time in three (the log stops right after the resource reload). Gabby has also had
   trouble with BetterEnd on a server, especially alongside Stellarity; the two are never tested
   together. `BTD_TEST_ONLY=structures` (or
-  `=aphelite`) in the environment plays only that part of the test, in a couple of minutes, for
-  tuning. `BTD_SCREENSHOTS=<folder>` keeps the test's
+  `=aphelite`, `=jelly`) in the environment plays only that part of the test, in a couple of minutes, for
+  tuning. `BTD_JELLY_DENSITY=1` adds a measurement to the jelly part: how many wild jellies are near a
+  player waiting 2,600 blocks out, each minute for ten minutes of natural spawning (at five times speed). `BTD_SCREENSHOTS=<folder>` keeps the test's
   screenshots (titles, each ruin from the air, the egg on the beacon, each dragon tier) there;
   the run directory they land in is thrown away otherwise. With a mod that reworks the dragon fight
   installed, the test expects our tier attacks to stay off. (On 26.3, BetterEnd keeps the fight

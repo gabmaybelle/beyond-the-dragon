@@ -1,0 +1,7 @@
+{
+	"parent": "beyond_the_dragon:block/jelly_egg_template",
+	"textures": {
+		"egg": "beyond_the_dragon:block/jelly_egg_stage1",
+		"petals": "beyond_the_dragon:block/jelly_egg_petals"
+	}
+}

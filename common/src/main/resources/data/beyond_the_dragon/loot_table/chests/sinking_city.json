@@ -245,6 +245,22 @@
 					]
 				}
 			]
+		},
+		{
+			"rolls": 1,
+			"conditions": [
+				{
+					"condition": "minecraft:random_chance",
+					"chance": 0.1
+				}
+			],
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "beyond_the_dragon:jelly_egg",
+					"weight": 1
+				}
+			]
 		}
 	]
 }

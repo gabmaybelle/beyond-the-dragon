@@ -17,6 +17,9 @@
 	"entrypoints": {
 		"main": [
 			"com.gabbymaybelle.beyondthedragon.fabric.BeyondTheDragonFabric"
+		],
+		"client": [
+			"com.gabbymaybelle.beyondthedragon.fabric.BeyondTheDragonFabricClient"
 		]
 	},
 	"mixins": [
