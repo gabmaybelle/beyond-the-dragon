@@ -12,16 +12,17 @@ which checks fail, code put back), what was learned, and what was deliberately n
   trim. 109 game-test checks on its own; CI runs each branch's own matrix (26.3 with Stellarity
   and Nullscape; 26.1.2 with Nullscape; 1.21.1 with Stellarity). BetterEnd is tested nowhere
   (Gabby: poorly compatible in modpacks). GitHub pre-releases
-  `v0.1.0` and `v0.1.1` carry six jars each (0.1.1 adds the shared tags, the brighter ore and
-  the End City fix). Textures and the trim approved by Gabby.
+  `v0.1.0`, `v0.1.1` and `v0.1.2` carry six jars each (0.1.1 adds the shared tags, the brighter
+  ore and the End City fix; 0.1.2 keeps ruins out of each other and shrinks restoration to the
+  telescope). Textures and the trim approved by Gabby.
 - **Broken:** nothing known. Nullscape's 1.21.1 End is sparse enough that the placement-yield
   check comes up one graveyard short of five in 4,000 blocks (they generate; the kind is just
   rare there), so Nullscape is out of the 1.21.1 matrix. BetterEnd's last 1.21.1 jars don't load
   together, so it's out of that matrix too.
 - **Next:** Gabby's play test (her 26.3 instances have the v0.1.0 jars), then the Modrinth and
   CurseForge uploads (she publishes on both herself; the upload sheets and the store icon are in
-  the local release folder and `store-art/`, never committed; 0.1.1 alone is enough for a first
-  upload). Then, from feedback: graveyard frequency on
+  the local release folder and `store-art/`, never committed; 0.1.2 alone is enough for a first
+  upload). Then, from feedback: a fixed seed for the 1.21.1 test world, graveyard frequency on
   sparse modded Ends, and v1.1 (Rumours, Xaero's and JourneyMap waypoints from restored
   observatories).
 
@@ -29,6 +30,7 @@ which checks fail, code put back), what was learned, and what was deliberately n
 
 | Date | Session | What happened |
 | --- | --- | --- |
+| 2026-10-15 | Release 0.1.2 | At Gabby's word: `version` 0.1.2 (`+26.1`, `+1.21.1` on the version branches) and the Unreleased changelog section dated, nothing else changed. `./gradlew build` passed on each branch; the game test was left to CI this time (no local game window), and the full matrix went green on each head (26.3 with Stellarity and Nullscape, 26.1.2 with Nullscape, 1.21.1 with Stellarity) before tagging `v0.1.2`, `v0.1.2+26.1` and `v0.1.2+1.21.1`. The six jars built from clean checkouts of the tags (each checked for its version and the `c` tags) and published as the GitHub pre-release `v0.1.2`; the release's jars match the tag builds byte for byte. The store description's observatory line now says only the telescope is broken. Not done: Gabby's hand play of the 0.1.2 jar, Modrinth and CurseForge (hers). |
 | 2026-10-15 | Test window | The placement-yield and End City overlap checks now scan 25 chunk columns per server call with a tick between, instead of all 501 in one call; the client is kept in step with the server, so the window had stopped drawing for minutes on a heavy modded End. Counts unchanged (26.3 Nullscape: 48, 24, 8 and 21 ruins, 80 End Cities, no overlaps), the window stayed responsive through the scans, and the game test passes with 109 checks on all three branches. Found: the 1.21.1 stand-in harness makes its world with a random seed (Fabric's test API fixes one), so 1.21.1's counts change from run to run; fixing the seed there would make its numbers comparable. |
 | 2026-10-15 | Smaller restoration | Gabby's call: an observatory's restoration is the telescope only. `generate-structures.js` builds the ruin as the whole tower minus the telescope, with a purpur slab as a cracked stump where its pillar stood (a `damaged` list in `generate()`), so the plan is six blocks (pillar and five end rods) instead of 94 of roof and wall; the lectern book spells out the shape, the keeper's letter and the Keeper's Eye advancement name the telescope. Observatories generated before keep their old damage, and with the new plan only their missing eyepiece rods count. Restoration test on every terrain in each branch's matrix (26.3 vanilla, Stellarity, Nullscape; 26.1.2 vanilla, Nullscape; 1.21.1 vanilla, Stellarity): 6 missing, not restored one short, restored on the last, chart with 5 markers; 109 checks on each branch. The version branches' templates were regenerated with their own `structure.js` (data versions 4790 and 3955), never taken from `main`. Learned: on Nullscape the End City overlap scan freezes the test window for a few minutes, and a window closed by hand then ends the run with exit 0xCFFFFFFF; the scan is fine, the window just isn't drawing. Not done: release (would be 0.1.2). |
 | 2026-10-15 | Release 0.1.1 | At Gabby's word: `version` 0.1.1 (`+26.1`, `+1.21.1` on the version branches), changelogs dated, a changelog line on `main` that BetterEnd is no longer tested. Game test 109 checks on each branch locally and the full CI matrix green on each head before tagging `v0.1.1`, `v0.1.1+26.1` and `v0.1.1+1.21.1`. The six jars built from clean checkouts of the tags (each checked for its version, the `c` tags and `avoid_end_cities`) and published as the GitHub pre-release `v0.1.1`. Learned: a worktree under the session scratchpad fails on Windows (the longest data file's path is too long); use a short folder. Not done: Modrinth and CurseForge (Gabby's); her 26.3 instances still have 0.1.0. |
