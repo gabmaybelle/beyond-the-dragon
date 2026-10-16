@@ -48,4 +48,4 @@ class Structure {
 const stairs = (base, facing, shape = 'straight') => `${base}_stairs[facing=${facing},half=bottom,shape=${shape},waterlogged=false]`;
 const fence = (base, sides = []) => `${base}_fence[${['east', 'north', 'south', 'west'].map(d => `${d}=${sides.includes(d)}`).join(',')},waterlogged=false]`;
 
-module.exports = { Structure, parse, stairs, fence };
+module.exports = { Structure, parse, stairs, fence, DATA_VERSION };

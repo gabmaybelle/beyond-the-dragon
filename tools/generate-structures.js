@@ -6,7 +6,7 @@
 // against, and the ruin, which is what generates. The wreck, the graveyard and the sinking city
 // are only ever ruins. Edit this file, never the .nbt files.
 const fs = require('fs'), path = require('path'), os = require('os');
-const { Structure } = require('./structure.js');
+const { Structure, DATA_VERSION } = require('./structure.js');
 const nbt = require('./nbt.js');
 const { list, T, byte } = nbt;
 const { openZip } = require('./render-blocks.js');
@@ -151,7 +151,8 @@ function book(title, intro, missing, intact) {
 		components: {
 			'minecraft:written_book_content': {
 				title: { raw: title }, author: 'the last keeper',
-				pages: list(T.COMPOUND, pages.map(p => ({ raw: p }))),
+				// 1.21.1 reads each page as JSON text (a quoted string); 26.x as plain text.
+				pages: list(T.COMPOUND, pages.map(p => ({ raw: DATA_VERSION < 4000 ? JSON.stringify(p) : p }))),
 			},
 		},
 	};

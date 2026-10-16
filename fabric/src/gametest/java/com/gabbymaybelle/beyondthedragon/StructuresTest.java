@@ -72,6 +72,7 @@ final class StructuresTest {
 			check(groundBlocks(report) >= 200, "the " + kind + " stands on land, not the void (" + report + ")");
 			if (kind.equals("observatory")) {
 				check(report.contains("1 lectern(s)") && !report.contains(" 0 chest(s)"), "the observatory has its lectern and chests (" + report + ")");
+				check(report.contains("(1 with its book)"), "the observatory's lectern holds its book, with pages (" + report + ")");
 			}
 			tour(ctx, server, kind, report);
 			found(ctx, server, kind, report);
@@ -408,6 +409,7 @@ final class StructuresTest {
 		// end stone, up to ten rows), and the island carries the rest: what's solid below the floor
 		// beyond the plinth's own blocks is ground, and a ruin over the void has next to none.
 		int lecterns = 0;
+		int books = 0;
 		int chests = 0;
 		String chestBlock = "";
 		int floorY = Integer.MAX_VALUE;
@@ -417,6 +419,14 @@ final class StructuresTest {
 					var state = end.getBlockState(new BlockPos(x, y, z));
 					if (state.is(Blocks.LECTERN)) {
 						lecterns++;
+						// The book must have loaded: one the game can't read is dropped, leaving the lectern empty.
+						if (end.getBlockEntity(new BlockPos(x, y, z)) instanceof net.minecraft.world.level.block.entity.LecternBlockEntity lectern
+								&& lectern.hasBook()) {
+							var content = lectern.getBook().get(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT);
+							if (content != null && !content.pages().isEmpty()) {
+								books++;
+							}
+						}
 					} else if (state.is(Blocks.CHEST) || BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath().contains("chest")) {
 						chests++; // Lootr swaps loot chests for its own block; the report names it
 						chestBlock = state.is(Blocks.CHEST) ? "" : " [" + BuiltInRegistries.BLOCK.getKey(state.getBlock()) + "]";
@@ -451,7 +461,7 @@ final class StructuresTest {
 		}
 		return "box from " + box.minX() + "," + box.minY() + "," + box.minZ() + " to " + box.maxX() + "," + box.maxY() + "," + box.maxZ()
 				+ ", floor y " + floorY + ", " + Math.max(0, solid - plinth) + " blocks of ground under the floor (plinth " + plinth + "), "
-				+ lecterns + " lectern(s), " + chests + " chest(s)" + chestBlock;
+				+ lecterns + " lectern(s) (" + books + " with its book), " + chests + " chest(s)" + chestBlock;
 	}
 
 	/** Puts back every missing block, which should restore the observatory and hand out the chart. */
