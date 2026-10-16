@@ -125,6 +125,7 @@ LORE = {
         "the vault under the ribs takes a trial key. the phantoms that circle here carry them. one prize to each of us, it said, and it kept its word.",
         "out past the skull there is a city that slipped. half of it hangs over nothing. we did not stay.",
         "nothing here was worth the keys. the real haul is far out, past the outer reaches, where the stone goes dark with metal.",
+        "the scales we prise off these bones are old and few. the dragon sheds a fresh one the first time it falls again: its egg on a lit beacon, then call it back.",
     ]),
     "sinking_city": ("A Resident's Note", "a resident", [
         "We are leaving before the rest goes. If you are reading this, go to the keeper's tower instead; the one with the glass eye.",
@@ -703,6 +704,13 @@ def amend(name, extra_common):
     write(f, d)
 amend("observatory", [enchanted_book(3)])
 amend("sinking_city", [enchanted_book(3), item("minecraft:music_disc_otherside", 1)])
+# The Dragon Scale trim in about one graveyard chest in eight (a graveyard has two), its own
+# roll; beating the Dragon Ladder's first tier is the sure way, and the graveyard's note says so.
+f = DATA / "loot_table" / "chests" / "graveyard.json"
+d = _json.loads(f.read_text(encoding="utf-8"))
+d["pools"].append({"rolls": 1, "condition": {"type": "minecraft:random_chance", "chance": 0.12},
+                   "entries": [item(ns("dragon_scale_armor_trim_smithing_template"), 1)]})
+write(f, d)
 if FORMAT != "1.21.1":
     # A jelly egg in one city chest in ten (a city has three), its own roll so it stays rare.
     f = DATA / "loot_table" / "chests" / "sinking_city.json"

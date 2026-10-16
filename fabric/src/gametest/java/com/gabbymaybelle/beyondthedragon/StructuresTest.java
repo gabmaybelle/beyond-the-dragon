@@ -121,6 +121,28 @@ final class StructuresTest {
 			});
 			check(LORE_TITLE.get(kind).equals(title), "the " + kind + "'s chests carry '" + LORE_TITLE.get(kind) + "' (got " + title + ")");
 		}
+		// The Dragon Scale trim turns up now and then in a graveyard's chests (about one in eight),
+		// and the graveyard's note points at the sure way: the egg on a lit beacon.
+		int[] found = server.computeOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			var table = s.reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, Aphelite.id("chests/graveyard")));
+			var params = new LootParams.Builder(end).withParameter(LootContextParams.ORIGIN, Vec3.ZERO).create(LootContextParamSets.CHEST);
+			int trims = 0;
+			int hint = 0;
+			for (int i = 0; i < 400; i++) {
+				for (ItemStack stack : table.getRandomItems(params)) {
+					if (stack.is(Aphelite.DRAGON_SCALE_TEMPLATE.get())) {
+						trims++;
+					} else if (i == 0 && stack.getItem() == Items.WRITTEN_BOOK) {
+						var content = stack.get(DataComponents.WRITTEN_BOOK_CONTENT);
+						hint = content != null && content.getPages(false).stream().anyMatch(p -> p.getString().contains("beacon")) ? 1 : 0;
+					}
+				}
+			}
+			return new int[] {trims, hint};
+		});
+		check(found[0] >= 20 && found[0] <= 80, "a graveyard's chests sometimes hold the Dragon Scale trim (" + found[0] + " in 400 chests)");
+		check(found[1] == 1, "the graveyard's note points at the Dragon Ladder (the egg on a lit beacon)");
 	}
 
 	/** A look at the ruin from the air, for the eyes: the screenshot is what the design reviews are made from. */
