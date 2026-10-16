@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
 import net.minecraft.client.CameraType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -21,10 +22,14 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.NaturalSpawner;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -65,6 +70,7 @@ final class JellyTest {
 		check(end > overworld * 1.3, "a jelly flies faster in the End (" + String.format("%.1f", end) + " blocks) than in the overworld ("
 				+ String.format("%.1f", overworld) + ")");
 		portraits(ctx, server);
+		spawning(ctx, server);
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.getInventory().clearContent();
@@ -277,6 +283,93 @@ final class JellyTest {
 		} catch (java.io.IOException e) {
 			return 1.0;
 		}
+	}
+
+	/** How many of the game's own spawn attempts are made on island ground at each distance. */
+	private static final int SPAWN_ATTEMPTS = 200;
+
+	/**
+	 * Wild jellies spawn the game's own way (the End biomes' creature list, then the jelly's spawn
+	 * rule) on island ground out in the Middle Reaches, and not on the islands nearer in nor
+	 * outside the End. The attempts are the game's natural spawner aimed at island surfaces near
+	 * the player, so the count doesn't depend on waiting for the game's slow creature timer.
+	 */
+	private void spawning(ClientGameTestContext ctx, TestServerContext server) {
+		int far = spawnsAt(ctx, server, Config.ringMiddle + 600);
+		int near = spawnsAt(ctx, server, Config.ringMiddle - 700);
+		boolean overworld = server.computeOnServer(s -> VoidJelly.canSpawnNaturallyAt(s.overworld(), new BlockPos(Config.ringMiddle + 600, 64, 0)));
+		check(far > 0, "wild jellies spawn on the End's islands in the Middle Reaches (" + far + " from " + SPAWN_ATTEMPTS + " attempts at "
+				+ (Config.ringMiddle + 600) + " blocks)");
+		check(near == 0, "no wild jellies spawn nearer in than the Middle Reaches (" + near + " at " + (Config.ringMiddle - 700) + " blocks)");
+		check(!overworld, "wild jellies don't spawn outside the End");
+		if (System.getenv("BTD_JELLY_DENSITY") != null) {
+			density(ctx, server, Config.ringMiddle + 600);
+		}
+	}
+
+	/**
+	 * A measurement, not a check (BTD_JELLY_DENSITY=1): how many wild jellies are near a player who
+	 * waits in the Middle Reaches through ten minutes of natural spawning, sampled each minute.
+	 */
+	private void density(ClientGameTestContext ctx, TestServerContext server, int distance) {
+		server.runOnServer(s -> player(s).teleportTo(s.getLevel(Level.END), distance + 0.5, 120, 0.5, Set.of(), 0, 0, false));
+		ctx.waitTicks(200);
+		StringBuilder counts = new StringBuilder();
+		// Five times the normal speed: `tick sprint` stops the window drawing long enough for the
+		// game watcher to call it hung. A game minute (1200 ticks) is then about 240 client ticks.
+		// The test world has natural spawning off; this measurement needs it on.
+		boolean spawning = server.computeOnServer(s -> s.getLevel(Level.END).getGameRules().get(net.minecraft.world.level.gamerules.GameRules.SPAWN_MOBS));
+		server.runCommand("gamerule spawn_mobs true");
+		server.runCommand("tick rate 100");
+		for (int minute = 1; minute <= 10; minute++) {
+			ctx.waitTicks(240);
+			int near = server.computeOnServer(s -> s.getLevel(Level.END).getEntitiesOfClass(VoidJelly.class,
+					new AABB(distance - 128, -64, -128, distance + 128, 320, 128)).size());
+			counts.append(minute == 1 ? "" : ", ").append(near);
+		}
+		server.runCommand("tick rate 20");
+		server.runCommand("gamerule spawn_mobs " + spawning);
+		ok.accept("measured: wild jellies within 128 blocks at " + distance + " blocks out, each minute for ten minutes: " + counts);
+	}
+
+	/** Stands the player in the End at that distance, then runs the natural spawner on nearby island ground. */
+	private int spawnsAt(ClientGameTestContext ctx, TestServerContext server, int distance) {
+		server.runOnServer(s -> player(s).teleportTo(s.getLevel(Level.END), distance + 0.5, 120, 0.5, Set.of(), 0, 0, false));
+		ctx.waitTicks(200);
+		int count = server.computeOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			java.util.List<BlockPos> ground = new java.util.ArrayList<>();
+			for (int dx = -90; dx <= 90; dx += 6) {
+				for (int dz = -90; dz <= 90; dz += 6) {
+					int x = distance + dx;
+					int z = dz;
+					if (dx * dx + dz * dz < 30 * 30 || !end.hasChunkAt(new BlockPos(x, 0, z))) {
+						continue;
+					}
+					int top = end.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+					if (top > end.getMinY() + 1) {
+						ground.add(new BlockPos(x, top, z));
+					}
+				}
+			}
+			if (ground.isEmpty()) {
+				return -1;
+			}
+			AABB around = new AABB(distance - 160, end.getMinY(), -160, distance + 160, end.getMaxY(), 160);
+			int before = end.getEntitiesOfClass(VoidJelly.class, around).size();
+			for (int i = 0; i < SPAWN_ATTEMPTS; i++) {
+				NaturalSpawner.spawnCategoryForPosition(MobCategory.CREATURE, end, ground.get(i % ground.size()));
+			}
+			java.util.List<VoidJelly> jellies = end.getEntitiesOfClass(VoidJelly.class, around);
+			int spawned = jellies.size() - before;
+			jellies.forEach(Entity::discard);
+			return spawned;
+		});
+		if (count < 0) {
+			failed.accept("no island ground found near " + distance + " blocks out in the End to spawn on");
+			return 0;
+		}
+		return count;
 	}
 
 	private static VoidJelly summon(ServerLevel level, Vec3 at, boolean hatched) {

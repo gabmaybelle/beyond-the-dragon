@@ -71,7 +71,8 @@ registrations in its registry event, so its `Platform` queues them and the resul
   with that recipe viewer (and what it needs) for a load check; the recipes are plain JSON, so
   the viewers list them on their own. `BTD_TEST_ONLY=structures` (or
   `=aphelite`, `=jelly`) in the environment plays only that part of the test, in a couple of minutes, for
-  tuning. `BTD_SCREENSHOTS=<folder>` keeps the test's
+  tuning. `BTD_JELLY_DENSITY=1` adds a measurement to the jelly part: how many wild jellies are near a
+  player waiting 2,600 blocks out, each minute for ten minutes of natural spawning (at five times speed). `BTD_SCREENSHOTS=<folder>` keeps the test's
   screenshots (titles, each ruin from the air, the egg on the beacon, each dragon tier) there;
   the run directory they land in is thrown away otherwise. With a mod that reworks the dragon fight
   installed, the test expects our tier attacks to stay off. BetterEnd keeps the fight but

@@ -14,6 +14,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ItemLike;
@@ -52,6 +53,11 @@ public class FabricPlatform implements Platform {
 	@Override
 	public void addOreToEndBiomes(ResourceKey<PlacedFeature> feature) {
 		BiomeModifications.addFeature(BiomeSelectors.foundInTheEnd(), GenerationStep.Decoration.UNDERGROUND_ORES, feature);
+	}
+
+	@Override
+	public void addCreatureToEndBiomes(Supplier<? extends EntityType<?>> type) {
+		BiomeModifications.addSpawn(BiomeSelectors.foundInTheEnd(), MobCategory.CREATURE, type.get(), 10, 1, 2);
 	}
 
 	@Override

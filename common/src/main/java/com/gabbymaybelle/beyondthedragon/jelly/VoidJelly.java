@@ -1,5 +1,7 @@
 package com.gabbymaybelle.beyondthedragon.jelly;
 
+import com.gabbymaybelle.beyondthedragon.rings.Rings;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -20,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -36,6 +39,8 @@ import org.jspecify.annotations.Nullable;
  * <li>It flies faster in the End than a happy ghast does ({@link #END_SPEED}); elsewhere it is
  * a happy ghast's speed.</li>
  * <li>Nothing tempts it (no luring wild ones with a harness), and it drops nothing.</li>
+ * <li>Wild ones spawn among the End's islands from the Middle Reaches out ({@link #canSpawnNaturallyAt}),
+ * and drift off (despawn) when no player is near; hatched ones stay.</li>
  * </ul>
  */
 public class VoidJelly extends HappyGhast {
@@ -51,6 +56,41 @@ public class VoidJelly extends HappyGhast {
 
 	public static AttributeSupplier.Builder createAttributes() {
 		return HappyGhast.createAttributes();
+	}
+
+	/**
+	 * Of the spawn attempts that find a good spot, how many make a jelly: a few drifting between
+	 * the islands rather than a flock. Gabby asked for about 2 to 4 near a player; measured at
+	 * 2,600 blocks out over ten minutes (BTD_JELLY_DENSITY), 1 in 4 gave 3 to 10, 1 in 10 crept
+	 * up to 6, and this gives 2 to 4.
+	 */
+	public static final float SPAWN_CHANCE = 0.07F;
+
+	/**
+	 * Where a wild jelly may appear: only in the End, from the Middle Reaches outwards, measured
+	 * from the End's centre the way the ring titles are, so it doesn't matter which biome (or which
+	 * End mod's biome) is there. The End's biomes list the jelly as a creature
+	 * ({@link Jellies#register}); this keeps it off the inner islands.
+	 */
+	public static boolean canSpawnNaturallyAt(Level level, BlockPos pos) {
+		return level.dimension() == Level.END && Rings.at(pos.getX(), pos.getZ()).compareTo(Rings.MIDDLE) >= 0;
+	}
+
+	@Override
+	public boolean checkSpawnRules(LevelAccessor level, EntitySpawnReason reason) {
+		if (reason == EntitySpawnReason.NATURAL || reason == EntitySpawnReason.CHUNK_GENERATION) {
+			return canSpawnNaturallyAt(level(), blockPosition()) && random.nextFloat() < SPAWN_CHANCE && super.checkSpawnRules(level, reason);
+		}
+		return super.checkSpawnRules(level, reason);
+	}
+
+	/**
+	 * A wild jelly drifts off (despawns) once no player is near, like a bat, so jellies don't pile
+	 * up across the End behind a traveller. A hatched one stays, like any animal.
+	 */
+	@Override
+	public boolean removeWhenFarAway(double distSqr) {
+		return !isHatched();
 	}
 
 	/** Whether this jelly hatched from an egg, so it can be harnessed and ridden. */

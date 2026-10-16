@@ -35,6 +35,7 @@ public final class Jellies {
 
 	public static void register() {
 		Services.PLATFORM.registerAttributes(VOID_JELLY, VoidJelly::createAttributes);
+		Services.PLATFORM.addCreatureToEndBiomes(VOID_JELLY);
 		Services.PLATFORM.addToCreativeTab(ResourceKey.create(Registries.CREATIVE_MODE_TAB, Identifier.withDefaultNamespace("tools_and_utilities")), CHORUS_STICK);
 	}
 

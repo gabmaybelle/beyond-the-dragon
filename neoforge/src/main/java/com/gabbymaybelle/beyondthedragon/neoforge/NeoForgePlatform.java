@@ -90,6 +90,11 @@ public class NeoForgePlatform implements Platform {
 	}
 
 	@Override
+	public void addCreatureToEndBiomes(Supplier<? extends EntityType<?>> type) {
+		// Done by data/beyond_the_dragon/neoforge/biome_modifier/void_jelly_spawns.json.
+	}
+
+	@Override
 	public <T extends LivingEntity> void registerAttributes(Supplier<EntityType<T>> type, Supplier<AttributeSupplier.Builder> builder) {
 		attributes.add(() -> attributeEvent.put(type.get(), builder.get().build()));
 	}

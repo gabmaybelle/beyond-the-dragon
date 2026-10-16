@@ -254,6 +254,18 @@ write(DATA / "neoforge" / "biome_modifier" / "aphelite_ore.json", {
     "features": ns("aphelite_ore"),
     "step": "underground_ores",
 })
+if FORMAT == "26.3":
+    # The Void Jelly (26.3 only for now) is listed among every End biome's creatures, one or two
+    # at a time; its own spawn rule keeps it to the Middle Reaches and beyond. Fabric: in code.
+    write(DATA / "neoforge" / "biome_modifier" / "void_jelly_spawns.json", {
+        "type": "neoforge:add_spawns",
+        "biomes": "#minecraft:is_end",
+        "spawners": {
+            "type": ns("void_jelly"),
+            "count": {"type": "minecraft:uniform", "min_inclusive": 1, "max_inclusive": 2},
+            "weight": 10,
+        },
+    })
 
 # --- the trim pattern -----------------------------------------------------------------------
 if FORMAT != "26.3":
