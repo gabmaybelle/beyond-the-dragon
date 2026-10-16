@@ -3,6 +3,7 @@
 ## Unreleased
 
 - The observatory's lectern now holds its book on 1.21.1. The book that says how to mend the telescope was written in a form only the newer versions read, so on 1.21.1 the lectern stood empty. Observatories that generate from now on have it; one already in a world keeps its empty lectern.
+- The Dragon Scale trim is easier to come by: now and then a dragon graveyard's chest holds one (about one chest in eight), and the note scratched on bone there says how to earn your own, by setting the dragon egg on a lit beacon and beating the dragon when it comes back.
 - The Void Jelly, a gentle creature of the far End. Half slime, half ghast: a see-through teal jelly that glows softly in the dark, with a little face inside. Wild ones drift among the islands from the Middle Reaches out (2,000 blocks from the centre), two to four at a time, and can't be ridden. To get your own, find a Jelly Egg (now and then in a sinking city's chests), set it down beside a chorus plant or flower, and in a few minutes it hatches. Feed the baby chorus fruit to help it grow; once grown it takes a saddle and up to four riders. Steer it with a Chorus Flower on a Stick (a fishing rod and a chorus flower), and it flies faster in the End than anywhere else.
 
 ## 0.1.2 (2026-10-15)

@@ -158,11 +158,28 @@
 							"pages": [
 								"the vault under the ribs takes a trial key. the phantoms that circle here carry them. one prize to each of us, it said, and it kept its word.",
 								"out past the skull there is a city that slipped. half of it hangs over nothing. we did not stay.",
-								"nothing here was worth the keys. the real haul is far out, past the outer reaches, where the stone goes dark with metal."
+								"nothing here was worth the keys. the real haul is far out, past the outer reaches, where the stone goes dark with metal.",
+								"the scales we prise off these bones are old and few. the dragon sheds a fresh one the first time it falls again: its egg on a lit beacon, then call it back."
 							],
 							"mode": "replace_all"
 						}
 					]
+				}
+			]
+		},
+		{
+			"rolls": 1,
+			"conditions": [
+				{
+					"condition": "minecraft:random_chance",
+					"chance": 0.12
+				}
+			],
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "beyond_the_dragon:dragon_scale_armor_trim_smithing_template",
+					"weight": 1
 				}
 			]
 		}
