@@ -3,6 +3,7 @@ package com.gabbymaybelle.beyondthedragon;
 import com.gabbymaybelle.beyondthedragon.aphelite.Aphelite;
 import com.gabbymaybelle.beyondthedragon.jelly.Jellies;
 import com.gabbymaybelle.beyondthedragon.platform.Services;
+import com.gabbymaybelle.beyondthedragon.structures.Observatories;
 import com.gabbymaybelle.beyondthedragon.structures.Structures;
 import com.gabbymaybelle.beyondthedragon.titles.TitleWatcher;
 import net.minecraft.server.MinecraftServer;
@@ -34,5 +35,6 @@ public final class BeyondTheDragon {
 	/** Each loader calls this at the end of every server tick. */
 	public static void serverTick(MinecraftServer server) {
 		TitleWatcher.serverTick(server);
+		Observatories.serverTick(server);
 	}
 }

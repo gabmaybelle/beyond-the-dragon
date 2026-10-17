@@ -137,7 +137,7 @@ function book(title, intro, missing, intact) {
 		const layer = byLayer.get(y);
 		layer.set(plain(e.state), (layer.get(plain(e.state)) || 0) + 1);
 	}
-	const pages = [intro];
+	const pages = Array.isArray(intro) ? [...intro] : [intro];
 	let page = '';
 	for (const y of [...byLayer.keys()].sort((a, b) => a - b)) {
 		let text = `Layer ${y}:\n`;
@@ -418,7 +418,7 @@ function withPlinth(b, depth) {
 // Keep in step with PLINTH in generate-data.py (the structures' start height).
 const PLINTH = 10;
 
-function generate(name, intact, missing, title, intro, lectern, damaged = []) {
+function generate(name, intact, missing, title, intro, lectern, damaged = [], places = {}) {
 	const theBook = book(title, intro, missing, intact);
 	for (const [, v] of intact.blocks) if (v.nbt && v.nbt.Book) v.nbt.Book = theBook;
 	out(`structure/${name}.nbt`, intact.toNbt());
@@ -428,10 +428,16 @@ function generate(name, intact, missing, title, intro, lectern, damaged = []) {
 	for (const [x, y, z, state] of damaged) ruin.set(x, y, z, state);
 	out(`structure/${name}_ruin.nbt`, ruin.toNbt());
 	// What the restoration code checks: each missing block's template position and block id,
-	// plus where the lectern is (the respawn spot, and where the chart is read from).
+	// plus where the lectern is (where the chart is read from) and any spots restoration fills
+	// (each must be empty in the template).
+	for (const [what, [x, y, z]] of Object.entries(places)) {
+		const there = intact.get(x, y, z);
+		if (there && there.state !== 'minecraft:air') throw new Error(`${name}: the ${what} spot ${x} ${y} ${z} holds ${there.state}`);
+	}
 	const plan = {
 		size: intact.size,
 		lectern,
+		...places,
 		missing: missing.filter(([x, y, z]) => intact.get(x, y, z) && intact.get(x, y, z).state !== 'minecraft:air')
 			.map(([x, y, z]) => ({ pos: [x, y, z], block: intact.get(x, y, z).state.replace(/\[.*$/, '') })),
 	};
@@ -448,9 +454,13 @@ const obs = observatory();
 obs.build = withPlinth(obs.build, PLINTH);
 obs.roof += PLINTH;
 obs.floor += PLINTH;
-generate('observatory', obs.build, observatoryMissing(obs), 'Keeper\'s Notes',
+generate('observatory', obs.build, observatoryMissing(obs), 'Keeper\'s Notes', [
 	'The storm took the telescope from the roof. Break the cracked stump and set a purpur pillar in its place; stack three end rods on it, and two more on the north side of the top one. Then she will see again.\n\nThe watch ends when the last piece is set.',
-	[10 - 2, obs.floor, 10 + 3], [[10, obs.roof + 1, 10, 'minecraft:purpur_slab[type=bottom,waterlogged=false]']]);
+	'When she sees again, the respawn anchor across the room wakes, charged. Use it, and when the End takes you, this tower is where you come back.\n\nKeep it charged with glowstone.'],
+	[10 - 2, obs.floor, 10 + 3], [[10, obs.roof + 1, 10, 'minecraft:purpur_slab[type=bottom,waterlogged=false]']],
+	// Restoring sets a charged respawn anchor across the room from the lectern, and a waystone
+	// (when Waystones is installed) on the far side of the stairwell; both stand on solid floor.
+	{ anchor: [10 + 2, obs.floor, 10 + 4], waystone: [10 + 4, obs.floor, 10 + 2] });
 generateOne('wreck', withPlinth(wreck(), PLINTH));
 generateOne('graveyard', withPlinth(graveyard(), PLINTH));
 generateOne('sinking_city', withPlinth(sinkingCity(), PLINTH));

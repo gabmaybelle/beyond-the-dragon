@@ -36,6 +36,13 @@ dependencies {
 	if (project.hasProperty("testNullscape")) {
 		runtimeOnly "maven.modrinth:nullscape:${project.nullscape_version}"
 	}
+	// Waystones: a restored observatory sets a waystone when it's installed (reached through its
+	// API by reflection, so it's never needed to build). -PtestWaystones checks it.
+	if (project.hasProperty("testWaystones")) {
+		runtimeOnly "maven.modrinth:waystones:${project.waystones_version}"
+		runtimeOnly "maven.modrinth:balm:${project.balm_version}"
+		runtimeOnly "maven.modrinth:shogi:${project.shogi_version}"
+	}
 	// Recipe viewers (each with what it needs): the recipes are plain crafting and smithing
 	// JSON, so a viewer lists them on its own; these runs prove the game loads with one.
 	if (project.hasProperty("testJei")) {

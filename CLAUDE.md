@@ -67,7 +67,8 @@ registrations in its registry event, so its `Platform` queues them and the resul
   window (five minutes or so: it climbs the whole Dragon Ladder). Add `-PtestStellarity` or
   `-PtestNullscape` to play it with that mod installed (fetched from Modrinth's maven, never
   bundled); CI runs all three. `-PtestBetterEnd` still works but is out of CI and not run
-  locally: Gabby finds BetterEnd poorly compatible in modpacks (2026-10-15). `-PtestJei` / `-PtestRei` load the game
+  locally: Gabby finds BetterEnd poorly compatible in modpacks (2026-10-15). `-PtestWaystones` loads Waystones
+  (with Balm and Shogi) to check the waystone a restored observatory sets; it isn't in CI. `-PtestJei` / `-PtestRei` load the game
   with that recipe viewer (and what it needs) for a load check; the recipes are plain JSON, so
   the viewers list them on their own. `BTD_TEST_ONLY=structures` (or
   `=aphelite`, `=jelly`) in the environment plays only that part of the test, in a couple of minutes, for

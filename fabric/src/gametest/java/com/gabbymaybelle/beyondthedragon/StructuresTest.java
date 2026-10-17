@@ -10,7 +10,9 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
 import net.minecraft.client.gui.screens.DeathScreen;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -26,9 +28,12 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RespawnAnchorBlock;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
@@ -524,8 +529,13 @@ final class StructuresTest {
 					markers += decorations == null ? 0 : decorations.decorations().size();
 				}
 			}
+			BlockPos anchor = Observatories.worldPos(piece, Observatories.plannedAnchor());
+			var anchorState = end.getBlockState(anchor);
+			String anchored = anchorState.is(Blocks.RESPAWN_ANCHOR) ? "anchor charge " + anchorState.getValue(RespawnAnchorBlock.CHARGE) : "no anchor (" + anchorState + ")";
+			BlockPos waystoneSpot = Observatories.worldPos(piece, Observatories.plannedWaystone());
+			String waystone = BuiltInRegistries.BLOCK.getKey(end.getBlockState(waystoneSpot).getBlock()) + "/" + BuiltInRegistries.BLOCK.getKey(end.getBlockState(waystoneSpot.above()).getBlock());
 			return before + " missing; early " + earlyRestored + "; one short " + (stillUnrestored ? "unrestored" : "RESTORED") + "; last " + (restored ? "restored" : "NOT restored")
-					+ "; charts " + charts + "; markers " + markers + "; lectern " + lectern;
+					+ "; charts " + charts + "; markers " + markers + "; lectern " + lectern + "; " + anchored + "; waystone spot " + waystone;
 		});
 		BeyondTheDragon.LOGGER.info("[test] restoration: {}", result);
 		check(result.contains("early false") && result.contains("one short unrestored"), "an observatory one block short is not restored (" + result + ")");
@@ -533,68 +543,120 @@ final class StructuresTest {
 		check(result.matches(".*charts [1-9].*") && !result.contains("markers 0"), "restoring hands out the keeper's chart with markers on it (" + result + ")");
 		check(BeyondTheDragonClientTest.advancementDone(server, "keepers_eye") && BeyondTheDragonClientTest.advancementDone(server, "keepers_chart"),
 				"restoring grants Keeper's Eye and Keeper's Chart");
+		check(result.contains("anchor charge 4"), "restoring sets a fully charged respawn anchor in the top room (" + result + ")");
+		if (FabricLoader.getInstance().isModLoaded("waystones")) {
+			check(result.matches(".*waystone spot waystones:purpur[a-z_]*/waystones:purpur[a-z_]*.*"), "with Waystones, restoring sets a purpur waystone (" + result + ")");
+		} else {
+			check(result.contains("waystone spot minecraft:air/minecraft:air"), "without Waystones, no waystone and nothing in its spot (" + result + ")");
+		}
 		respawn(ctx, server);
 	}
 
-	/** Dying in the End after a restoration comes back at the observatory's lectern. */
+	/**
+	 * Respawning after a restoration: no free respawn any more; the observatory's anchor sets the
+	 * spawn without exploding and brings you back, using a charge; an anchor elsewhere in the End
+	 * still explodes; and an observatory restored before there were anchors gets one.
+	 */
 	private void respawn(ClientGameTestContext ctx, TestServerContext server) {
-		BlockPos lectern = server.computeOnServer(s -> {
-			ServerLevel end = s.getLevel(Level.END);
-			var restored = ObservatoryData.get(end).restored();
-			return restored.isEmpty() ? null : restored.get(0).lectern();
+		var restored = server.computeOnServer(s -> {
+			var list = ObservatoryData.get(s.getLevel(Level.END)).restored();
+			return list.isEmpty() ? null : list.get(0);
 		});
-		if (lectern == null) {
+		if (restored == null) {
 			check(false, "a restored observatory is on record for the respawn check");
 			return;
 		}
-		// Die a good way off, so coming back at the lectern can't be an accident; the client gets
-		// a moment to arrive first, or a death during a dimension change shows no death screen.
-		server.runOnServer(s -> {
+		BlockPos lectern = restored.lectern();
+		BlockPos anchor = server.computeOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			return Observatories.worldPos(Observatories.ruinPiece(end.structureManager().getStructureAt(lectern, Observatories.structure(end))), Observatories.plannedAnchor());
+		});
+
+		// A death in the End with no spawn set goes home, as in vanilla.
+		String first = die(ctx, server, Level.END, lectern.offset(40, 10, 40));
+		check(first.contains("overworld"), "a death in the End without an anchor set respawns at home, not at the observatory (" + first + ")");
+
+		// Use the observatory's anchor: it sets the spawn and stays put.
+		String used = server.computeOnServer(s -> {
 			ServerLevel end = s.getLevel(Level.END);
 			ServerPlayer player = player(s);
-			player.setGameMode(GameType.CREATIVE);
-			player.teleportTo(end, lectern.getX() + 40.5, lectern.getY() + 10, lectern.getZ() + 40.5, java.util.Set.of(), 0, 0, false);
+			player.teleportTo(end, anchor.getX() + 1.5, anchor.getY(), anchor.getZ() + 0.5, java.util.Set.of(), 0, 0, false);
+			end.getBlockState(anchor).useWithoutItem(end, player, new BlockHitResult(Vec3.atCenterOf(anchor), Direction.UP, anchor, false));
+			var config = player.getRespawnConfig();
+			return "block " + BuiltInRegistries.BLOCK.getKey(end.getBlockState(anchor).getBlock())
+					+ "; spawn " + (config == null ? "none" : config.respawnData().dimension().identifier() + " " + config.respawnData().pos());
 		});
-		ctx.waitTicks(40);
-		server.runOnServer(s -> {
-			ServerPlayer player = player(s);
-			player.setPermanentlyInvulnerable(false);
-			player.setGameMode(GameType.SURVIVAL);
-			player.kill(s.getLevel(Level.END));
-		});
-		ctx.waitForScreen(DeathScreen.class);
-		ctx.clickScreenButton("deathScreen.respawn");
-		ctx.waitTicks(60);
-		String where = server.computeOnServer(s -> {
-			ServerPlayer player = player(s);
-			player.setPermanentlyInvulnerable(true);
-			return player.level().dimension().identifier() + " " + player.blockPosition() + " (lectern " + lectern + ")";
-		});
-		double distance = server.computeOnServer(s -> player(s).blockPosition().distSqr(lectern.above()));
-		check(where.contains("the_end") && distance <= 9, "a death in the End respawns at the restored observatory's lectern (" + where + ")");
+		check(used.contains("block minecraft:respawn_anchor") && used.contains("spawn minecraft:the_end " + anchor),
+				"the observatory's anchor sets the spawn there and doesn't explode (" + used + "; anchor " + anchor + ")");
+		ctx.waitTicks(20);
 
-		// The same death at home must be vanilla's: back at the world spawn, not in the End.
+		String second = die(ctx, server, Level.END, lectern.offset(40, 10, 40));
+		double distance = server.computeOnServer(s -> player(s).blockPosition().distSqr(anchor));
+		int charge = server.computeOnServer(s -> {
+			var state = s.getLevel(Level.END).getBlockState(anchor);
+			return state.is(Blocks.RESPAWN_ANCHOR) ? state.getValue(RespawnAnchorBlock.CHARGE) : -1; // -1: no anchor left
+		});
+		check(second.contains("the_end") && distance <= 9 && charge == RespawnAnchorBlock.MAX_CHARGES - 1,
+				"a death in the End then respawns at the observatory's anchor, using a charge (" + second + ", anchor " + anchor + ", charge " + charge + ")");
+
+		// An anchor anywhere else in the End still explodes, and doesn't move the spawn, unless the
+		// End's own rules let anchors work everywhere (Stellarity does): then it's left alone.
+		boolean endAllowsAnchors = server.computeOnServer(s -> s.getLevel(Level.END).environmentAttributes()
+				.getValue(EnvironmentAttributes.RESPAWN_ANCHOR_WORKS, anchor.offset(80, 0, 80)));
+		String elsewhere = server.computeOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			ServerPlayer player = player(s);
+			BlockPos away = anchor.offset(80, 0, 80);
+			end.setBlockAndUpdate(away, Blocks.RESPAWN_ANCHOR.defaultBlockState().setValue(RespawnAnchorBlock.CHARGE, 4));
+			end.getBlockState(away).useWithoutItem(end, player, new BlockHitResult(Vec3.atCenterOf(away), Direction.UP, away, false));
+			var config = player.getRespawnConfig();
+			return "block " + BuiltInRegistries.BLOCK.getKey(end.getBlockState(away).getBlock()) + "; spawn " + (config == null ? "none" : config.respawnData().pos());
+		});
+		if (endAllowsAnchors) {
+			check(elsewhere.contains("respawn_anchor"), "this End lets anchors work everywhere, and an anchor away from the observatory is left to work (" + elsewhere + ")");
+		} else {
+			check(!elsewhere.contains("respawn_anchor") && elsewhere.contains("spawn " + anchor),
+					"an anchor elsewhere in the End explodes and leaves the spawn at the observatory (" + elsewhere + ")");
+		}
+
+		// An observatory restored before there were anchors: no anchor, and no flag on its record.
+		// The player stands by it, so it is loaded whatever the checks above left behind.
+		server.runOnServer(s -> {
+			ServerLevel end = s.getLevel(Level.END);
+			player(s).teleportTo(end, lectern.getX() + 1.5, lectern.getY(), lectern.getZ() + 1.5, java.util.Set.of(), 0, 0, false);
+			end.setBlockAndUpdate(anchor, Blocks.AIR.defaultBlockState());
+			ObservatoryData.get(end).update(new ObservatoryData.Restored(restored.start(), lectern, false, restored.waystone()));
+		});
+		ctx.waitTicks(120);
+		String old = server.computeOnServer(s -> {
+			var state = s.getLevel(Level.END).getBlockState(anchor);
+			return state.is(Blocks.RESPAWN_ANCHOR) ? "anchor charge " + state.getValue(RespawnAnchorBlock.CHARGE) : "no anchor";
+		});
+		check(old.equals("anchor charge 4"), "an observatory restored before anchors gets its charged anchor once loaded (" + old + ")");
+	}
+
+	/** Kills the player at a spot (they get a moment to arrive first, or the death screen never shows), respawns, and says where they came back. */
+	private String die(ClientGameTestContext ctx, TestServerContext server, ResourceKey<Level> dimension, BlockPos at) {
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.setGameMode(GameType.CREATIVE);
-			player.teleportTo(s.overworld(), 0.5, 200, 0.5, java.util.Set.of(), 0, 0, false);
+			player.teleportTo(s.getLevel(dimension), at.getX() + 0.5, at.getY(), at.getZ() + 0.5, java.util.Set.of(), 0, 0, false);
 		});
 		ctx.waitTicks(40);
 		server.runOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.setPermanentlyInvulnerable(false);
 			player.setGameMode(GameType.SURVIVAL);
-			player.kill(s.overworld());
+			player.kill(s.getLevel(dimension));
 		});
 		ctx.waitForScreen(DeathScreen.class);
 		ctx.clickScreenButton("deathScreen.respawn");
 		ctx.waitTicks(60);
-		String home = server.computeOnServer(s -> {
+		return server.computeOnServer(s -> {
 			ServerPlayer player = player(s);
 			player.setPermanentlyInvulnerable(true);
 			return player.level().dimension().identifier() + " " + player.blockPosition();
 		});
-		check(home.contains("overworld"), "a death in the Overworld respawns at home, not at an observatory (" + home + ")");
 	}
 
 	private static StructureStart nearestObservatory(ServerLevel end) {
