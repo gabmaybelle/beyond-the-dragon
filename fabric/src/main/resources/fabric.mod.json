@@ -13,6 +13,7 @@
 		"issues": "https://github.com/gabmaybelle/beyond-the-dragon/issues"
 	},
 	"license": "MIT",
+	"icon": "assets/beyond_the_dragon/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
