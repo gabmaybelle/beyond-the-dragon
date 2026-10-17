@@ -22,9 +22,10 @@ machines, nothing that fights your other mods.
   into the void. A few shulkers and phantoms guard them. Chests hold End odds and ends and, past
   the outer ring, aphelite.
 - **Restore an observatory** and it sees again: its lectern gives the Keeper's Chart, a map
-  marking the nearest ruin of each kind and the nearest End City, and from then on anyone who
-  dies in the End comes back there. Beds explode in the End and anchors don't work, so this is
-  the End's first respawn point. The book on the lectern says how to mend its telescope.
+  marking the nearest ruin of each kind and the nearest End City, and a charged respawn anchor
+  wakes in its top room. Beds explode in the End and so do anchors anywhere else, so a restored
+  observatory is the one place you can set your spawn out there. With Waystones installed, it
+  gets a waystone too. The book on the lectern says how to mend its telescope.
 - **The Dragon Ladder.** Sneak to set the dragon egg on a lit beacon and the dragon takes
   notice: every time you respawn it after that, it comes back one tier stronger, up to tier 3,
   with a new attack each tier. The first kill at each tier drops a reward at the exit portal.

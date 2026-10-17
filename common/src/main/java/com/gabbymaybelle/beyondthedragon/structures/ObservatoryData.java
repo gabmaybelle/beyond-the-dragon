@@ -14,11 +14,18 @@ import net.minecraft.world.level.saveddata.SavedDataType;
 
 /** The observatories that have been restored, saved with the End: where each stands and where its lectern is. */
 public final class ObservatoryData extends SavedData {
-	/** A restored observatory: the structure's start corner (its identity) and its lectern (the respawn spot). */
-	public record Restored(BlockPos start, BlockPos lectern) {
+	/**
+	 * A restored observatory: the structure's start corner (its identity), its lectern (where the
+	 * chart is read), and whether its respawn anchor and its waystone have been set. Observatories
+	 * restored before there were anchors are saved without the two flags and read as false, so
+	 * they get their anchor the next time they load.
+	 */
+	public record Restored(BlockPos start, BlockPos lectern, boolean anchor, boolean waystone) {
 		static final Codec<Restored> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				BlockPos.CODEC.fieldOf("start").forGetter(Restored::start),
-				BlockPos.CODEC.fieldOf("lectern").forGetter(Restored::lectern)
+				BlockPos.CODEC.fieldOf("lectern").forGetter(Restored::lectern),
+				Codec.BOOL.optionalFieldOf("anchor", false).forGetter(Restored::anchor),
+				Codec.BOOL.optionalFieldOf("waystone", false).forGetter(Restored::waystone)
 		).apply(instance, Restored::new));
 	}
 
@@ -56,6 +63,12 @@ public final class ObservatoryData extends SavedData {
 
 	public void add(Restored observatory) {
 		restored.add(observatory);
+		setDirty();
+	}
+
+	/** Replaces the record of an observatory already on the list (found by its start). */
+	public void update(Restored observatory) {
+		restored.replaceAll(r -> r.start().equals(observatory.start()) ? observatory : r);
 		setDirty();
 	}
 }

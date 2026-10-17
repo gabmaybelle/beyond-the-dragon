@@ -9,7 +9,7 @@
 		"EnderDragonMixin",
 		"LecternBlockMixin",
 		"LivingEntityMixin",
-		"ServerPlayerMixin"
+		"RespawnAnchorBlockMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

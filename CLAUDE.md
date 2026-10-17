@@ -74,7 +74,9 @@ registrations in its registry event, so its `Platform` queues them and the resul
   screen, and 5.5.5 (the pinned id) passes the whole test when it starts but hangs at startup
   about one time in three (the log stops right after the resource reload). Gabby has also had
   trouble with BetterEnd on a server, especially alongside Stellarity; the two are never tested
-  together. `BTD_TEST_ONLY=structures` (or
+  together. `-PtestWaystones` loads Waystones (with Balm and Shogi) to check the waystone a
+  restored observatory sets; it isn't in CI. Every Waystones build for 26.1.2 needs Fabric API
+  0.155.2 or later, so add `-Pfabric_api_version=0.155.2+26.1.2` to that run. `BTD_TEST_ONLY=structures` (or
   `=aphelite`, `=jelly`) in the environment plays only that part of the test, in a couple of minutes, for
   tuning. `BTD_JELLY_DENSITY=1` adds a measurement to the jelly part: how many wild jellies are near a
   player waiting 2,600 blocks out, each minute for ten minutes of natural spawning (at five times speed). `BTD_SCREENSHOTS=<folder>` keeps the test's
