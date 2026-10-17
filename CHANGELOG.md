@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 (2026-10-16)
 
 - A restored observatory now gives you a respawn anchor instead of a free respawn. When the telescope sees again, a fully charged anchor wakes in the top room: use it to set your spawn there, and keep it charged with glowstone like any anchor. Anchors work inside a restored observatory, and only there in the End; elsewhere out there they still explode. Before, everyone who died in the End came back at the nearest restored observatory without asking; now only players who set their spawn at one do. Observatories already restored in your world get their charged anchor the next time you come near.
 - With Waystones installed, restoring an observatory also sets a purpur waystone in its top room, already activated for whoever restored it, so restored observatories join your waystone network. Observatories restored before you added Waystones get theirs the next time you come near.

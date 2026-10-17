@@ -61,6 +61,10 @@ short of the test's count there (they still generate). Recipes use the crafting 
 tables, so recipe viewers show them; the game test loads with JEI and with REI. Nothing scans the world while you play: the rings and titles are one check per
 player per second, and structure lookups come from the seed.
 
+With [Waystones](https://modrinth.com/mod/waystones) installed, every observatory you restore
+gets a purpur waystone, so restored observatories join your waystone network; the game test
+checks it with Waystones loaded. Waystones is never required.
+
 Other mods can find aphelite without knowing about this one: the ingot and the ore carry the
 shared tags mods look for (`c:ingots/aphelite`, `c:ores/aphelite`).
 
