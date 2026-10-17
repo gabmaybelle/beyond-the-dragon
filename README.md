@@ -61,6 +61,10 @@ through the whole test when it starts). Recipes use the crafting and smithing ta
 and EMI show them. Nothing scans the world while you play: the rings and titles are one check
 per player per second, and structure lookups come from the seed.
 
+With [Waystones](https://modrinth.com/mod/waystones) installed, every observatory you restore
+gets a purpur waystone, so restored observatories join your waystone network; the game test
+checks it with Waystones loaded. Waystones is never required.
+
 Other mods can find aphelite without knowing about this one: the ingot and the ore carry the
 shared tags mods look for (`c:ingots/aphelite`, `c:ores/aphelite`). With Apotheosis installed
 (tested on NeoForge), aphelite swords and armour take its affixes like any other gear.
