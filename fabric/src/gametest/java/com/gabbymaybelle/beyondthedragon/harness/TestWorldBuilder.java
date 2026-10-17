@@ -34,7 +34,9 @@ public final class TestWorldBuilder {
 		ctx.runOnClient(mc -> {
 			WorldCreationUiState ui = ((CreateWorldScreen) mc.screen).getUiState();
 			ui.setName("Beyond the Dragon test");
-			ui.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE);
+			// Survival, as Fabric's test API makes them on 26.x: in creative nothing wears out, nothing is
+			// used up and no fall hurts, so a check of those could pass for the wrong reason.
+			ui.setGameMode(WorldCreationUiState.SelectedGameMode.SURVIVAL);
 			ui.setAllowCommands(true);
 			ui.setSeed(seed);
 			ui.getNormalPresetList().stream().filter(entry -> entry.preset().is(WorldPresets.FLAT)).findFirst().ifPresent(ui::setWorldType);
