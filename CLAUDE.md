@@ -78,7 +78,8 @@ registrations in its registry event, so its `Platform` queues them and the resul
   (BetterEnd 21.0.11 with BCLib and WorldWeaver 21.0.13 and WunderLib 21.0.8) don't fit each
   other, so none of them loads; Gabby has had trouble with BetterEnd in packs generally. `-PtestJei` / `-PtestRei` load the game
   with that recipe viewer (and what it needs) for a load check; the recipes are plain JSON, so
-  the viewers list them on their own. `BTD_TEST_ONLY=structures` (or
+  the viewers list them on their own. `-PtestWaystones` loads Waystones (with Balm) to check the
+  waystone a restored observatory sets; it isn't in CI. `BTD_TEST_ONLY=structures` (or
   `=aphelite`, `=jelly`) in the environment plays only that part of the test, in a couple of minutes, for
   tuning. The test world's seed is 1, as Fabric's test API gives it on 26.x, so the seed scans
   count the same every run; `BTD_SEED=<seed>` tries another, and the log names the seed in use.

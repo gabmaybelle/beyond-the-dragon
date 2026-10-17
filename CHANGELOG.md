@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- A restored observatory now gives you a respawn anchor instead of a free respawn. When the telescope sees again, a fully charged anchor wakes in the top room: use it to set your spawn there, and keep it charged with glowstone like any anchor. Anchors work inside a restored observatory, and only there in the End; elsewhere out there they still explode. Before, everyone who died in the End came back at the nearest restored observatory without asking; now only players who set their spawn at one do. Observatories already restored in your world get their charged anchor the next time you come near.
+- With Waystones installed, restoring an observatory also sets a purpur waystone in its top room, already activated for whoever restored it, so restored observatories join your waystone network. Observatories restored before you added Waystones get theirs the next time you come near.
+
 ## 0.2.1 (2026-10-16)
 
 - The Fabric jar for 1.21.1 now loads with older Fabric Loaders. 0.2.0 asked for Fabric Loader 0.19.5 or newer, which most 1.21.1 launchers and packs don't have yet, so it refused to start; it now needs 0.15.11 or newer, the same as Fabric API for 1.21.1. Nothing else changed.

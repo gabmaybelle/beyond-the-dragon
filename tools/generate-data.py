@@ -129,7 +129,7 @@ LORE = {
     ]),
     "sinking_city": ("A Resident's Note", "a resident", [
         "We are leaving before the rest goes. If you are reading this, go to the keeper's tower instead; the one with the glass eye.",
-        "Mend it, and its chart will show you every ruin and city near. More than that: the lectern is where the dead come back. The End has no other such place.",
+        "Mend it, and its chart will show you every ruin and city near. More than that: a respawn anchor works in its top room. The End has no other such place.",
         "We took what little was here. If you want more than pearls and purpur, fly: five thousand paces out the ruins keep a metal a step past netherite.",
     ]),
 }

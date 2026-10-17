@@ -9,6 +9,7 @@
 		"EnderDragonMixin",
 		"LecternBlockMixin",
 		"LivingEntityMixin",
+		"RespawnAnchorBlockMixin",
 		"ServerPlayerMixin",
 		"SinglePoolElementAccessor"
 	],
