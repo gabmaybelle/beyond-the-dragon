@@ -14,22 +14,22 @@ which checks fail, code put back), what was learned, and what was deliberately n
   and the Dragon Scale trim in graveyard chests. 136 game-test checks on its own on `main`; CI runs
   each branch's own matrix (26.3 with Stellarity and Nullscape; 26.1.2 with Nullscape; 1.21.1 with
   Stellarity). BetterEnd is tested nowhere (Gabby: poorly compatible in modpacks). GitHub
-  pre-releases `v0.1.0` to `v0.1.2` and `v0.2.0` carry six jars each; `v0.2.1+1.21.1` carries the
+  pre-releases `v0.1.0` to `v0.1.2`, `v0.2.0` and `v0.3.0` carry six jars each; `v0.2.1+1.21.1` carries the
   two 1.21.1 jars (Fabric Loader 0.15.11 or newer). Textures, the trim and the jelly's look
   chosen by Gabby.
 - **Broken:** nothing known. Nullscape's 1.21.1 End is sparse enough that the placement-yield
   check comes up one graveyard short of five in 4,000 blocks (they generate; the kind is just
   rare there), so Nullscape is out of the 1.21.1 matrix. BetterEnd's last 1.21.1 jars don't load
   together, so it's out of that matrix too.
-- **Next:** the Modrinth and CurseForge uploads of 0.2.0 (and 0.2.1 for 1.21.1; Gabby publishes on
-  both herself). The 1.21.1 test world plays in survival like 26.x's (being tested). Then the next
-  feature, chosen with Gabby: something at the Edge, repeat Dragon Ladder rewards, map waypoints
-  from restored observatories (Xaero's, JourneyMap), or an observatory network.
+- **Next:** the Modrinth and CurseForge uploads of 0.3.0 (Gabby publishes on both herself). Then
+  map waypoints from restored observatories (Xaero's, JourneyMap); later maybe something at the
+  Edge or repeat Dragon Ladder rewards.
 
 ## Log
 
 | Date | Session | What happened |
 | --- | --- | --- |
+| 2026-10-16 | Release 0.3.0 | At Gabby's word: `version` 0.3.0 (`+26.1`, `+1.21.1` on the version branches; 1.21.1's Fabric jar still asks for Fabric Loader 0.15.11), the changelog dated and a Waystones line in the README, nothing else changed. `./gradlew build` passed on each branch and the full CI matrix went green on each head (26.3 on its own, with Stellarity and Nullscape; 26.1.2 on its own and with Nullscape; 1.21.1 on its own and with Stellarity) before tagging `v0.3.0`, `v0.3.0+26.1` and `v0.3.0+1.21.1`. The six jars built from clean checkouts of the tags (each checked for its version and the new classes) are on the GitHub pre-release `v0.3.0`, and match the tag builds byte for byte. Not done: Gabby's hand play of the 0.3.0 jar, Modrinth and CurseForge (hers). |
 | 2026-10-16 | The observatory's anchor, on 1.21.1 | `main`'s change (a charged respawn anchor on restoring, anchors working inside restored observatories in place of the free respawn, old worlds getting theirs, a waystone with Waystones). 1.21.1's `RespawnAnchorBlock.canSetSpawn(Level)` takes no position, so its two callers are redirected instead: `useWithoutItem` (`RespawnAnchorBlockMixin`) and `ServerPlayer.findRespawnAndUseSpawnBlock` (`ServerPlayerMixin`, which no longer gives the free respawn). The two flags are saved in NBT (missing in older saves, so read as false). Waystones on 1.21.1 names the look a style (`WaystoneStyles.PURPUR`); its jars are `modRuntimeOnly` so Loom remaps them. Templates and data regenerated with this branch's own scripts (data version 3955). **Counted:** `./gradlew build` passes; `BTD_TEST_ONLY=structures` 47 checks on its own, with Stellarity and with Waystones 21.1.46 (`waystones:purpur_waystone` placed); full game test 143 checks, "every test passed". **Proof run:** with both redirects back to vanilla, the three anchor checks fail (the anchor explodes, no spawn, home after the death); code put back. |
 | 2026-10-16 | A survival test world on 1.21.1 | The stand-in harness made its test world in creative; it now makes it in survival, as Fabric's test API does on 26.x, so nothing wears out, gets used up or is shrugged off for the wrong reason. **Counted:** the full game test passes on its own (138 checks, "every test passed") and with Stellarity (121 checks; the dragon attack checks are left out beside a mod that reworks the fight). No check changed result, as expected: each test already switched game modes where it needed one. |
 | 2026-10-16 | Release 0.2.1 for 1.21.1 | The 1.21.1 Fabric jar asked for Fabric Loader 0.19.5 or newer, which most 1.21.1 launchers and packs don't have; it now asks for 0.15.11, the same as Fabric API for 1.21.1. Checked on a Fabric Loader 0.16.9 server, which refused 0.2.0's jar and loads 0.2.1's. Released at Gabby's word as the pre-release `v0.2.1+1.21.1` with the two 1.21.1 jars; CI green before tagging. |
