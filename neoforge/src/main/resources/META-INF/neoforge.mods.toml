@@ -8,6 +8,7 @@ displayName = "Beyond the Dragon"
 authors = "Gabby"
 description = '''A reason to keep playing after the Ender Dragon: ruins at the edge of the End, a dragon that gets harder every time, and a metal that only exists far from home.'''
 displayURL = "https://github.com/gabmaybelle/beyond-the-dragon"
+logoFile = "assets/beyond_the_dragon/icon.png"
 
 [[mixins]]
 config = "beyond_the_dragon.mixins.json"
